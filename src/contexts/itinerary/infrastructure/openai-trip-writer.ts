@@ -77,7 +77,8 @@ async function writeSummaries(regionName: string, outlineJson: string): Promise<
     return [...parsed.days].sort((a, b) => a.dayNumber - b.dayNumber).map((d) => d.summary.trim());
   } catch (e) {
     // 키·본문은 남기지 않는다 — 종류와 상태 코드만.
-    if (e instanceof OpenAI.RateLimitError) console.warn("[openai] 요청 한도 초과(429)");
+    // 429 는 속도 제한(rate_limit_exceeded)과 크레딧 없음(insufficient_quota)이 같은 상태 코드라 code 로 가른다.
+    if (e instanceof OpenAI.RateLimitError) console.warn(`[openai] 요청 거절(429, code=${e.code})`);
     else if (e instanceof OpenAI.AuthenticationError) console.warn("[openai] 인증 실패(401) — OPENAI_API_KEY 확인");
     else if (e instanceof OpenAI.APIConnectionError) console.warn("[openai] 연결 실패·시간 초과");
     else if (e instanceof OpenAI.APIError) console.warn(`[openai] API 오류 ${e.status}`);
