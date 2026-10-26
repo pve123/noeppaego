@@ -29,11 +29,17 @@ src/
       application/              유스케이스. 읽기는 쿼리 → 읽기 모델(직렬화 가능한 View)
         find-long-breaks.ts
       infrastructure/           바깥 세계 — 공공데이터포털 클라이언트·포트 구현·캐시
+    destination/                갈 만한 곳 컨텍스트 — 연휴와 겹치는 축제(관광공사 KorService2)로 지역 추천
+      domain/                   Coordinate·TravelWindow(값 객체), Festival·포트, 추천(도메인 서비스)
+      application/              find-destinations 쿼리 → 읽기 모델
+      infrastructure/           관광공사 클라이언트·포트 구현
+  shared/public-data/           공공데이터포털 호출 공통(인증키·거절 코드·실패를 값으로)
 ```
 
 - 의존은 `app → contexts/<x>/index → application → domain ← infrastructure` 한 방향. `eslint.config.mjs` 의 `no-restricted-imports` 가 막는다.
 - CQRS: 1차는 읽기뿐이라 쿼리만 있다. 쓰기(즐겨찾기·일정 저장)가 생기면 `application/` 에 커맨드를 둔다.
-- 다음 컨텍스트 후보: `destination`(지역 추천·TourAPI) · `itinerary`(하루별 일정) · `weather`(예보 반영).
+- 컨텍스트끼리는 서로 import 하지 않는다. 화면이 calendar 의 연휴 날짜를 destination 에 넘긴다.
+- 다음 컨텍스트 후보: `itinerary`(하루별 일정) · `weather`(예보 반영).
 
 ## 규칙
 
