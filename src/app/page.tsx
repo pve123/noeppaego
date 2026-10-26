@@ -40,7 +40,12 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
 
   return (
     <>
-      {view.next && <NextBreak item={view.next} />}
+      {view.next && (
+        <NextBreak
+          item={view.next}
+          upcomingLabel={view.year === today.year ? "다음 연휴까지" : `${view.year}년 첫 연휴까지`}
+        />
+      )}
 
       <section id="breaks" aria-labelledby="all-breaks" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-20 sm:px-6">
         <div className="flex flex-col gap-3">

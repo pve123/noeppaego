@@ -1,7 +1,7 @@
-import { Coordinate, SEOUL } from "../domain/coordinate";
+import { Coordinate, SEOUL } from "@/shared/kernel/coordinate";
 import { recommendDestinations, reachKm } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
-import { TravelWindow } from "../domain/travel-window";
+import { TravelWindow } from "@/shared/kernel/travel-window";
 
 // ── 쿼리 ─────────────────────────────────────────────
 

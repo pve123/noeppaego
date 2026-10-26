@@ -21,13 +21,26 @@ const TONE: Record<MapPin["tone"], { bg: string; fg: string }> = {
   ink: { bg: "#22223b", fg: "#fffbea" },
 };
 
+export type MapRoute = { tone: MapPin["tone"]; points: { lat: number; lng: number }[] };
+
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
 
 /**
  * 카카오맵에 핀을 찍고 모든 핀이 보이게 맞춘다.
  * 키(NEXT_PUBLIC_KAKAO_MAP_KEY)가 없거나 SDK 를 못 불러오면 지도 자리를 비운다 — 같은 정보가 카드에 있다.
  */
-export function KakaoMap({ pins, label }: { pins: MapPin[]; label: string }) {
+export function KakaoMap({
+  pins,
+  routes = [],
+  label,
+  caption,
+}: {
+  pins: MapPin[];
+  routes?: MapRoute[];
+  label: string;
+  /** 지도 아래 안내 — 지도가 숨으면 같이 숨는다 */
+  caption?: string;
+}) {
   const container = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(!APP_KEY);
 
@@ -46,6 +59,12 @@ export function KakaoMap({ pins, label }: { pins: MapPin[]; label: string }) {
           bounds.extend(at);
           new maps.CustomOverlay({ position: at, content: pinElement(pin), yAnchor: 1.1 }).setMap(map);
         }
+        // 동선 — 잉크 테두리 위에 그날 색 점선
+        for (const route of routes.filter((r) => r.points.length > 1)) {
+          const path = route.points.map((p) => new maps.LatLng(p.lat, p.lng));
+          new maps.Polyline({ path, strokeWeight: 7, strokeColor: "#22223b", strokeOpacity: 0.9 }).setMap(map);
+          new maps.Polyline({ path, strokeWeight: 4, strokeColor: TONE[route.tone].bg, strokeOpacity: 1, strokeStyle: "shortdash" }).setMap(map);
+        }
         if (pins.length > 1) map.setBounds(bounds, 48, 48, 48, 48);
       })
       .catch(() => !cancelled && setFailed(true));
@@ -53,16 +72,19 @@ export function KakaoMap({ pins, label }: { pins: MapPin[]; label: string }) {
     return () => {
       cancelled = true;
     };
-  }, [pins]);
+  }, [pins, routes]);
 
   if (failed) return null;
   return (
-    <div
-      ref={container}
-      role="img"
-      aria-label={label}
-      className="h-[360px] w-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop sm:h-[420px]"
-    />
+    <figure>
+      <div
+        ref={container}
+        role="img"
+        aria-label={label}
+        className="h-[360px] w-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop sm:h-[420px]"
+      />
+      {caption && <figcaption className="mt-3 text-sm text-muted">{caption}</figcaption>}
+    </figure>
   );
 }
 
@@ -78,7 +100,7 @@ function pinElement(pin: MapPin): HTMLElement {
   badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-size:16px;box-shadow:2px 2px 0 #22223b`;
 
   const name = document.createElement("span");
-  name.textContent = pin.label;
+  name.textContent = pin.label.length > 14 ? `${pin.label.slice(0, 13)}…` : pin.label;
   name.style.cssText =
     "padding:3px 9px;border:2.5px solid #22223b;border-radius:999px;background:#fff;font-size:14px";
 

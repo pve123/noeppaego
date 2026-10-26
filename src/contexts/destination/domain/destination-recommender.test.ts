@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { Coordinate, SEOUL } from "./coordinate";
+import { Coordinate, SEOUL } from "@/shared/kernel/coordinate";
 import { recommendDestinations, reachKm } from "./destination-recommender";
 import { Festival } from "./festival";
-import { TravelWindow } from "./travel-window";
+import { TravelWindow } from "@/shared/kernel/travel-window";
 
 const GANGNEUNG = new Coordinate(37.7519, 128.8761); // 서울에서 약 165km
 const BUSAN = new Coordinate(35.1796, 129.0756); // 약 325km
