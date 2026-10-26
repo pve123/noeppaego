@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type MapPin = {
   id: string;
@@ -22,6 +22,15 @@ const TONE: Record<MapPin["tone"], { bg: string; fg: string }> = {
 };
 
 export type MapRoute = { tone: MapPin["tone"]; points: { lat: number; lng: number }[] };
+
+/** 번호표 한 줄 — 누르면 pinIds 핀과 routeIndexes 선만 남긴다 */
+export type MapLegendItem = {
+  badge: string;
+  text: string;
+  tone: MapPin["tone"];
+  pinIds: string[];
+  routeIndexes: number[];
+};
 
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
 
@@ -45,8 +54,8 @@ export function KakaoMap({
   pins: MapPin[];
   routes?: MapRoute[];
   label: string;
-  /** 번호표 — 핀 번호와 이름을 짝지어 읽게 한다. 데스크톱에서는 지도 오른쪽에 세로로 */
-  legend?: { badge: string; text: string; tone: MapPin["tone"] }[];
+  /** 번호표 — 핀 번호와 이름을 짝지어 읽게 한다. 누르면 그 핀과 선만 보인다. 데스크톱에서는 지도 오른쪽에 세로로 */
+  legend?: MapLegendItem[];
   /** 지도 위 제목 — 지도가 숨으면 같이 숨는다 */
   title?: string;
   /** 지도 아래 안내 — 지도가 숨으면 같이 숨는다 */
@@ -56,8 +65,18 @@ export function KakaoMap({
 }) {
   const container = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(!APP_KEY);
+  /** 고른 번호표(badge). 없으면 전체 */
+  const [focus, setFocus] = useState<string>();
+  const focused = legend.find((item) => item.badge === focus);
+  const shownPins = useMemo(() => (focused ? pins.filter((p) => focused.pinIds.includes(p.id)) : pins), [pins, focused]);
+  const shownRoutes = useMemo(
+    () => (focused ? routes.filter((_, i) => focused.routeIndexes.includes(i)) : routes),
+    [routes, focused],
+  );
 
   useEffect(() => {
+    const pins = shownPins;
+    const routes = shownRoutes;
     if (!APP_KEY || !container.current || pins.length === 0) return;
     let cancelled = false;
     let observer: ResizeObserver | undefined;
@@ -122,7 +141,7 @@ export function KakaoMap({
       cancelled = true;
       observer?.disconnect();
     };
-  }, [pins, routes]);
+  }, [shownPins, shownRoutes]);
 
   if (failed) return null;
   return (
@@ -138,19 +157,43 @@ export function KakaoMap({
           }`}
         />
         {legend.length > 0 && (
-          <ul aria-label="지도 번호" className="space-y-2 self-start">
-            {legend.map((item) => (
-              <li key={item.badge} className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface px-3 py-2.5">
-                <span
-                  className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink font-display"
-                  style={{ background: TONE[item.tone].bg, color: TONE[item.tone].fg }}
-                >
-                  {item.badge}
-                </span>
-                <span className="font-bold leading-snug [overflow-wrap:anywhere]">{item.text}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="self-start">
+            <p className="mb-2 text-sm text-muted">번호를 누르면 그 지역만 보여 드려요.</p>
+            <ul aria-label="지도 번호" className="space-y-2">
+              {legend.map((item) => {
+                const active = item.badge === focus;
+                return (
+                  <li key={item.badge}>
+                    <button
+                      type="button"
+                      aria-pressed={active}
+                      onClick={() => setFocus(active ? undefined : item.badge)}
+                      className={`flex w-full items-start gap-3 rounded-2xl border-[2.5px] border-ink px-3 py-2.5 text-left transition-transform ${
+                        active ? "-translate-y-0.5 bg-yellow shadow-pop-sm" : focus ? "bg-surface opacity-60 hover:opacity-100" : "bg-surface hover:-translate-y-0.5"
+                      }`}
+                    >
+                      <span
+                        className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink font-display"
+                        style={{ background: TONE[item.tone].bg, color: TONE[item.tone].fg }}
+                      >
+                        {item.badge}
+                      </span>
+                      <span className="font-bold leading-snug [overflow-wrap:anywhere]">{item.text}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            {focus && (
+              <button
+                type="button"
+                onClick={() => setFocus(undefined)}
+                className="mt-3 h-11 rounded-full border-[2.5px] border-ink bg-surface px-5 font-display text-[17px] hover:bg-yellow"
+              >
+                전체 보기
+              </button>
+            )}
+          </div>
         )}
       </div>
       {caption && <figcaption className="mt-3 text-sm text-muted">{caption}</figcaption>}
