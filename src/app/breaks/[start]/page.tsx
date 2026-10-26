@@ -20,13 +20,13 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** 카드 머리 띠 색과 같은 순서 */
 const PIN_TONES: MapPin["tone"][] = ["yellow", "mint", "coral", "lavender"];
 
-export default function BreakPage({ params }: PageProps<"/breaks/[start]">) {
+export default function BreakPage({ params, searchParams }: PageProps<"/breaks/[start]">) {
   return (
     <>
       <SiteHeader />
       <main>
         <Suspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="h-96 animate-pulse bg-ink/90" />}>
-          <BreakDetail params={params} />
+          <BreakDetail params={params} searchParams={searchParams} />
         </Suspense>
       </main>
       <SiteFooter />
@@ -34,8 +34,9 @@ export default function BreakPage({ params }: PageProps<"/breaks/[start]">) {
   );
 }
 
-async function BreakDetail({ params }: Pick<PageProps<"/breaks/[start]">, "params">) {
+async function BreakDetail({ params, searchParams }: PageProps<"/breaks/[start]">) {
   const { start } = await params;
+  const { from } = await searchParams;
   if (!ISO_DATE.test(start)) notFound();
   await connection(); // 「오늘」은 요청 시각 기준
   const today = CalendarDate.todayIn("Asia/Seoul", new Date());
@@ -58,32 +59,56 @@ async function BreakDetail({ params }: Pick<PageProps<"/breaks/[start]">, "param
       </div>
       <NextBreak item={item} withLink={false} />
       <Suspense fallback={<DestinationsSkeleton />}>
-        <Destinations start={item.base.startIso} end={item.base.endIso} />
+        <Destinations
+          start={item.base.startIso}
+          end={item.base.endIso}
+          originId={typeof from === "string" ? from : undefined}
+        />
       </Suspense>
     </>
   );
 }
 
-async function Destinations({ start, end }: { start: string; end: string }) {
+async function Destinations({ start, end, originId }: { start: string; end: string; originId?: string }) {
   let view;
   try {
-    view = await findDestinations({ start, end });
+    view = await findDestinations({ start, end, originId });
   } catch (e) {
     if (e instanceof PublicDataError) return <SourceError subject="축제 정보" failure={e.failure} code={e.code} />;
     throw e;
   }
 
   return (
-    <section aria-labelledby="where" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+    <section id="where" aria-labelledby="where-title" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-20 sm:px-6">
       <span className="-rotate-2 inline-block rounded-full border-[3px] border-ink bg-mint px-4 py-1.5 font-display text-[17px]">
         이 연휴에 열리는 축제 기준
       </span>
-      <h2 id="where" className="mt-4 font-display text-[clamp(32px,4vw,48px)] leading-tight">
+      <h2 id="where-title" className="mt-4 font-display text-[clamp(32px,4vw,48px)] leading-tight">
         이 연휴엔 여기 어때요?
       </h2>
       <p className="mt-2 text-[17px]">
         {view.originName}에서 {view.reachKm ? `${view.reachKm}km 안, ` : ""}축제가 많은 곳부터 골랐어요.
       </p>
+
+      <nav aria-label="출발지" className="mt-5 flex flex-wrap items-center gap-2">
+        <span className="mr-1 font-bold">출발</span>
+        {view.origins.map((o) => {
+          const active = o.id === view.originId;
+          return (
+            <Link
+              key={o.id}
+              href={`/breaks/${start}?from=${o.id}#where`}
+              scroll={false}
+              aria-current={active ? "true" : undefined}
+              className={`inline-flex h-10 items-center rounded-full border-[2.5px] border-ink px-4 font-display text-[16px] transition-transform ${
+                active ? "-rotate-2 bg-yellow shadow-pop-sm" : "bg-surface hover:-translate-y-0.5"
+              }`}
+            >
+              {o.name}
+            </Link>
+          );
+        })}
+      </nav>
 
       {view.destinations.length > 0 && (
         <div className="mt-8">

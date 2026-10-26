@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 import type { DayView, PlaceView, SlotView } from "@/contexts/itinerary";
 import type { MapPin } from "./kakao-map";
 
@@ -6,7 +7,7 @@ import type { MapPin } from "./kakao-map";
 export const DAY_TONES: MapPin["tone"][] = ["yellow", "mint", "coral"];
 const DAY_BG = { yellow: "bg-yellow", mint: "bg-mint", coral: "bg-coral", lavender: "bg-lavender", ink: "bg-ink" };
 
-export function ItineraryDay({ day }: { day: DayView }) {
+export function ItineraryDay({ day, summary }: { day: DayView; /** 그날 소개 글(늦게 채워진다) */ summary?: ReactNode }) {
   const tone = DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length];
   return (
     <section aria-labelledby={`day-${day.dayNumber}`}>
@@ -16,13 +17,26 @@ export function ItineraryDay({ day }: { day: DayView }) {
         </span>
         <span className="font-display text-2xl text-muted">{day.dateLabel}</span>
       </h2>
+      {summary}
 
       <ol className="mt-6 space-y-4 border-l-[3px] border-dashed border-ink pl-5 sm:pl-7">
         {day.slots.map((slot, i) => (
           <li key={slot.key} className="relative">
+            {slot.travelLabel && (
+              <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-muted">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 17h14M6 17l1.5-6h9L18 17M8 11l1-4h6l1 4" />
+                  <circle cx="8" cy="18" r="1.6" />
+                  <circle cx="16" cy="18" r="1.6" />
+                </svg>
+                {slot.travelLabel}
+              </p>
+            )}
             <span
               aria-hidden
-              className={`absolute -left-[34px] top-5 flex size-7 items-center justify-center rounded-full border-[3px] border-ink font-display text-xs sm:-left-[42px] ${DAY_BG[tone]}`}
+              className={`absolute -left-[34px] flex size-7 items-center justify-center rounded-full border-[3px] border-ink font-display text-xs sm:-left-[42px] ${
+                slot.travelLabel ? "top-[48px]" : "top-5"
+              } ${DAY_BG[tone]}`}
             >
               {slot.place ? i + 1 : ""}
             </span>
@@ -99,4 +113,20 @@ function PlaceTitle({ place }: { place: PlaceView }) {
       )}
     </p>
   );
+}
+
+/** AI 가 쓴 그날 소개 — AI 글이라는 걸 밝힌다 */
+export async function DaySummary({ summaries, index }: { summaries: Promise<string[] | undefined>; index: number }) {
+  const text = (await summaries)?.[index];
+  if (!text) return null;
+  return (
+    <p className="mt-4 max-w-3xl rounded-2xl border-[2.5px] border-dashed border-ink bg-surface px-4 py-3 leading-relaxed">
+      <span className="mr-2 inline-block rounded-full bg-lavender px-2 py-0.5 align-[2px] text-xs font-bold">AI 한마디</span>
+      {text}
+    </p>
+  );
+}
+
+export function DaySummarySkeleton() {
+  return <div aria-hidden className="mt-4 h-[72px] max-w-3xl animate-pulse rounded-2xl bg-soft-ink" />;
 }

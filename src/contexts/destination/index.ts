@@ -4,10 +4,12 @@
  */
 import "server-only";
 import { findDestinations as handle, type FindDestinations } from "./application/find-destinations";
+import { KakaoDriveTimes } from "@/shared/kakao/kakao-mobility";
 import { TourFestivalRepository } from "./infrastructure/tour-festival-repository";
 
 const repository = new TourFestivalRepository();
+const driveTimes = new KakaoDriveTimes();
 
-export const findDestinations = (query: FindDestinations) => handle(query, repository);
+export const findDestinations = (query: FindDestinations) => handle(query, repository, driveTimes);
 
 export type { DestinationView, DestinationsView, FestivalView, LatLng } from "./application/find-destinations";

@@ -1,7 +1,8 @@
-import { Coordinate, SEOUL } from "@/shared/kernel/coordinate";
+import { durationLabel } from "@/shared/kernel/duration";
+import { TravelWindow } from "@/shared/kernel/travel-window";
 import { recommendDestinations, reachKm } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
-import { TravelWindow } from "@/shared/kernel/travel-window";
+import { DriveTimes, ORIGINS, originOf } from "../domain/origin";
 
 // ── 쿼리 ─────────────────────────────────────────────
 
@@ -9,6 +10,8 @@ export type FindDestinations = {
   /** YYYY-MM-DD */
   start: string;
   end: string;
+  /** 출발지 id — 모르면 서울 */
+  originId?: string;
 };
 
 // ── 읽기 모델 ─────────────────────────────────────────
@@ -28,38 +31,48 @@ export type DestinationView = {
   name: string;
   center: LatLng;
   distanceKm: number;
+  /** 「차로 약 2시간 10분」 — 길찾기를 못 하면 undefined */
+  driveLabel?: string;
   festivals: FestivalView[];
 };
 
 export type DestinationsView = {
+  originId: string;
   originName: string;
   origin: LatLng;
-  /** 「서울에서 400km 안」 같은 거리 안내. 제한이 없으면 undefined */
+  /** 고를 수 있는 출발지 */
+  origins: { id: string; name: string }[];
+  /** 「400km 안」 같은 거리 안내. 제한이 없으면 undefined */
   reachKm?: number;
   destinations: DestinationView[];
 };
 
 // ── 핸들러 ────────────────────────────────────────────
 
-const ORIGIN: { name: string; at: Coordinate } = { name: "서울", at: SEOUL };
-
 export async function findDestinations(
   query: FindDestinations,
   repository: FestivalRepository,
+  driveTimes: DriveTimes,
 ): Promise<DestinationsView> {
   const window = TravelWindow.of(query.start, query.end);
+  const origin = originOf(query.originId);
   const festivals = await repository.findOverlapping(window);
   const reach = reachKm(window.days);
+  const destinations = recommendDestinations(festivals, window, origin.at);
+  const minutes = await Promise.all(destinations.map((d) => driveTimes.minutes(origin.at, d.center)));
 
   return {
-    originName: ORIGIN.name,
-    origin: { lat: ORIGIN.at.lat, lng: ORIGIN.at.lng },
+    originId: origin.id,
+    originName: origin.name,
+    origin: { lat: origin.at.lat, lng: origin.at.lng },
+    origins: ORIGINS.map(({ id, name }) => ({ id, name })),
     reachKm: Number.isFinite(reach) ? reach : undefined,
-    destinations: recommendDestinations(festivals, window, ORIGIN.at).map((d) => ({
+    destinations: destinations.map((d, i) => ({
       code: d.region.code,
       name: d.region.name,
       center: { lat: d.center.lat, lng: d.center.lng },
       distanceKm: Math.round(d.distanceKm),
+      driveLabel: minutes[i] === undefined ? undefined : `차로 ${durationLabel(minutes[i])}`,
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,

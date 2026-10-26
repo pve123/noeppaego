@@ -1,6 +1,7 @@
+import { durationLabel } from "@/shared/kernel/duration";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
-import { Place, PlaceCatalog, RestaurantFinder } from "../domain/place";
-import { draftTrip, fillMeals, fillStays, MAX_TRIP_DAYS, mealsOf, SlotTime } from "../domain/trip-planner";
+import { DriveTimes, Place, PlaceCatalog, RestaurantFinder } from "../domain/place";
+import { draftTrip, fillMeals, fillStays, MAX_TRIP_DAYS, mealsOf, SlotTime, TripDay } from "../domain/trip-planner";
 
 // ── 쿼리 ─────────────────────────────────────────────
 
@@ -35,6 +36,8 @@ export type SlotView = {
   alternatives: PlaceView[];
   /** 장소가 없을 때 안내 */
   note?: string;
+  /** 같은 날 앞 장소에서 오는 길 — 「차로 약 12분」, 길찾기를 못 하면 「직선 1.2km」 */
+  travelLabel?: string;
 };
 
 export type DayView = {
@@ -71,6 +74,7 @@ export async function planItinerary(
   query: PlanItinerary,
   catalog: PlaceCatalog,
   restaurants: RestaurantFinder,
+  driveTimes: DriveTimes,
 ): Promise<ItineraryView | undefined> {
   const window = TravelWindow.of(query.start, query.end);
   const dates = window.dates(MAX_TRIP_DAYS);
@@ -86,6 +90,7 @@ export async function planItinerary(
 
   const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
   const days = fillStays(fillMeals(draft, candidates), lodgings);
+  const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
 
   return {
     regionName,
@@ -95,8 +100,14 @@ export async function planItinerary(
     days: days.map((day, i) => ({
       dayNumber: i + 1,
       dateLabel: dateLabel(day.date),
-      slots: day.slots.map((slot) => {
-        const base = { key: `${day.date}-${slot.time}`, time: slot.time, timeLabel: TIME_LABEL[slot.time], alternatives: [] };
+      slots: day.slots.map((slot, j) => {
+        const base = {
+          key: `${day.date}-${slot.time}`,
+          time: slot.time,
+          timeLabel: TIME_LABEL[slot.time],
+          alternatives: [],
+          travelLabel: travel[i][j],
+        };
         switch (slot.kind) {
           case "visit":
             return { ...base, place: placeView(slot.place) };
@@ -119,6 +130,38 @@ export async function planItinerary(
       }),
     })),
   };
+}
+
+function placeOf(slot: TripDay["slots"][number]): Place | undefined {
+  if (slot.kind === "visit") return slot.place;
+  if (slot.kind === "meal" || slot.kind === "stay") return slot.choice;
+  return undefined;
+}
+
+/** 하루 안에서 장소가 있는 칸끼리 앞 → 뒤 이동 시간. 그날 첫 장소는 비운다. */
+async function travelLabels(
+  days: (Place | undefined)[][],
+  driveTimes: DriveTimes,
+): Promise<(string | undefined)[][]> {
+  return Promise.all(
+    days.map(async (places) => {
+      let previous: Place | undefined;
+      const legs = places.map((place) => {
+        const from = previous;
+        if (place) previous = place;
+        return place && from && from.id !== place.id ? { from, to: place } : undefined;
+      });
+      return Promise.all(
+        legs.map(async (leg) => {
+          if (!leg) return undefined;
+          const minutes = await driveTimes.minutes(leg.from.location, leg.to.location);
+          return minutes === undefined
+            ? `직선 ${leg.from.location.distanceKm(leg.to.location).toFixed(1)}km`
+            : `차로 ${durationLabel(minutes)}`;
+        }),
+      );
+    }),
+  );
 }
 
 function placeView(place: Place): PlaceView {

@@ -28,7 +28,7 @@ export function DestinationCard({
           {destination.name}
         </h3>
         <span className="shrink-0 rotate-3 rounded-full border-[2.5px] border-ink bg-surface px-3 py-1 font-display text-[15px] tabular-nums">
-          {destination.distanceKm}km
+          {destination.driveLabel ?? `${destination.distanceKm}km`}
         </span>
       </div>
 
