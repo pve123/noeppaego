@@ -89,6 +89,7 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
             이 일정으로 다시 짜기
           </Link>
         </div>
+        {!viewerId && <p className="mt-2 text-sm text-soft-ink">카카오로 로그인하면 이 일정을 찜해 둘 수 있어요.</p>}
       </PageBand>
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
