@@ -4,7 +4,9 @@ import { TravelWindow } from "./travel-window";
 
 export type Destination = {
   readonly region: Region;
-  /** 출발지에서 지역 축제들 가운데까지 직선 거리 */
+  /** 지역 축제들의 가운데 */
+  readonly center: Coordinate;
+  /** 출발지에서 center 까지 직선 거리 */
   readonly distanceKm: number;
   /** 연휴와 오래 겹치는 순 */
   readonly festivals: readonly Festival[];
@@ -39,9 +41,12 @@ export function recommendDestinations(
   const reach = reachKm(window.days);
 
   return [...byRegion.values()]
-    .map((group) => ({
-      region: group[0].region,
-      distanceKm: origin.distanceKm(Coordinate.centerOf(group.map((f) => f.location))),
+    .map((group) => {
+      const center = Coordinate.centerOf(group.map((f) => f.location));
+      return { region: group[0].region, center, distanceKm: origin.distanceKm(center), group };
+    })
+    .map(({ group, ...rest }) => ({
+      ...rest,
       festivals: [...group].sort(
         (a, b) =>
           window.overlapDays(b.start, b.end) - window.overlapDays(a.start, a.end) ||
