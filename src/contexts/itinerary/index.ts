@@ -15,7 +15,7 @@ import {
   type ItinerarySnapshot,
   type SaveItinerary,
 } from "./application/saved-itineraries";
-import { ClaudeTripWriter } from "./infrastructure/claude-trip-writer";
+import { OpenAiTripWriter } from "./infrastructure/openai-trip-writer";
 import { DrizzleSavedItineraryRepository } from "./infrastructure/drizzle-saved-itinerary-repository";
 import { KmaWeatherOutlook } from "./infrastructure/kma-weather-outlook";
 import { KakaoRestaurantFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
@@ -29,7 +29,7 @@ const restaurants = process.env.KAKAO_REST_API_KEY
 
 const driveTimes = new KakaoDriveTimes();
 
-const writer = new ClaudeTripWriter();
+const writer = new OpenAiTripWriter();
 const outlook = new KmaWeatherOutlook();
 
 export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, driveTimes, outlook);
