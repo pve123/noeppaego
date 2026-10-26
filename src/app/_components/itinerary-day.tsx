@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import type { DayView, PlaceView, SlotView } from "@/contexts/itinerary";
+import type { DayView, PlaceView, SlotView, WeatherView } from "@/contexts/itinerary";
 import type { MapPin } from "./kakao-map";
 
 /** 일차별 색 — 지도 핀·동선과 같은 순서 */
@@ -12,34 +12,23 @@ export function ItineraryDay({ day, summary }: { day: DayView; /** 그날 소개
   return (
     <section aria-labelledby={`day-${day.dayNumber}`}>
       <h2 id={`day-${day.dayNumber}`} className="flex flex-wrap items-baseline gap-3">
-        <span className={`-rotate-2 rounded-2xl border-[3px] border-ink px-4 py-1 font-display text-3xl ${DAY_BG[tone]}`}>
+        <span className={`-rotate-2 rounded-2xl border-[3px] border-ink px-4 py-0.5 font-display text-[28px] ${DAY_BG[tone]}`}>
           {day.dayNumber}일차
         </span>
-        <span className="font-display text-2xl text-muted">{day.dateLabel}</span>
+        <span className="font-display text-[22px] text-muted">{day.dateLabel}</span>
       </h2>
+      {day.weather && <WeatherChips weather={day.weather} />}
       {summary}
 
-      <ol className="mt-6 space-y-4 border-l-[3px] border-dashed border-ink pl-5 sm:pl-7">
-        {day.slots.map((slot, i) => (
-          <li key={slot.key} className="relative">
+      <ol className="mt-5 space-y-3">
+        {day.slots.map((slot) => (
+          <li key={slot.key}>
             {slot.travelLabel && (
-              <p className="mb-2 flex items-center gap-1.5 text-sm font-bold text-muted">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M5 17h14M6 17l1.5-6h9L18 17M8 11l1-4h6l1 4" />
-                  <circle cx="8" cy="18" r="1.6" />
-                  <circle cx="16" cy="18" r="1.6" />
-                </svg>
+              <p className="mb-2 ml-4 flex items-center gap-1.5 text-sm text-muted">
+                <span aria-hidden className="h-4 w-[2.5px] rounded bg-ink/30" />
                 {slot.travelLabel}
               </p>
             )}
-            <span
-              aria-hidden
-              className={`absolute -left-[34px] flex size-7 items-center justify-center rounded-full border-[3px] border-ink font-display text-xs sm:-left-[42px] ${
-                slot.travelLabel ? "top-[48px]" : "top-5"
-              } ${DAY_BG[tone]}`}
-            >
-              {slot.place ? i + 1 : ""}
-            </span>
             <SlotCard slot={slot} />
           </li>
         ))}
@@ -48,69 +37,74 @@ export function ItineraryDay({ day, summary }: { day: DayView; /** 그날 소개
   );
 }
 
+function WeatherChips({ weather }: { weather: WeatherView }) {
+  return (
+    <ul aria-label="날씨" className="mt-3 flex flex-wrap gap-2 text-sm">
+      {weather.parts.map((part) => (
+        <li key={part} className={`rounded-full px-3 py-1 ${weather.wet ? "bg-lavender font-bold" : "bg-surface"}`}>
+          {part}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function SlotCard({ slot }: { slot: SlotView }) {
   return (
-    <article className="rounded-3xl border-[3px] border-ink bg-surface p-4 shadow-pop-sm sm:p-5">
-      <div className="flex items-start gap-4">
-        {slot.place?.imageUrl ? (
-          <Image
-            src={slot.place.imageUrl}
-            alt=""
-            width={96}
-            height={96}
-            unoptimized
-            className="size-20 shrink-0 rounded-2xl border-[2.5px] border-ink object-cover sm:size-24"
-          />
-        ) : null}
-        <div className="min-w-0 flex-1">
-          <p className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border-[2.5px] border-ink bg-cream px-2.5 py-0.5 font-display text-[15px]">
-              {slot.timeLabel}
-            </span>
-            {slot.place?.category && <span className="text-sm font-bold text-muted">{slot.place.category}</span>}
-            {slot.place?.indoor && slot.time !== "lunch" && slot.time !== "dinner" && (
-              <span className="rounded-full bg-lavender px-2 py-0.5 text-xs font-bold">실내</span>
-            )}
-          </p>
-          {slot.place ? <PlaceTitle place={slot.place} /> : <p className="mt-2 font-display text-xl text-muted">{slot.note}</p>}
-          {slot.place && <p className="mt-0.5 truncate text-sm text-muted">{slot.place.address}</p>}
-        </div>
-      </div>
-
-      {slot.alternatives.length > 0 && (
-        <p className="mt-3 border-t-[2px] border-dashed border-ink/30 pt-3 text-sm">
-          <span className="font-bold">근처 다른 곳 </span>
-          {slot.alternatives.map((p, i) => (
-            <span key={p.id}>
-              {i > 0 && " · "}
-              {p.url ? (
-                <a href={p.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+    <article className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface p-3 sm:gap-4 sm:p-4">
+      <span className="mt-0.5 w-11 shrink-0 font-display text-[17px]">{slot.timeLabel}</span>
+      {slot.place?.imageUrl && (
+        <Image
+          src={slot.place.imageUrl}
+          alt=""
+          width={64}
+          height={64}
+          unoptimized
+          className="size-14 shrink-0 rounded-xl border-2 border-ink object-cover sm:size-16"
+        />
+      )}
+      <div className="min-w-0 flex-1">
+        {slot.place ? <PlaceTitle place={slot.place} /> : <p className="font-display text-lg text-muted">{slot.note}</p>}
+        {slot.place?.category && <p className="text-sm text-muted">{slot.place.category}</p>}
+        {slot.forRain && (
+          <p className="mt-1 inline-block rounded-full bg-lavender px-2 py-0.5 text-xs font-bold">비 소식이 있어 실내로 골랐어요</p>
+        )}
+        {slot.alternatives.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
+            <span className="text-muted">다른 곳</span>
+            {slot.alternatives.map((p) =>
+              p.url ? (
+                <a
+                  key={p.id}
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-full border-2 border-ink/30 px-2.5 py-0.5 hover:border-ink"
+                >
                   {p.title}
                 </a>
               ) : (
-                p.title
-              )}
-              {p.category && <span className="text-muted"> ({p.category})</span>}
-            </span>
-          ))}
-        </p>
-      )}
+                <span key={p.id} className="rounded-full border-2 border-ink/20 px-2.5 py-0.5">
+                  {p.title}
+                </span>
+              ),
+            )}
+          </div>
+        )}
+      </div>
     </article>
   );
 }
 
 function PlaceTitle({ place }: { place: PlaceView }) {
-  const title = <span className="font-display text-xl leading-snug sm:text-2xl">{place.title}</span>;
+  const title = <span className="font-display text-[19px] leading-snug sm:text-xl">{place.title}</span>;
+  if (!place.url) return <p>{title}</p>;
   return (
-    <p className="mt-2">
-      {place.url ? (
-        <a href={place.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-          {title}
-          <span className="ml-1 text-sm text-muted">카카오맵 ↗</span>
-        </a>
-      ) : (
-        title
-      )}
+    <p>
+      <a href={place.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+        {title}
+        <span className="ml-1.5 text-sm text-muted">카카오맵에서 보기</span>
+      </a>
     </p>
   );
 }
@@ -120,13 +114,13 @@ export async function DaySummary({ summaries, index }: { summaries: Promise<stri
   const text = (await summaries)?.[index];
   if (!text) return null;
   return (
-    <p className="mt-4 max-w-3xl rounded-2xl border-[2.5px] border-dashed border-ink bg-surface px-4 py-3 leading-relaxed">
-      <span className="mr-2 inline-block rounded-full bg-lavender px-2 py-0.5 align-[2px] text-xs font-bold">AI 한마디</span>
+    <p className="mt-3 max-w-3xl leading-relaxed">
+      <span className="mr-2 inline-block rounded-full bg-lavender px-2 py-0.5 align-[2px] text-xs font-bold">AI 소개</span>
       {text}
     </p>
   );
 }
 
 export function DaySummarySkeleton() {
-  return <div aria-hidden className="mt-4 h-[72px] max-w-3xl animate-pulse rounded-2xl bg-soft-ink" />;
+  return <div aria-hidden className="mt-3 h-12 max-w-3xl animate-pulse rounded-xl bg-soft-ink" />;
 }

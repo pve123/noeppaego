@@ -41,12 +41,15 @@ src/
     kernel/                     공유 커널 — Coordinate·TravelWindow(순수 값 객체, 도메인도 import 가능)
     public-data/                공공데이터포털 호출 공통(인증키·거절 코드·실패를 값으로)
     tour-api/                   관광공사 KorService2 클라이언트(행사·지역·위치 조회)
+    kma/                        기상청 단기·중기예보 클라이언트와 해석(격자 변환·권역 코드·발표 시각)
+    kakao/                      카카오모빌리티 길찾기(차 이동 시간)
 ```
 
 - 의존은 `app → contexts/<x>/index → application → domain ← infrastructure` 한 방향. `eslint.config.mjs` 의 `no-restricted-imports` 가 막는다.
 - CQRS: 1차는 읽기뿐이라 쿼리만 있다. 쓰기(즐겨찾기·일정 저장)가 생기면 `application/` 에 커맨드를 둔다.
 - 컨텍스트끼리는 서로 import 하지 않는다. 화면이 calendar 의 연휴 날짜를 destination 에 넘긴다.
-- 다음 컨텍스트 후보: `weather`(예보 반영 — 실내 장소 `indoor` 로 바꿔 끼운다).
+- 날씨: 출발 10일 안이면 예보를 보고 비 오는 반나절(강수확률 60% 이상이거나 비·눈 예보)에는 실내 장소를 고른다. 축제는 바꾸지 않는다.
+- 화면 문구는 해요체로 쓰고 줄표·쉼표·가운뎃점 대신 조사로 잇는다(`shared/kernel/korean`).
 
 ## 규칙
 

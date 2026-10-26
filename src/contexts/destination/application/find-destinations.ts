@@ -1,4 +1,5 @@
 import { durationLabel } from "@/shared/kernel/duration";
+import { rangeText } from "@/shared/kernel/korean";
 import { TravelWindow } from "@/shared/kernel/travel-window";
 import { recommendDestinations, reachKm } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
@@ -76,7 +77,7 @@ export async function findDestinations(
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,
-        dateLabel: `${monthDay(f.start)} – ${monthDay(f.end)}`,
+        dateLabel: rangeText(monthDay(f.start), monthDay(f.end)),
         address: f.address,
         imageUrl: f.imageUrl,
       })),

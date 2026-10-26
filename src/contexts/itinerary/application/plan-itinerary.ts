@@ -1,7 +1,9 @@
 import { durationLabel } from "@/shared/kernel/duration";
+import { rangeText } from "@/shared/kernel/korean";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
 import { DriveTimes, Place, PlaceCatalog, RestaurantFinder } from "../domain/place";
 import { draftTrip, fillMeals, fillStays, MAX_TRIP_DAYS, mealsOf, SlotTime, TripDay } from "../domain/trip-planner";
+import { DayWeather, HalfDay, isWet, WeatherOutlook } from "../domain/weather";
 
 // ── 쿼리 ─────────────────────────────────────────────
 
@@ -11,6 +13,8 @@ export type PlanItinerary = {
   end: string;
   /** 법정동 시·도-시·군·구(`41-480`) */
   regionCode: string;
+  /** 오늘(한국, YYYY-MM-DD) — 예보 고르기 */
+  today: string;
 };
 
 // ── 읽기 모델 ─────────────────────────────────────────
@@ -38,11 +42,21 @@ export type SlotView = {
   note?: string;
   /** 같은 날 앞 장소에서 오는 길 — 「차로 약 12분」, 길찾기를 못 하면 「직선 1.2km」 */
   travelLabel?: string;
+  /** 비 소식이 있어 실내 장소로 골랐다 */
+  forRain?: boolean;
+};
+
+export type WeatherView = {
+  /** 칩 하나씩 — 「오전 흐리고 비 70%」「오후 구름많음 20%」「최저 2° 최고 13°」 */
+  parts: string[];
+  wet: boolean;
 };
 
 export type DayView = {
   dayNumber: number;
   dateLabel: string;
+  /** 예보가 없는 날(10일 넘게 남음)은 undefined */
+  weather?: WeatherView;
   slots: SlotView[];
 };
 
@@ -75,6 +89,7 @@ export async function planItinerary(
   catalog: PlaceCatalog,
   restaurants: RestaurantFinder,
   driveTimes: DriveTimes,
+  outlook: WeatherOutlook,
 ): Promise<ItineraryView | undefined> {
   const window = TravelWindow.of(query.start, query.end);
   const dates = window.dates(MAX_TRIP_DAYS);
@@ -85,8 +100,13 @@ export async function planItinerary(
     catalog.festivalsIn(query.regionCode, window),
     catalog.lodgingsIn(query.regionCode),
   ]);
-  const draft = draftTrip(dates, sights, festivals);
-  if (!regionName || draft.length === 0) return undefined;
+  const center = (festivals[0] ?? sights[0])?.location;
+  if (!regionName || !center) return undefined;
+
+  const weather = await outlook.forecast(center, query.regionCode, dates, query.today);
+  const draft = draftTrip(dates, sights, festivals, (date, time) =>
+    isWet(time === "morning" ? weather.get(date)?.am : weather.get(date)?.pm),
+  );
 
   const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
   const days = fillStays(fillMeals(draft, candidates), lodgings);
@@ -100,6 +120,7 @@ export async function planItinerary(
     days: days.map((day, i) => ({
       dayNumber: i + 1,
       dateLabel: dateLabel(day.date),
+      weather: weatherView(weather.get(day.date)),
       slots: day.slots.map((slot, j) => {
         const base = {
           key: `${day.date}-${slot.time}`,
@@ -110,7 +131,7 @@ export async function planItinerary(
         };
         switch (slot.kind) {
           case "visit":
-            return { ...base, place: placeView(slot.place) };
+            return { ...base, place: placeView(slot.place), forRain: slot.forRain };
           case "meal":
             return {
               ...base,
@@ -130,6 +151,15 @@ export async function planItinerary(
       }),
     })),
   };
+}
+
+function weatherView(day: DayWeather | undefined): WeatherView | undefined {
+  if (!day || (!day.am && !day.pm)) return undefined;
+  const same = day.am && day.pm && day.am.sky === day.pm.sky && day.am.rainChance === day.pm.rainChance;
+  const half = (name: string, h: HalfDay | undefined) => (h ? [`${name} ${h.sky} ${h.rainChance}%`] : []);
+  const sky = same ? [day.am!.sky, `비 올 확률 ${day.am!.rainChance}%`] : [...half("오전", day.am), ...half("오후", day.pm)];
+  const temp = day.tempMin !== undefined && day.tempMax !== undefined ? [`최저 ${day.tempMin}° 최고 ${day.tempMax}°`] : [];
+  return { parts: [...sky, ...temp], wet: isWet(day.am) || isWet(day.pm) };
 }
 
 function placeOf(slot: TripDay["slots"][number]): Place | undefined {
@@ -173,7 +203,7 @@ function placeView(place: Place): PlaceView {
     lng: place.location.lng,
     imageUrl: place.imageUrl,
     url: place.url,
-    category: place.period ? `축제 ${dateLabel(place.period.start)} – ${dateLabel(place.period.end)}` : place.category,
+    category: place.period ? `${rangeText(dateLabel(place.period.start), dateLabel(place.period.end))} 축제` : place.category,
     indoor: place.indoor,
   };
 }

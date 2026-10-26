@@ -1,3 +1,4 @@
+import { joinWithAnd } from "@/shared/kernel/korean";
 import { CalendarDate } from "../domain/calendar-date";
 import { HolidayCalendar } from "../domain/holiday-calendar";
 import { HolidayCalendarRepository } from "../domain/holiday-calendar-repository";
@@ -114,7 +115,7 @@ function toView(longBreak: LongBreak, calendar: HolidayCalendar, today: Calendar
   return {
     key: base.start.iso,
     month: firstHolidayIn(base, calendar)?.month ?? base.start.month,
-    title: longBreak.holidayNames.join(" · "),
+    title: joinWithAnd(longBreak.holidayNames),
     status: statusOf(base, today),
     base: optionView(base, calendar),
     extensions: longBreak.extensions.map((o) => optionView(o, calendar)),
@@ -141,7 +142,7 @@ function optionView(option: BreakOption, calendar: HolidayCalendar): BreakOption
 }
 
 function dayView(date: CalendarDate, option: BreakOption, calendar: HolidayCalendar): DayView {
-  const holidayName = calendar.holidayNamesOn(date).join(" · ") || undefined;
+  const holidayName = joinWithAnd(calendar.holidayNamesOn(date)) || undefined;
   const kind: DayKind = option.isLeaveDay(date) ? "leave" : holidayName ? "holiday" : "weekend";
   return { iso: date.iso, day: date.day, weekdayLabel: date.weekdayLabel, kind, holidayName };
 }

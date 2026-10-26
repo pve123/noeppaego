@@ -1,38 +1,29 @@
 export function Hero() {
   return (
-    <section id="top" className="mx-auto flex max-w-6xl flex-wrap items-center gap-10 px-4 pb-18 pt-12 sm:px-6">
-      <div className="flex min-w-0 flex-[1_1_440px] flex-col gap-5">
+    <section id="top" className="mx-auto flex max-w-6xl items-center gap-10 px-4 pb-14 pt-8 sm:px-6 sm:pt-12">
+      <div className="flex min-w-0 flex-1 flex-col gap-5">
         <span className="-rotate-3 self-start rounded-full border-[3px] border-ink bg-mint px-4 py-1.5 font-display text-[17px]">
-          연차 계산은 저희가 할게요
+          연차 계산은 맡겨 주세요
         </span>
-        <h1 className="font-display text-[clamp(44px,6.4vw,84px)] leading-[1.12]">
+        <h1 className="font-display text-[clamp(40px,6vw,80px)] leading-[1.12]">
           언제 떠나면
           <br />
           <span className="rounded-2xl bg-yellow px-2.5">가장 길게</span> 쉴까?
         </h1>
-        <p className="max-w-[480px] text-lg leading-[1.8]">
-          공휴일과 주말을 이어서, 연차를 가장 적게 쓰고 가장 길게 쉬는 날을 골라 드려요.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <a
-            href="#next"
-            className="inline-flex h-[58px] items-center rounded-[18px] border-[3px] border-ink bg-coral px-7 font-display text-xl shadow-pop-sm transition-transform hover:-translate-y-0.5"
-          >
-            다음 연휴 보기
-          </a>
-          <a
-            href="#breaks"
-            className="inline-flex h-[58px] items-center rounded-[18px] border-[3px] border-ink bg-surface px-6 font-display text-xl transition-transform hover:-translate-y-0.5"
-          >
-            1년 치 모아보기
-          </a>
-        </div>
+        <p className="max-w-[460px] text-lg leading-[1.8]">공휴일과 주말을 이어서 연차는 적게 쓰고 오래 쉬는 날을 찾아 드려요.</p>
+        <a
+          href="#next"
+          className="inline-flex h-14 items-center self-start rounded-[18px] border-[3px] border-ink bg-coral px-7 font-display text-xl shadow-pop-sm transition-transform hover:-translate-y-0.5"
+        >
+          다음 연휴 보기
+        </a>
       </div>
 
-      <div className="flex min-w-0 flex-[1_1_420px] justify-center">
-        <div className="relative aspect-square w-[min(100%,460px)]">
+      {/* 휴대폰에서는 그림을 빼 첫 화면에 버튼까지 보이게 한다 */}
+      <div className="hidden min-w-0 flex-1 justify-center md:flex">
+        <div className="relative aspect-square w-[min(100%,400px)]">
           <div className="absolute inset-[6%] rounded-full border-[3px] border-ink bg-yellow" />
-          <svg viewBox="0 0 200 200" className="absolute inset-0 size-full" role="img" aria-label="달력과 비행기 일러스트">
+          <svg viewBox="0 0 200 200" className="absolute inset-0 size-full" aria-hidden="true">
             <path d="M24 150 C 60 128, 84 160, 116 138 S 164 126, 180 96" fill="none" stroke="#22223B" strokeWidth="3" strokeDasharray="6 6" strokeLinecap="round" />
             <rect x="58" y="62" width="84" height="80" rx="14" fill="#FFFFFF" stroke="#22223B" strokeWidth="4" />
             <path d="M58 88 h84" stroke="#22223B" strokeWidth="4" />
@@ -46,9 +37,8 @@ export function Hero() {
             <circle cx="36" cy="64" r="10" fill="#3CCFB4" stroke="#22223B" strokeWidth="3" />
             <circle cx="172" cy="152" r="7" fill="#B8B5FF" stroke="#22223B" strokeWidth="3" />
           </svg>
-          <span className="absolute bottom-[12%] left-0 -rotate-[8deg] rounded-full border-[3px] border-ink bg-lavender px-3.5 py-1.5 font-display text-[17px]">#징검다리</span>
-          <span className="absolute right-0 top-[42%] rotate-6 rounded-full border-[3px] border-ink bg-mint px-3.5 py-1.5 font-display text-[17px]">#황금연휴</span>
-          <span className="absolute left-[8%] top-[4%] -rotate-[4deg] rounded-full border-[3px] border-ink bg-surface px-3.5 py-1.5 font-display text-[17px]">#연차1일</span>
+          <span aria-hidden className="absolute bottom-[12%] left-0 -rotate-[8deg] rounded-full border-[3px] border-ink bg-lavender px-3.5 py-1.5 font-display text-[17px]">#징검다리</span>
+          <span aria-hidden className="absolute right-0 top-[42%] rotate-6 rounded-full border-[3px] border-ink bg-mint px-3.5 py-1.5 font-display text-[17px]">#황금연휴</span>
         </div>
       </div>
     </section>

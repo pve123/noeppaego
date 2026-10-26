@@ -56,6 +56,22 @@ describe("draftTrip", () => {
     expect(secondLunch.near).toEqual(at(5)); // 둘째 날 점심 — 오전(B) 근처
   });
 
+  it("비 오는 반나절에는 실내 장소를 고르고 표시한다 — 축제는 그대로", () => {
+    const museum = place("박물관", 30, { kind: "culture", indoor: true });
+    const rainyMorning = (date: string, time: string) => date === "2026-12-26" && time === "morning";
+    const days = draftTrip(dates, [place("A", 0), place("B", 1), place("C", 2), museum], [], rainyMorning);
+    const morning = days[1].slots[0];
+    expect(morning.kind === "visit" && morning.place.id).toBe("박물관");
+    expect(morning.kind === "visit" && morning.forRain).toBe(true);
+    const afternoon = days[1].slots.find((s) => s.time === "afternoon");
+    expect(afternoon?.kind === "visit" && afternoon.forRain).toBeUndefined();
+
+    const festival = place("축제", 5, { kind: "festival", period: { start: "2026-12-26", end: "2026-12-26" } });
+    const withFestival = draftTrip(dates, [place("A", 0), museum], [festival], rainyMorning);
+    const festivalMorning = withFestival[1].slots[0];
+    expect(festivalMorning.kind === "visit" && festivalMorning.place.id).toBe("축제");
+  });
+
   it("볼 곳이 하나도 없으면 일정을 짜지 않는다", () => {
     expect(draftTrip(dates, [], [])).toEqual([]);
   });
