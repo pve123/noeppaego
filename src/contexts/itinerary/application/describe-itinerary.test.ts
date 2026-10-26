@@ -5,6 +5,7 @@ import { ItineraryView } from "./plan-itinerary";
 
 const plan: ItineraryView = {
   regionName: "경기도 파주시",
+  customized: false,
   lengthLabel: "1박 2일",
   startLabel: "12.26(토)",
   endLabel: "12.27(일)",

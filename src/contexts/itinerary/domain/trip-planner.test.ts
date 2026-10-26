@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { Place } from "./place";
-import { draftTrip, fillMeals, fillStays, layoutOf, mealsOf, TripDay } from "./trip-planner";
+import { draftTrip, fillMeals, fillStays, layoutOf, mealsOf, slotKeyOf, TripDay } from "./trip-planner";
 
 // 경도 0.01 ≈ 0.9km — x 값으로 동서 위치만 다르게 둔다.
 const at = (x: number) => new Coordinate(37.7, 126.7 + x * 0.01);
@@ -107,5 +107,62 @@ describe("fillStays", () => {
     const stays = filled.flatMap((d) => d.slots).filter((s) => s.kind === "stay");
     expect(stays).toHaveLength(2);
     expect(stays.every((s) => s.kind === "stay" && s.choice?.id === "가까운 펜션")).toBe(true);
+  });
+});
+
+describe("사용자가 고른 곳(picks)", () => {
+  const dates = ["2026-12-25", "2026-12-26", "2026-12-27"];
+  const sights = [place("A", 0), place("B", 1), place("C", 2), place("D", 3), place("E", 20)];
+
+  it("관광지 칸을 고른 곳으로 고정하고 뒤 동선은 거기서 이어 간다", () => {
+    const picks = new Map([[slotKeyOf("2026-12-26", "morning"), "E"]]);
+    const days = draftTrip(dates, sights, [], () => false, picks);
+    const morning = days[1].slots[0];
+    expect(morning.kind === "visit" && morning.place.id).toBe("E");
+    expect(morning.kind === "visit" && morning.picked).toBe(true);
+  });
+
+  it("다른 칸이 고른 곳을 먼저 가져가지 않는다", () => {
+    // B 는 원래 둘째 날 오전에 들어갈 곳 — 셋째 날 오전으로 옮겨 달라고 하면 둘째 날엔 다른 곳이 들어간다
+    const picks = new Map([[slotKeyOf("2026-12-27", "morning"), "B"]]);
+    const ids = draftTrip(dates, sights, [], () => false, picks)
+      .flatMap((d) => d.slots)
+      .flatMap((s) => (s.kind === "visit" ? [s.place.id] : []));
+    expect(ids.filter((id) => id === "B")).toHaveLength(1);
+    expect(ids.at(-1)).toBe("B");
+  });
+
+  it("목록에 없는 곳을 골랐으면 그 칸은 자동으로 고른다", () => {
+    const picks = new Map([[slotKeyOf("2026-12-25", "afternoon"), "없는곳"]]);
+    const days = draftTrip(dates, sights, [], () => false, picks);
+    const afternoon = days[0].slots.find((s) => s.time === "afternoon");
+    expect(afternoon?.kind === "visit" && afternoon.place.id).toBe("A");
+  });
+
+  it("관광지 칸마다 일정에 안 들어간 근처 볼거리를 바꿀 후보로 준다", () => {
+    const days = draftTrip(dates, sights, [], () => false);
+    const visit = days[0].slots.find((s) => s.kind === "visit");
+    const used = days.flatMap((d) => d.slots).flatMap((s) => (s.kind === "visit" ? [s.place.id] : []));
+    expect(visit?.kind === "visit" && visit.alternatives.map((p) => p.id)).toEqual(["E"]);
+    expect(used).not.toContain("E");
+  });
+
+  it("식사 칸을 고른 식당으로 바꾸면 원래 식당은 후보로 내려간다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
+    const near = [place("국밥", 0.1, { kind: "restaurant" }), place("파스타", 0.5, { kind: "restaurant" })];
+    const picks = new Map([[slotKeyOf("2026-12-25", "lunch"), "파스타"]]);
+    const [lunch] = mealsOf(fillMeals(days, [near, []], 2, picks));
+    expect(lunch.choice?.id).toBe("파스타");
+    expect(lunch.picked).toBe(true);
+    expect(lunch.alternatives.map((p) => p.id)).toEqual(["국밥"]);
+  });
+
+  it("다른 끼니가 고른 식당을 이 끼니가 먼저 가져가지 않는다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 0.2)], []);
+    const shared = [place("국밥", 0.1, { kind: "restaurant" }), place("파스타", 0.3, { kind: "restaurant" })];
+    const picks = new Map([[slotKeyOf("2026-12-25", "dinner"), "국밥"]]);
+    const [lunch, dinner] = mealsOf(fillMeals(days, [shared, shared], 2, picks));
+    expect(lunch.choice?.id).toBe("파스타");
+    expect(dinner.choice?.id).toBe("국밥");
   });
 });

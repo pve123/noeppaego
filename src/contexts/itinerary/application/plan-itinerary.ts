@@ -2,7 +2,16 @@ import { durationLabel } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
 import { DriveTimes, Place, PlaceCatalog, RestaurantFinder } from "../domain/place";
-import { draftTrip, fillMeals, fillStays, MAX_TRIP_DAYS, mealsOf, SlotTime, TripDay } from "../domain/trip-planner";
+import {
+  draftTrip,
+  fillMeals,
+  fillStays,
+  MAX_TRIP_DAYS,
+  mealsOf,
+  slotKeyOf,
+  SlotTime,
+  TripDay,
+} from "../domain/trip-planner";
 import { DayWeather, HalfDay, isWet, WeatherOutlook } from "../domain/weather";
 
 // ── 쿼리 ─────────────────────────────────────────────
@@ -15,6 +24,8 @@ export type PlanItinerary = {
   regionCode: string;
   /** 오늘(한국, YYYY-MM-DD) — 예보 고르기 */
   today: string;
+  /** 사용자가 바꾼 칸 — 칸 키(`2026-12-25-lunch`) → 장소 id */
+  picks?: Record<string, string>;
 };
 
 // ── 읽기 모델 ─────────────────────────────────────────
@@ -32,11 +43,14 @@ export type PlaceView = {
 };
 
 export type SlotView = {
+  /** 칸 키 `2026-12-25-lunch` — 바꾸기 주소에 쓴다 */
   key: string;
+  /** 사용자가 직접 바꾼 칸 */
+  picked?: boolean;
   time: SlotTime;
   timeLabel: string;
   place?: PlaceView;
-  /** 식사 칸의 다른 후보 */
+  /** 이 칸을 바꿀 수 있는 후보 — 식사 칸은 근처 다른 식당, 관광지 칸은 근처 다른 볼거리 */
   alternatives: PlaceView[];
   /** 장소가 없을 때 안내 */
   note?: string;
@@ -62,6 +76,8 @@ export type DayView = {
 
 export type ItineraryView = {
   regionName: string;
+  /** 사용자가 바꾼 칸이 하나라도 있다 */
+  customized: boolean;
   /** 「2박 3일」 */
   lengthLabel: string;
   startLabel: string;
@@ -78,8 +94,10 @@ const TIME_LABEL: Record<SlotTime, string> = {
   home: "귀가",
 };
 
-/** 근처 식당 후보 수 — 고른 곳 + 다른 후보 2곳 + 앞 끼니와 겹칠 여유 */
-const MEAL_CANDIDATES = 8;
+/** 근처 식당 후보 수 — 고른 곳 + 바꿀 후보 + 앞 끼니와 겹칠 여유 */
+const MEAL_CANDIDATES = 10;
+/** 식사 칸마다 보여 줄 바꿀 후보 수 */
+const MEAL_ALTERNATIVES = 3;
 
 // ── 핸들러 ────────────────────────────────────────────
 
@@ -103,17 +121,23 @@ export async function planItinerary(
   const center = (festivals[0] ?? sights[0])?.location;
   if (!regionName || !center) return undefined;
 
+  const picks = new Map(Object.entries(query.picks ?? {}));
   const weather = await outlook.forecast(center, query.regionCode, dates, query.today);
-  const draft = draftTrip(dates, sights, festivals, (date, time) =>
-    isWet(time === "morning" ? weather.get(date)?.am : weather.get(date)?.pm),
+  const draft = draftTrip(
+    dates,
+    sights,
+    festivals,
+    (date, time) => isWet(time === "morning" ? weather.get(date)?.am : weather.get(date)?.pm),
+    picks,
   );
 
   const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
-  const days = fillStays(fillMeals(draft, candidates), lodgings);
+  const days = fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings);
   const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
 
   return {
     regionName,
+    customized: days.some((d) => d.slots.some((s) => (s.kind === "visit" || s.kind === "meal") && s.picked)),
     lengthLabel: dates.length === 1 ? "당일치기" : `${dates.length - 1}박 ${dates.length}일`,
     startLabel: dateLabel(dates[0]),
     endLabel: dateLabel(dates.at(-1)!),
@@ -123,7 +147,7 @@ export async function planItinerary(
       weather: weatherView(weather.get(day.date)),
       slots: day.slots.map((slot, j) => {
         const base = {
-          key: `${day.date}-${slot.time}`,
+          key: slotKeyOf(day.date, slot.time),
           time: slot.time,
           timeLabel: TIME_LABEL[slot.time],
           alternatives: [],
@@ -131,11 +155,18 @@ export async function planItinerary(
         };
         switch (slot.kind) {
           case "visit":
-            return { ...base, place: placeView(slot.place), forRain: slot.forRain };
+            return {
+              ...base,
+              place: placeView(slot.place),
+              forRain: slot.forRain,
+              picked: slot.picked,
+              alternatives: slot.alternatives.map(placeView),
+            };
           case "meal":
             return {
               ...base,
               place: slot.choice && placeView(slot.choice),
+              picked: slot.picked,
               alternatives: slot.alternatives.map(placeView),
               note: slot.choice ? undefined : "근처에 등록된 식당을 찾지 못했어요",
             };

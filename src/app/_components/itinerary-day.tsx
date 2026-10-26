@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { DayView, SlotView, WeatherView } from "@/contexts/itinerary";
 import type { MapPin } from "./kakao-map";
@@ -7,7 +8,19 @@ import { ZoomableImage } from "./zoomable-image";
 export const DAY_TONES: MapPin["tone"][] = ["yellow", "mint", "coral"];
 const DAY_BG = { yellow: "bg-yellow", mint: "bg-mint", coral: "bg-coral", lavender: "bg-lavender", ink: "bg-ink" };
 
-export function ItineraryDay({ day, summary }: { day: DayView; /** 그날 소개 글(늦게 채워진다) */ summary?: ReactNode }) {
+/** 칸 하나를 바꾸는(placeId 가 없으면 되돌리는) 주소 */
+export type HrefFor = (slotKey: string, placeId?: string) => string;
+
+export function ItineraryDay({
+  day,
+  summary,
+  hrefFor,
+}: {
+  day: DayView;
+  /** 그날 소개 글(늦게 채워진다) */
+  summary?: ReactNode;
+  hrefFor: HrefFor;
+}) {
   const tone = DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length];
   return (
     <section aria-labelledby={`day-${day.dayNumber}`}>
@@ -29,7 +42,7 @@ export function ItineraryDay({ day, summary }: { day: DayView; /** 그날 소개
                 {slot.travelLabel}
               </p>
             )}
-            <SlotCard slot={slot} />
+            <SlotCard slot={slot} hrefFor={hrefFor} />
           </li>
         ))}
       </ol>
@@ -53,7 +66,7 @@ function WeatherChips({ weather }: { weather: WeatherView }) {
  * 일정 칸 — 역할마다 자리를 나눈다.
  * 왼쪽 시간 · 가운데 정보(사진·이름·종류) · 오른쪽 위 행동(별점과 리뷰) · 아랫단 대안(근처 다른 식당)
  */
-function SlotCard({ slot }: { slot: SlotView }) {
+function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor: HrefFor }) {
   const place = slot.place;
   return (
     <article className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-surface">
@@ -77,7 +90,10 @@ function SlotCard({ slot }: { slot: SlotView }) {
             )}
             {place?.category &&
               (isMeal(slot) ? <FoodChips category={place.category} /> : <p className="mt-0.5 text-sm text-muted">{place.category}</p>)}
-            {slot.forRain && (
+            {slot.picked && (
+          <p className="mt-2 mr-2 inline-block rounded-full bg-yellow px-2.5 py-0.5 text-xs font-bold">직접 고른 곳</p>
+        )}
+        {slot.forRain && (
               <p className="mt-2 inline-block rounded-full bg-lavender px-2.5 py-0.5 text-xs font-bold">비 소식이 있어 실내로 골랐어요</p>
             )}
           </div>
@@ -96,25 +112,28 @@ function SlotCard({ slot }: { slot: SlotView }) {
         </div>
       </div>
 
-      {slot.alternatives.length > 0 && (
+      {(slot.alternatives.length > 0 || slot.picked) && (
         <div className="flex flex-wrap items-center gap-1.5 border-t-2 border-dashed border-ink/25 bg-cream px-3 py-2.5 text-sm sm:px-4">
-          <span className="mr-1 font-bold text-muted">근처 다른 식당</span>
-          {slot.alternatives.map((p) =>
-            p.url ? (
-              <a
-                key={p.id}
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full border-2 border-ink/25 bg-surface px-2.5 py-0.5 hover:border-ink"
-              >
-                {p.title}
-              </a>
-            ) : (
-              <span key={p.id} className="rounded-full border-2 border-ink/15 bg-surface px-2.5 py-0.5">
-                {p.title}
-              </span>
-            ),
+          <span className="mr-1 font-bold text-muted">{isMeal(slot) ? "다른 식당으로 바꾸기" : "다른 곳으로 바꾸기"}</span>
+          {slot.alternatives.map((p) => (
+            <Link
+              key={p.id}
+              href={hrefFor(slot.key, p.id)}
+              scroll={false}
+              title={p.category ? `${p.title} (${p.category})` : p.title}
+              className="rounded-full border-2 border-ink/25 bg-surface px-2.5 py-0.5 hover:border-ink hover:bg-yellow"
+            >
+              {p.title}
+            </Link>
+          ))}
+          {slot.picked && (
+            <Link
+              href={hrefFor(slot.key)}
+              scroll={false}
+              className="ml-auto rounded-full border-2 border-ink bg-surface px-3 py-0.5 font-bold hover:bg-yellow"
+            >
+              원래대로
+            </Link>
           )}
         </div>
       )}
