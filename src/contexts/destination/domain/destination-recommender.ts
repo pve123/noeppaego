@@ -1,6 +1,6 @@
-import { Coordinate } from "./coordinate";
+import { Coordinate } from "@/shared/kernel/coordinate";
 import { Festival, Region } from "./festival";
-import { TravelWindow } from "./travel-window";
+import { TravelWindow } from "@/shared/kernel/travel-window";
 
 export type Destination = {
   readonly region: Region;

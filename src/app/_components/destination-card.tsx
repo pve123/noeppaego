@@ -1,11 +1,21 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { DestinationView, FestivalView } from "@/contexts/destination";
 
 const BANDS = ["bg-yellow", "bg-mint", "bg-coral", "bg-lavender"];
 /** 카드에 바로 보이는 축제 수 — 나머지는 접는다 */
 const VISIBLE = 3;
 
-export function DestinationCard({ destination, rank }: { destination: DestinationView; rank: number }) {
+export function DestinationCard({
+  destination,
+  rank,
+  planHref,
+}: {
+  destination: DestinationView;
+  rank: number;
+  /** 이 지역 일정 페이지 */
+  planHref: string;
+}) {
   const { festivals } = destination;
   const shown = festivals.slice(0, VISIBLE);
   const rest = festivals.slice(VISIBLE);
@@ -41,6 +51,15 @@ export function DestinationCard({ destination, rank }: { destination: Destinatio
             </ul>
           </details>
         )}
+        <div className="mt-auto pt-5">
+          <Link
+            href={planHref}
+            className="inline-flex h-12 items-center gap-2 rounded-2xl border-[3px] border-ink bg-coral px-5 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5"
+          >
+            여기로 일정 짜기
+            <span aria-hidden>→</span>
+          </Link>
+        </div>
       </div>
     </article>
   );

@@ -1,5 +1,5 @@
-import { Coordinate } from "./coordinate";
-import { TravelWindow } from "./travel-window";
+import { Coordinate } from "@/shared/kernel/coordinate";
+import { TravelWindow } from "@/shared/kernel/travel-window";
 
 /** 시·군·구 단위 지역 — 코드는 법정동 시·도 + 시·군·구(`41-480`) */
 export type Region = {

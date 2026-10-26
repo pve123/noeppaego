@@ -12,6 +12,9 @@ const frameworks = {
   message: "도메인·애플리케이션 레이어는 프레임워크를 모릅니다.",
 };
 
+// 공유 커널(@/shared/kernel — 컨텍스트들이 같이 쓰는 순수 값 객체) 밖의 @/ 경로
+const outsideKernel = (message) => ({ regex: "^@/(?!shared/kernel/)", message });
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -30,9 +33,10 @@ const eslintConfig = defineConfig([
           patterns: [
             frameworks,
             {
-              group: ["**/application/**", "**/infrastructure/**", "@/*"],
-              message: "도메인은 같은 컨텍스트의 domain 만 import 합니다.",
+              group: ["**/application/**", "**/infrastructure/**"],
+              message: "도메인은 같은 컨텍스트의 domain 과 공유 커널만 import 합니다.",
             },
+            outsideKernel("도메인은 같은 컨텍스트의 domain 과 공유 커널만 import 합니다."),
           ],
         },
       ],
@@ -48,9 +52,10 @@ const eslintConfig = defineConfig([
           patterns: [
             frameworks,
             {
-              group: ["**/infrastructure/**", "@/*"],
-              message: "애플리케이션은 domain 포트로만 바깥을 봅니다.",
+              group: ["**/infrastructure/**"],
+              message: "애플리케이션은 domain 포트와 공유 커널로만 바깥을 봅니다.",
             },
+            outsideKernel("애플리케이션은 domain 포트와 공유 커널로만 바깥을 봅니다."),
           ],
         },
       ],

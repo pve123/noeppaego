@@ -1,0 +1,36 @@
+import { Coordinate } from "@/shared/kernel/coordinate";
+import { TravelWindow } from "@/shared/kernel/travel-window";
+
+export type PlaceKind = "sight" | "culture" | "festival" | "restaurant" | "lodging";
+
+/** 일정에 넣을 수 있는 장소 */
+export type Place = {
+  readonly id: string;
+  readonly kind: PlaceKind;
+  readonly title: string;
+  readonly location: Coordinate;
+  readonly address: string;
+  readonly imageUrl?: string;
+  /** 자세히 보기(카카오맵 장소 등) */
+  readonly url?: string;
+  /** 「한식」「카페」 같은 짧은 분류 */
+  readonly category?: string;
+  /** 실내 — 비 오는 날 바꿔 끼울 후보(3차 날씨 반영) */
+  readonly indoor: boolean;
+  /** 축제 기간(YYYY-MM-DD) */
+  readonly period?: { readonly start: string; readonly end: string };
+};
+
+/** 포트 — 지역(법정동 시·도-시·군·구 코드)의 장소 */
+export interface PlaceCatalog {
+  regionName(regionCode: string): Promise<string | undefined>;
+  /** 관광지·문화시설 — 볼거리 좋은 순(사진 있는 것부터) */
+  sightsIn(regionCode: string): Promise<Place[]>;
+  festivalsIn(regionCode: string, window: TravelWindow): Promise<Place[]>;
+  lodgingsIn(regionCode: string): Promise<Place[]>;
+}
+
+/** 포트 — 좌표 근처 식당, 가까운 순 */
+export interface RestaurantFinder {
+  near(at: Coordinate, limit: number): Promise<Place[]>;
+}

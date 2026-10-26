@@ -111,7 +111,7 @@ async function Destinations({ start, end }: { start: string; end: string }) {
         <ol className="mt-10 grid gap-6 md:grid-cols-2">
           {view.destinations.map((d, i) => (
             <li key={d.code} className="min-w-0">
-              <DestinationCard destination={d} rank={i + 1} />
+              <DestinationCard destination={d} rank={i + 1} planHref={`/breaks/${start}/${d.code}`} />
             </li>
           ))}
         </ol>
