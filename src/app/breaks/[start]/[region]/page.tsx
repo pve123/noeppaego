@@ -4,9 +4,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/calendar";
-import { planItinerary, type ItineraryView } from "@/contexts/itinerary";
+import { describeItinerary, planItinerary, type ItineraryView } from "@/contexts/itinerary";
 import { PublicDataError } from "@/shared/public-data/public-data";
-import { ItineraryDay, DAY_TONES } from "../../../_components/itinerary-day";
+import { DAY_TONES, DaySummary, DaySummarySkeleton, ItineraryDay } from "../../../_components/itinerary-day";
 import { KakaoMap, type MapPin } from "../../../_components/kakao-map";
 import { SiteFooter, SiteHeader } from "../../../_components/site-header";
 import { SourceError } from "../../../_components/source-error";
@@ -49,6 +49,9 @@ async function Itinerary({ params }: Pick<PageProps<"/breaks/[start]/[region]">,
     throw e;
   }
   if (!plan) notFound();
+
+  // 소개 글은 기다리지 않는다 — 날마다 Suspense 로 늦게 채운다(호출은 한 번).
+  const summaries = describeItinerary(plan);
 
   const pins: MapPin[] = plan.days.flatMap((day) =>
     day.slots.flatMap((slot, i) =>
@@ -102,8 +105,16 @@ async function Itinerary({ params }: Pick<PageProps<"/breaks/[start]/[region]">,
         />
 
         <div className="mt-12 space-y-14">
-          {plan.days.map((day) => (
-            <ItineraryDay key={day.dayNumber} day={day} />
+          {plan.days.map((day, i) => (
+            <ItineraryDay
+              key={day.dayNumber}
+              day={day}
+              summary={
+                <Suspense fallback={<DaySummarySkeleton />}>
+                  <DaySummary summaries={summaries} index={i} />
+                </Suspense>
+              }
+            />
           ))}
         </div>
       </div>

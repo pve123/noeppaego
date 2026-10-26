@@ -34,3 +34,8 @@ export interface PlaceCatalog {
 export interface RestaurantFinder {
   near(at: Coordinate, limit: number): Promise<Place[]>;
 }
+
+/** 포트 — 자동차 이동 시간(분). 모르면 undefined */
+export interface DriveTimes {
+  minutes(from: Coordinate, to: Coordinate): Promise<number | undefined>;
+}
