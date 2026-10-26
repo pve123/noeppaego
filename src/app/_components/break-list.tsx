@@ -26,7 +26,8 @@ export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextY
               ▾
             </span>
           </summary>
-          <div className="opacity-60">
+          <p className="mt-3 text-sm text-muted">지난 연휴도 눌러서 그때 갈 만했던 곳과 일정을 볼 수 있어요.</p>
+          <div className="opacity-75 transition-opacity hover:opacity-100">
             <MonthGroups breaks={past} />
           </div>
         </details>
