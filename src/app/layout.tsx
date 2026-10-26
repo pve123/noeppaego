@@ -11,7 +11,7 @@ const noto = Noto_Sans_KR({
   variable: "--font-noto",
 });
 
-const DESCRIPTION = "공휴일과 주말을 이어 연차를 가장 적게 쓰고 길게 쉬는 날을 찾고, 갈 곳과 하루 일정까지 짜 드려요.";
+const DESCRIPTION = "공휴일과 주말을 이어서 연차는 적게 쓰고 오래 쉬는 날을 찾아 드려요. 갈 곳과 하루 일정도 짜 드려요.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://holiday-trip.vercel.app"),

@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/calendar";
@@ -8,12 +7,15 @@ import { findDestinations } from "@/contexts/destination";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { DestinationCard } from "../../_components/destination-card";
 import { KakaoMap, type MapPin } from "../../_components/kakao-map";
-import { NextBreak } from "../../_components/next-break";
+import { leaveText, periodText } from "../../_components/leave-text";
+import { OriginSelect } from "../../_components/origin-select";
+import { PageBand } from "../../_components/page-band";
 import { SiteFooter, SiteHeader } from "../../_components/site-header";
 import { SourceError } from "../../_components/source-error";
+import { Steps } from "../../_components/steps";
 
 export const metadata: Metadata = {
-  title: "어디 갈까? · 연휴 여행 플래너",
+  title: "갈 곳 고르기 | 연휴 여행 플래너",
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -25,7 +27,8 @@ export default function BreakPage({ params, searchParams }: PageProps<"/breaks/[
     <>
       <SiteHeader />
       <main>
-        <Suspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="h-96 animate-pulse bg-ink/90" />}>
+        <Steps current={2} hrefs={["/#breaks"]} />
+        <Suspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="mt-4 h-40 animate-pulse bg-ink/90" />}>
           <BreakDetail params={params} searchParams={searchParams} />
         </Suspense>
       </main>
@@ -50,20 +53,22 @@ async function BreakDetail({ params, searchParams }: PageProps<"/breaks/[start]"
   }
   if (!item) notFound();
 
+  const { base } = item;
   return (
     <>
-      <div className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
-        <Link href="/#breaks" className="font-display text-lg underline underline-offset-4">
-          ← 연휴 목록
-        </Link>
-      </div>
-      <NextBreak item={item} withLink={false} />
+      <PageBand
+        eyebrow={`${item.title} 연휴 ${base.length}일`}
+        title="어디로 갈까요?"
+        sub={
+          <>
+            {periodText(base)}
+            <br />
+            {leaveText(base)}
+          </>
+        }
+      />
       <Suspense fallback={<DestinationsSkeleton />}>
-        <Destinations
-          start={item.base.startIso}
-          end={item.base.endIso}
-          originId={typeof from === "string" ? from : undefined}
-        />
+        <Destinations start={base.startIso} end={base.endIso} originId={typeof from === "string" ? from : undefined} />
       </Suspense>
     </>
   );
@@ -79,67 +84,45 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
   }
 
   return (
-    <section id="where" aria-labelledby="where-title" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-20 sm:px-6">
-      <span className="-rotate-2 inline-block rounded-full border-[3px] border-ink bg-mint px-4 py-1.5 font-display text-[17px]">
-        이 연휴에 열리는 축제 기준
-      </span>
-      <h2 id="where-title" className="mt-4 font-display text-[clamp(32px,4vw,48px)] leading-tight">
-        이 연휴엔 여기 어때요?
-      </h2>
-      <p className="mt-2 text-[17px]">
-        {view.originName}에서 {view.reachKm ? `${view.reachKm}km 안, ` : ""}축제가 많은 곳부터 골랐어요.
-      </p>
-
-      <nav aria-label="출발지" className="mt-5 flex flex-wrap items-center gap-2">
-        <span className="mr-1 font-bold">출발</span>
-        {view.origins.map((o) => {
-          const active = o.id === view.originId;
-          return (
-            <Link
-              key={o.id}
-              href={`/breaks/${start}?from=${o.id}#where`}
-              scroll={false}
-              aria-current={active ? "true" : undefined}
-              className={`inline-flex h-10 items-center rounded-full border-[2.5px] border-ink px-4 font-display text-[16px] transition-transform ${
-                active ? "-rotate-2 bg-yellow shadow-pop-sm" : "bg-surface hover:-translate-y-0.5"
-              }`}
-            >
-              {o.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {view.destinations.length > 0 && (
-        <div className="mt-8">
-          <KakaoMap
-            label={`${view.originName}에서 추천 지역 ${view.destinations.length}곳까지의 지도`}
-            pins={[
-              { id: "origin", ...view.origin, badge: "출발", label: view.originName, tone: "ink" },
-              ...view.destinations.map((d, i) => ({
-                id: d.code,
-                ...d.center,
-                badge: String(i + 1),
-                label: d.name,
-                tone: PIN_TONES[i % PIN_TONES.length],
-              })),
-            ]}
-          />
-        </div>
-      )}
+    <section aria-label="추천 지역" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-[16px]">
+          {view.originName}에서 {view.reachKm ? `${view.reachKm}km 안에서 ` : ""}축제가 많은 곳부터 보여 드려요.
+        </p>
+        <OriginSelect origins={view.origins} selected={view.originId} basePath={`/breaks/${start}`} />
+      </div>
 
       {view.destinations.length === 0 ? (
         <p className="mt-8 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center font-display text-[22px]">
-          이 기간에 등록된 축제가 아직 없어요. 가까워지면 다시 들러 주세요!
+          이 기간에 등록된 축제가 아직 없어요. 날짜가 가까워지면 다시 확인해 주세요.
         </p>
       ) : (
-        <ol className="mt-10 grid gap-6 md:grid-cols-2">
-          {view.destinations.map((d, i) => (
-            <li key={d.code} className="min-w-0">
-              <DestinationCard destination={d} rank={i + 1} planHref={`/breaks/${start}/${d.code}`} />
-            </li>
-          ))}
-        </ol>
+        <>
+          <ol className="mt-6 grid gap-5 md:grid-cols-2">
+            {view.destinations.map((d, i) => (
+              <li key={d.code} className="min-w-0">
+                <DestinationCard destination={d} rank={i + 1} planHref={`/breaks/${start}/${d.code}`} />
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-14">
+            <KakaoMap
+              title="지도로 보기"
+              label={`${view.originName}에서 추천 지역 ${view.destinations.length}곳까지 보여 주는 지도`}
+              pins={[
+                { id: "origin", ...view.origin, badge: "출발", label: view.originName, tone: "ink" },
+                ...view.destinations.map((d, i) => ({
+                  id: d.code,
+                  ...d.center,
+                  badge: String(i + 1),
+                  label: d.name,
+                  tone: PIN_TONES[i % PIN_TONES.length],
+                })),
+              ]}
+            />
+          </div>
+        </>
       )}
     </section>
   );
@@ -147,11 +130,11 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
 
 function DestinationsSkeleton() {
   return (
-    <div aria-busy="true" aria-label="갈 만한 곳을 찾는 중" className="mx-auto max-w-6xl animate-pulse px-4 py-20 sm:px-6">
-      <div className="h-12 w-80 rounded-2xl bg-soft-ink" />
-      <div className="mt-10 grid gap-6 md:grid-cols-2">
+    <div aria-busy="true" aria-label="갈 곳을 찾는 중" className="mx-auto max-w-6xl animate-pulse px-4 py-10 sm:px-6">
+      <div className="h-11 w-80 rounded-2xl bg-soft-ink" />
+      <div className="mt-6 grid gap-5 md:grid-cols-2">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-72 rounded-3xl bg-soft-ink" />
+          <div key={i} className="h-56 rounded-3xl bg-soft-ink" />
         ))}
       </div>
     </div>

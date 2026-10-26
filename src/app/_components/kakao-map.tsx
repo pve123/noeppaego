@@ -33,11 +33,14 @@ export function KakaoMap({
   pins,
   routes = [],
   label,
+  title,
   caption,
 }: {
   pins: MapPin[];
   routes?: MapRoute[];
   label: string;
+  /** 지도 위 제목 — 지도가 숨으면 같이 숨는다 */
+  title?: string;
   /** 지도 아래 안내 — 지도가 숨으면 같이 숨는다 */
   caption?: string;
 }) {
@@ -77,6 +80,7 @@ export function KakaoMap({
   if (failed) return null;
   return (
     <figure>
+      {title && <h2 className="mb-4 font-display text-[26px]">{title}</h2>}
       <div
         ref={container}
         role="img"

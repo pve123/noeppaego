@@ -9,6 +9,7 @@ export async function describeItinerary(plan: ItineraryView, writer: TripWriter)
   const outline: DayOutline[] = plan.days.map((day) => ({
     dayNumber: day.dayNumber,
     dateLabel: day.dateLabel,
+    weather: day.weather?.parts.join(" / "),
     stops: day.slots.flatMap((slot) =>
       slot.place
         ? [{ time: slot.timeLabel, title: slot.place.title, category: slot.place.category, indoor: slot.place.indoor }]

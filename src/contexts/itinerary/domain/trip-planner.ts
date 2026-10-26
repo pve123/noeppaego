@@ -4,7 +4,13 @@ import { Place } from "./place";
 /** 연휴가 길어도 한 지역 일정은 2박 3일까지 — 그 이상은 한 지역에 머물기엔 길다. */
 export const MAX_TRIP_DAYS = 3;
 
-export type Visit = { readonly time: "morning" | "afternoon"; readonly kind: "visit"; readonly place: Place };
+export type Visit = {
+  readonly time: "morning" | "afternoon";
+  readonly kind: "visit";
+  readonly place: Place;
+  /** 비 소식이 있어 실내 장소로 골랐다 */
+  readonly forRain?: boolean;
+};
 export type Meal = {
   readonly time: "lunch" | "dinner";
   readonly kind: "meal";
@@ -38,47 +44,54 @@ export function layoutOf(dayIndex: number, totalDays: number): SlotTime[] {
  * - 그날 열리는 축제가 있으면 그날 첫 방문지로 먼저 넣는다.
  * - 나머지는 바로 앞 방문지에서 가장 가까운 곳(처음은 목록 맨 앞 — 볼거리 좋은 순)으로 이어 동선을 줄인다.
  * - 같은 곳은 두 번 넣지 않는다. 방문지가 모자라면 그 칸은 뺀다.
+ * - 비 오는 반나절(wet)에는 실내 장소에서 고른다. 실내가 없으면 그냥 고른다. 축제는 바꾸지 않는다.
  *
  * 방문지가 하나도 없으면 빈 배열 — 일정을 짤 수 없는 지역이다.
  */
-export function draftTrip(dates: readonly string[], sights: readonly Place[], festivals: readonly Place[]): TripDay[] {
+export function draftTrip(
+  dates: readonly string[],
+  sights: readonly Place[],
+  festivals: readonly Place[],
+  wet: (date: string, time: "morning" | "afternoon") => boolean = () => false,
+): TripDay[] {
   if (sights.length === 0 && festivals.length === 0) return [];
 
   const used = new Set<string>();
   let previous: Coordinate | undefined;
 
-  const pick = (date: string): Place | undefined => {
+  const pick = (date: string, time: "morning" | "afternoon"): Visit | undefined => {
     const festival = festivals.find(
       (f) => !used.has(f.id) && f.period && f.period.start <= date && date <= f.period.end,
     );
-    const place = festival ?? nearest(sights.filter((s) => !used.has(s.id)), previous);
-    if (place) {
-      used.add(place.id);
-      previous = place.location;
-    }
-    return place;
+    const free = sights.filter((s) => !used.has(s.id));
+    const indoor = wet(date, time) ? free.filter((s) => s.indoor) : [];
+    const place = festival ?? nearest(indoor.length > 0 ? indoor : free, previous);
+    if (!place) return undefined;
+    used.add(place.id);
+    previous = place.location;
+    return { time, kind: "visit", place, forRain: !festival && indoor.length > 0 ? true : undefined };
   };
 
   return dates.map((date, dayIndex) => {
     const times = layoutOf(dayIndex, dates.length);
-    const visits = new Map<SlotTime, Place>();
+    const visits = new Map<SlotTime, Visit>();
     for (const time of times) {
       if (time === "morning" || time === "afternoon") {
-        const place = pick(date);
-        if (place) visits.set(time, place);
+        const visit = pick(date, time);
+        if (visit) visits.set(time, visit);
       }
     }
 
-    const ordered = times.flatMap((t) => (visits.has(t) ? [visits.get(t)!] : []));
-    const lastVisit = ordered.at(-1)?.location ?? previous;
+    const placesOf = (ts: SlotTime[]) => ts.flatMap((t) => (visits.has(t) ? [visits.get(t)!.place] : []));
+    const lastVisit = placesOf(times).at(-1)?.location ?? previous;
     const slots: Slot[] = [];
     times.forEach((time, i) => {
       if (time === "morning" || time === "afternoon") {
-        const place = visits.get(time);
-        if (place) slots.push({ time, kind: "visit", place });
+        const visit = visits.get(time);
+        if (visit) slots.push(visit);
       } else if (time === "lunch" || time === "dinner") {
-        const before = times.slice(0, i).flatMap((t) => (visits.has(t) ? [visits.get(t)!] : [])).at(-1);
-        const after = times.slice(i + 1).flatMap((t) => (visits.has(t) ? [visits.get(t)!] : []))[0];
+        const before = placesOf(times.slice(0, i)).at(-1);
+        const after = placesOf(times.slice(i + 1))[0];
         const near = (before ?? after)?.location ?? lastVisit;
         if (near) slots.push({ time, kind: "meal", near, alternatives: [] });
       } else if (time === "night") {

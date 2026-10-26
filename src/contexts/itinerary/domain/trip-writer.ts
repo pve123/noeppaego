@@ -2,6 +2,8 @@
 export type DayOutline = {
   readonly dayNumber: number;
   readonly dateLabel: string;
+  /** 예보 — 없으면 아직 모르는 날 */
+  readonly weather?: string;
   readonly stops: readonly {
     readonly time: string;
     readonly title: string;

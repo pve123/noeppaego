@@ -7,6 +7,7 @@ import { KakaoDriveTimes } from "@/shared/kakao/kakao-mobility";
 import { describeItinerary as describe } from "./application/describe-itinerary";
 import { planItinerary as handle, type ItineraryView, type PlanItinerary } from "./application/plan-itinerary";
 import { ClaudeTripWriter } from "./infrastructure/claude-trip-writer";
+import { KmaWeatherOutlook } from "./infrastructure/kma-weather-outlook";
 import { KakaoRestaurantFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
 import { TourPlaceCatalog } from "./infrastructure/tour-place-catalog";
 
@@ -19,9 +20,10 @@ const restaurants = process.env.KAKAO_REST_API_KEY
 const driveTimes = new KakaoDriveTimes();
 
 const writer = new ClaudeTripWriter();
+const outlook = new KmaWeatherOutlook();
 
-export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, driveTimes);
+export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, driveTimes, outlook);
 /** 하루마다 AI 소개 글 — 못 쓰면 undefined */
 export const describeItinerary = (plan: ItineraryView) => describe(plan, writer);
 
-export type { DayView, ItineraryView, PlaceView, SlotView } from "./application/plan-itinerary";
+export type { DayView, ItineraryView, PlaceView, SlotView, WeatherView } from "./application/plan-itinerary";
