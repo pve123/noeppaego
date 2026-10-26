@@ -1,26 +1,38 @@
 @import "tailwindcss";
 
+/* 디자인: 「주말 여행 어디가지」 캔버스의 「웹 · 귀엽고 경쾌한」 시안 — 라이트 전용 */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --cream: #fffbea;
+  --surface: #ffffff;
+  --ink: #22223b;
+  --muted: #4a4a68;
+  --coral: #ff6b6b;
+  --yellow: #ffd84d;
+  --mint: #3ccfb4;
+  --lavender: #b8b5ff;
+  --soft-ink: #e6e4f5;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-cream: var(--cream);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-coral: var(--coral);
+  --color-yellow: var(--yellow);
+  --color-mint: var(--mint);
+  --color-lavender: var(--lavender);
+  --color-soft-ink: var(--soft-ink);
+  --font-sans: var(--font-noto), system-ui, sans-serif;
+  --font-display: var(--font-jua), var(--font-noto), sans-serif;
+  --shadow-pop: 5px 5px 0 var(--ink);
+  --shadow-pop-sm: 3px 3px 0 var(--ink);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  word-break: keep-all;
 }

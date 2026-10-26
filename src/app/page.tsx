@@ -1,69 +1,71 @@
-import Image from "next/image";
+import { Suspense } from "react";
+import { connection } from "next/server";
+import { CalendarDate, findLongBreaks, HolidaySourceError } from "@/contexts/calendar";
+import { BreakList } from "./_components/break-list";
+import { BreaksSkeleton } from "./_components/breaks-skeleton";
+import { Hero } from "./_components/hero";
+import { NextBreak } from "./_components/next-break";
+import { SiteHeader } from "./_components/site-header";
+import { SourceError } from "./_components/source-error";
+import { YearTabs } from "./_components/year-tabs";
 
-export default function Home() {
+export default function Home({ searchParams }: PageProps<"/">) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <SiteHeader />
+      <main>
+        <Hero />
+        <Suspense fallback={<BreaksSkeleton />}>
+          <Breaks searchParams={searchParams} />
+        </Suspense>
       </main>
-    </div>
+      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-4 py-14 sm:px-6">
+        <span className="font-display text-[clamp(26px,3vw,36px)]">그럼, 즐거운 연휴 보내요!</span>
+        <span className="text-sm text-muted">공휴일 자료: 한국천문연구원 특일 정보</span>
+      </footer>
+    </>
+  );
+}
+
+async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
+  const { year } = await searchParams;
+  await connection(); // 「오늘」은 요청 시각 기준
+  const today = CalendarDate.todayIn("Asia/Seoul", new Date());
+
+  let view;
+  try {
+    view = await findLongBreaks({ year: Number(year) || undefined, today });
+  } catch (e) {
+    if (e instanceof HolidaySourceError) return <SourceError failure={e.failure} code={e.code} />;
+    throw e;
+  }
+
+  return (
+    <>
+      {view.next && <NextBreak item={view.next} />}
+
+      <section id="breaks" aria-labelledby="all-breaks" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-20 sm:px-6">
+        <div className="flex flex-col gap-3">
+          <h2 id="all-breaks" className="font-display text-[clamp(32px,4vw,48px)] leading-tight">
+            {view.year}년 연휴 한눈에 보기
+          </h2>
+          {!view.notPublished && (
+            <p className="text-[17px]">
+              공휴일 {view.holidayCount}일 · 연차 없이 3일 이상 쉬는 연휴{" "}
+              <mark className="rounded-md bg-yellow px-1.5 font-bold text-ink">{view.freeBreakCount}번</mark>
+            </p>
+          )}
+        </div>
+        <YearTabs years={view.years} selected={view.year} />
+
+        {view.notPublished ? (
+          <p className="mt-8 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center font-display text-[22px]">
+            {view.year}년 공휴일은 아직 발표 전이에요. 보통 그 전 해 여름쯤 나와요!
+          </p>
+        ) : (
+          <BreakList breaks={view.breaks} />
+        )}
+      </section>
+    </>
   );
 }
