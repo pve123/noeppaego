@@ -12,6 +12,8 @@ npm run dev
 
 검사: `npm run typecheck` · `npm run lint`(레이어 규칙 포함) · `npm test`
 
+DB: 스키마는 `src/shared/db/schema.ts`, 마이그레이션은 `drizzle/`. 스키마를 바꾸면 `npm run db:generate` 뒤 `npm run db:migrate`(.env.local 의 DATABASE_URL 에 적용).
+
 ## 구조 — 바운디드 컨텍스트 + 레이어
 
 ```
@@ -33,7 +35,9 @@ src/
       domain/                   Festival·포트, 추천(도메인 서비스)
       application/              find-destinations 쿼리 → 읽기 모델
       infrastructure/           포트 구현
+    account/                    카카오 로그인 — 회원 번호만 받는다. 세션은 서명 쿠키(shared/auth)
     itinerary/                  하루 일정 — 방문지·식사·숙소를 가까운 순으로 이어 2박 3일까지
+                                + 일정 저장·찜(Command)과 저장한 일정·찜 목록(Query)
       domain/                   Place·포트(PlaceCatalog·RestaurantFinder), 일정 짜기(도메인 서비스)
       application/              plan-itinerary 쿼리 → 읽기 모델
       infrastructure/           관광공사 장소, 맛집(카카오 로컬 → 실패·키 없음이면 관광공사)
@@ -46,7 +50,7 @@ src/
 ```
 
 - 의존은 `app → contexts/<x>/index → application → domain ← infrastructure` 한 방향. `eslint.config.mjs` 의 `no-restricted-imports` 가 막는다.
-- CQRS: 1차는 읽기뿐이라 쿼리만 있다. 쓰기(즐겨찾기·일정 저장)가 생기면 `application/` 에 커맨드를 둔다.
+- CQRS: 쓰기는 일정 저장·찜하기·로그인(Command), 나머지는 읽기(Query). 저장은 화면이 보낸 일정이 아니라 서버가 주소 값으로 다시 짠 일정을 그 순간 그대로(snapshot) 둔다.
 - 컨텍스트끼리는 서로 import 하지 않는다. 화면이 calendar 의 연휴 날짜를 destination 에 넘긴다.
 - 날씨: 출발 10일 안이면 예보를 보고 비 오는 반나절(강수확률 60% 이상이거나 비·눈 예보)에는 실내 장소를 고른다. 축제는 바꾸지 않는다.
 - 화면 문구는 해요체로 쓰고 줄표·쉼표·가운뎃점 대신 조사로 잇는다(`shared/kernel/korean`).

@@ -19,7 +19,8 @@ export function ItineraryDay({
   day: DayView;
   /** 그날 소개 글(늦게 채워진다) */
   summary?: ReactNode;
-  hrefFor: HrefFor;
+  /** 칸 바꾸기 주소 — 없으면 바꾸기를 보여 주지 않는다(저장한 일정) */
+  hrefFor?: HrefFor;
 }) {
   const tone = DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length];
   return (
@@ -66,7 +67,7 @@ function WeatherChips({ weather }: { weather: WeatherView }) {
  * 일정 칸 — 역할마다 자리를 나눈다.
  * 왼쪽 시간 · 가운데 정보(사진·이름·종류) · 오른쪽 위 행동(별점과 리뷰) · 아랫단 대안(근처 다른 식당)
  */
-function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor: HrefFor }) {
+function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
   const place = slot.place;
   return (
     <article className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-surface">
@@ -112,7 +113,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor: HrefFor }) {
         </div>
       </div>
 
-      {(slot.alternatives.length > 0 || slot.picked) && (
+      {hrefFor && (slot.alternatives.length > 0 || slot.picked) && (
         <div className="flex flex-wrap items-center gap-1.5 border-t-2 border-dashed border-ink/25 bg-cream px-3 py-2.5 text-sm sm:px-4">
           <span className="mr-1 font-bold text-muted">{isMeal(slot) ? "다른 식당으로 바꾸기" : "다른 곳으로 바꾸기"}</span>
           {slot.alternatives.map((p) => (
