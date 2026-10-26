@@ -5,6 +5,16 @@ import { HolidayCalendar } from "../domain/holiday-calendar";
 import { HolidayCalendarRepository } from "../domain/holiday-calendar-repository";
 import { fetchRestDays } from "./spcde-info-client";
 
+/**
+ * 천문연구원 공식 이름 → 화면에 쓰는 친숙한 이름. 「대체공휴일(기독탄신일)」처럼 이름 안에 있어도 바꾼다.
+ * (부처님오신날·설날 같은 이름은 이미 친숙해 그대로 둔다)
+ */
+const FRIENDLY_NAMES: [official: string, friendly: string][] = [
+  ["기독탄신일", "성탄절"],
+  ["1월1일", "신정"],
+];
+const friendly = (name: string) => FRIENDLY_NAMES.reduce((n, [from, to]) => n.replaceAll(from, to), name);
+
 export class SpcdeHolidayCalendarRepository implements HolidayCalendarRepository {
   async findByYear(year: number): Promise<HolidayCalendar> {
     const restDays = unwrap(await fetchRestDays(year));
@@ -14,7 +24,7 @@ export class SpcdeHolidayCalendarRepository implements HolidayCalendarRepository
     const holidays = [...restDays, { date: `${year + 1}-01-01`, name: "신정" }];
     return new HolidayCalendar(
       year,
-      holidays.map(({ date, name }) => ({ date: CalendarDate.of(date), name })),
+      holidays.map(({ date, name }) => ({ date: CalendarDate.of(date), name: friendly(name) })),
     );
   }
 }
