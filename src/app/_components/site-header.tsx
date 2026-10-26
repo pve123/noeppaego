@@ -61,11 +61,15 @@ export function SiteFooter() {
             <p className="text-[15px]">즐거운 연휴 보내세요</p>
           </div>
         </div>
-        <div>
+        <div className="w-full sm:w-auto">
           <p className="font-display text-lg">정보 출처</p>
-          <ul className="mt-2 flex flex-wrap gap-2">
+          {/* 휴대폰: 한 상자 안에 줄을 맞춘 표 / 넓은 화면: 칩 */}
+          <ul className="mt-2 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border-[2.5px] border-ink bg-surface text-sm sm:flex sm:flex-wrap sm:gap-2 sm:divide-y-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent">
             {SOURCES.map((s) => (
-              <li key={s.who} className="rounded-full border-[2.5px] border-ink bg-surface px-3 py-1 text-sm">
+              <li
+                key={s.who}
+                className="flex items-center justify-between gap-3 px-4 py-2.5 sm:gap-1.5 sm:rounded-full sm:border-[2.5px] sm:border-ink sm:bg-surface sm:px-3 sm:py-1"
+              >
                 <span className="text-muted">{s.what}</span> <span className="font-bold">{s.who}</span>
               </li>
             ))}

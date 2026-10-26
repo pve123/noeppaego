@@ -53,7 +53,7 @@ export function SaveCard({ loggedIn, target }: { loggedIn: boolean; target: Save
 /** 휴대폰 아래 고정 바 — 긴 일정을 내려도 저장(또는 로그인)이 손 닿는 곳에 있다 */
 export function SaveBar({ loggedIn, target }: { loggedIn: boolean; target: SaveTarget }) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t-[3px] border-ink bg-cream/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
+    <div data-save-bar className="fixed inset-x-0 bottom-0 z-40 border-t-[3px] border-ink bg-cream/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur sm:hidden">
       {loggedIn ? (
         <SaveButton target={target} full />
       ) : (

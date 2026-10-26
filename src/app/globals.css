@@ -120,6 +120,13 @@ html {
   scroll-padding-top: 84px;
 }
 
+/* ── 휴대폰 아래 고정 저장 바가 있으면 그만큼 페이지 끝을 띄운다(푸터가 가리지 않게) ── */
+@media (max-width: 639.98px) {
+  body:has([data-save-bar]) {
+    padding-bottom: calc(92px + env(safe-area-inset-bottom));
+  }
+}
+
 /* ── 옆으로 미는 줄: 스크롤바를 숨긴다(손가락·트랙패드로 민다) ── */
 .no-scrollbar {
   scrollbar-width: none;
