@@ -14,8 +14,8 @@ export function OriginSelect({
 }) {
   const router = useRouter();
   return (
-    <label className="inline-flex items-center gap-2 font-bold">
-      출발
+    <label className="inline-flex flex-wrap items-center gap-2 font-bold">
+      어디서 출발하세요?
       <select
         value={selected}
         onChange={(e) => router.push(`${basePath}?from=${e.target.value}`, { scroll: false })}
