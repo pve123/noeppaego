@@ -7,6 +7,7 @@ import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/cale
 import { findDestinations } from "@/contexts/destination";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { DestinationCard } from "../../_components/destination-card";
+import { KakaoMap, type MapPin } from "../../_components/kakao-map";
 import { NextBreak } from "../../_components/next-break";
 import { SiteFooter, SiteHeader } from "../../_components/site-header";
 import { SourceError } from "../../_components/source-error";
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+/** 카드 머리 띠 색과 같은 순서 */
+const PIN_TONES: MapPin["tone"][] = ["yellow", "mint", "coral", "lavender"];
 
 export default function BreakPage({ params }: PageProps<"/breaks/[start]">) {
   return (
@@ -81,6 +84,24 @@ async function Destinations({ start, end }: { start: string; end: string }) {
       <p className="mt-2 text-[17px]">
         {view.originName}에서 {view.reachKm ? `${view.reachKm}km 안, ` : ""}축제가 많은 곳부터 골랐어요.
       </p>
+
+      {view.destinations.length > 0 && (
+        <div className="mt-8">
+          <KakaoMap
+            label={`${view.originName}에서 추천 지역 ${view.destinations.length}곳까지의 지도`}
+            pins={[
+              { id: "origin", ...view.origin, badge: "출발", label: view.originName, tone: "ink" },
+              ...view.destinations.map((d, i) => ({
+                id: d.code,
+                ...d.center,
+                badge: String(i + 1),
+                label: d.name,
+                tone: PIN_TONES[i % PIN_TONES.length],
+              })),
+            ]}
+          />
+        </div>
+      )}
 
       {view.destinations.length === 0 ? (
         <p className="mt-8 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center font-display text-[22px]">

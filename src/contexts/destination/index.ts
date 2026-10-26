@@ -10,4 +10,4 @@ const repository = new TourFestivalRepository();
 
 export const findDestinations = (query: FindDestinations) => handle(query, repository);
 
-export type { DestinationView, DestinationsView, FestivalView } from "./application/find-destinations";
+export type { DestinationView, DestinationsView, FestivalView, LatLng } from "./application/find-destinations";

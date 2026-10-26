@@ -21,15 +21,19 @@ export type FestivalView = {
   imageUrl?: string;
 };
 
+export type LatLng = { lat: number; lng: number };
+
 export type DestinationView = {
   code: string;
   name: string;
+  center: LatLng;
   distanceKm: number;
   festivals: FestivalView[];
 };
 
 export type DestinationsView = {
   originName: string;
+  origin: LatLng;
   /** 「서울에서 400km 안」 같은 거리 안내. 제한이 없으면 undefined */
   reachKm?: number;
   destinations: DestinationView[];
@@ -49,10 +53,12 @@ export async function findDestinations(
 
   return {
     originName: ORIGIN.name,
+    origin: { lat: ORIGIN.at.lat, lng: ORIGIN.at.lng },
     reachKm: Number.isFinite(reach) ? reach : undefined,
     destinations: recommendDestinations(festivals, window, ORIGIN.at).map((d) => ({
       code: d.region.code,
       name: d.region.name,
+      center: { lat: d.center.lat, lng: d.center.lng },
       distanceKm: Math.round(d.distanceKm),
       festivals: d.festivals.map((f) => ({
         id: f.id,
