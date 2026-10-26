@@ -36,3 +36,86 @@ body {
   font-family: var(--font-sans);
   word-break: keep-all;
 }
+
+/* ── 키보드 초점 — 모든 버튼·링크가 같은 테두리 ───────────── */
+:where(a, button, input, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+/* ── 불러오는 자리: 빛이 지나간다 ─────────────────────── */
+.shimmer {
+  background: linear-gradient(100deg, var(--soft-ink) 30%, #f4f2fb 50%, var(--soft-ink) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+.shimmer-dark {
+  background: linear-gradient(100deg, #2c2c48 30%, #3a3a5c 50%, #2c2c48 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+/* ── 화면 전환(View Transitions) — 자리는 빨리 빠지고 내용은 천천히 들어온다 ── */
+:root {
+  --duration-exit: 150ms;
+  --duration-enter: 210ms;
+  --duration-move: 400ms;
+}
+::view-transition-old(.slide-down) {
+  animation:
+    var(--duration-exit) ease-out both fade reverse,
+    var(--duration-exit) ease-out both slide-y reverse;
+}
+::view-transition-new(.slide-up) {
+  animation:
+    var(--duration-enter) ease-in var(--duration-exit) both fade,
+    var(--duration-move) ease-in both slide-y;
+}
+@keyframes fade {
+  from {
+    filter: blur(3px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+@keyframes slide-y {
+  from {
+    transform: translateY(10px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* ── 움직임 줄이기를 켠 사람에게는 움직이지 않는다 ───────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after,
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+  /* 붙어 있는 헤더에 가리지 않게 — 앵커로 이동할 때 이만큼 띄운다 */
+  scroll-padding-top: 84px;
+}

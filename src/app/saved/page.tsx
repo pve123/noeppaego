@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listFavorites } from "@/contexts/itinerary";
@@ -6,6 +5,7 @@ import { currentUserId } from "@/shared/auth/session";
 import { toggleFavoriteAction } from "../actions";
 import { KakaoLoginButton } from "../_components/kakao-login-button";
 import { PageBand } from "../_components/page-band";
+import { RevealSuspense, Shimmer } from "../_components/reveal";
 import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
 
 export const metadata: Metadata = {
@@ -22,9 +22,9 @@ export default function SavedPage() {
       <main>
         <PageBand title="찜한 일정" sub="내가 저장한 일정과 공유받아 찜한 일정이에요." />
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <Suspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="h-40 animate-pulse rounded-3xl bg-soft-ink" />}>
+          <RevealSuspense fallback={<Shimmer className="h-40" />}>
             <Favorites />
-          </Suspense>
+          </RevealSuspense>
         </div>
       </main>
       <SiteFooter />

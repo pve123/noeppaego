@@ -36,22 +36,15 @@ export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextY
   );
 }
 
+/** 한 판으로 이어 놓는다 — 달마다 묶으면 연휴가 하나뿐인 달은 카드 하나만 덩그러니 남는다. 몇 월인지는 카드에 */
 function MonthGroups({ breaks }: { breaks: LongBreakView[] }) {
-  const byMonth = Map.groupBy(breaks, (b) => b.month);
   return (
-    <div className="mt-8 space-y-10">
-      {[...byMonth].map(([month, items]) => (
-        <div key={month}>
-          <h3 className="mb-4 font-display text-[26px]">{month}월</h3>
-          <ul className="grid gap-5 md:grid-cols-2">
-            {items.map((item, i) => (
-              <li key={item.key} className="min-w-0">
-                <BreakCard item={item} colorIndex={month + i} />
-              </li>
-            ))}
-          </ul>
-        </div>
+    <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {breaks.map((item, i) => (
+        <li key={item.key} className="min-w-0">
+          <BreakCard item={item} colorIndex={i} />
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

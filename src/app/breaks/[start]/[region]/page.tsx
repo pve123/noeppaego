@@ -11,7 +11,9 @@ import { currentUser } from "@/shared/auth/session";
 import { SaveBar, SaveCard } from "../../../_components/save-cta";
 import { DAY_TONES, DaySummary, DaySummarySkeleton, ItineraryDay } from "../../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../../_components/itinerary-map";
+import { Notice } from "../../../_components/notice";
 import { PageBand } from "../../../_components/page-band";
+import { RevealSuspense, Shimmer } from "../../../_components/reveal";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../../_components/site-header";
 import { SourceError } from "../../../_components/source-error";
 import { Steps } from "../../../_components/steps";
@@ -50,9 +52,9 @@ export default function ItineraryPage({ params, searchParams }: PageProps<"/brea
       <SiteHeader />
       <SiteNotice />
       <main>
-        <Suspense fallback={<ItinerarySkeleton />}>
+        <RevealSuspense fallback={<ItinerarySkeleton />}>
           <Itinerary params={params} searchParams={searchParams} />
-        </Suspense>
+        </RevealSuspense>
       </main>
       <SiteFooter />
     </>
@@ -123,15 +125,25 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
         <div className="mb-8">
           <SaveCard loggedIn={loggedIn} target={saveTarget} />
         </div>
-        {plan.customized && (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[2.5px] border-ink bg-yellow px-4 py-3">
-            <p className="font-bold">직접 바꾼 칸이 있어요. 바꾼 일정에는 AI 소개가 붙지 않아요.</p>
-            <Link href={base} scroll={false} className="h-10 rounded-full border-[2.5px] border-ink bg-surface px-4 font-display leading-[34px]">
-              처음 일정으로
-            </Link>
-          </div>
-        )}
-        {noWeather && <p className="mb-8 rounded-2xl bg-surface px-4 py-3 text-[15px]">날씨는 출발 10일 전부터 일정에 반영해요.</p>}
+        <div className="mb-8 space-y-3">
+          {plan.customized && (
+            <Notice
+              tone="highlight"
+              action={
+                <Link
+                  href={base}
+                  scroll={false}
+                  className="inline-flex h-10 items-center rounded-full border-[2.5px] border-ink bg-surface px-4 font-display"
+                >
+                  처음 일정으로
+                </Link>
+              }
+            >
+              직접 바꾼 칸이 있어요. 바꾼 일정에는 AI 소개가 붙지 않아요.
+            </Notice>
+          )}
+          {noWeather && <Notice>날씨는 출발 10일 전부터 일정에 반영해요.</Notice>}
+        </div>
 
         <div className="space-y-12">
           {plan.days.map((day, i) => (
@@ -160,10 +172,11 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
 function ItinerarySkeleton() {
   return (
     <div aria-busy="true" aria-label="일정을 짜는 중">
-      <div className="mt-4 h-40 animate-pulse bg-ink/90" />
-      <div className="mx-auto max-w-6xl animate-pulse space-y-3 px-4 py-10 sm:px-6">
+      <div className="shimmer-dark mt-4 h-40" />
+      <div className="mx-auto max-w-6xl space-y-3 px-4 py-10 sm:px-6">
+        <Shimmer className="h-32" />
         {[0, 1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-20 rounded-2xl bg-soft-ink" />
+          <Shimmer key={i} className="h-24 rounded-2xl" />
         ))}
       </div>
     </div>
