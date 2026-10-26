@@ -120,6 +120,14 @@ html {
   scroll-padding-top: 84px;
 }
 
+/* ── 옆으로 미는 줄: 스크롤바를 숨긴다(손가락·트랙패드로 민다) ── */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── 진행 상태 점 세 개 ─────────────────────────────── */
 .loading-dot {
   animation: loading-dot 1s ease-in-out infinite;

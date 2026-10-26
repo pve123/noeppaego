@@ -24,8 +24,8 @@ export function DestinationCard({
   return (
     <Link href={planHref} className="group block h-full rounded-3xl outline-offset-4">
       <article className="flex h-full flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
-        <div className={`flex items-center justify-between gap-3 border-b-[3px] border-ink px-5 py-3.5 ${BANDS[(rank - 1) % BANDS.length]}`}>
-          <h3 className="min-w-0 font-display text-[22px] leading-tight">
+        <div className={`flex flex-col items-start gap-2 border-b-[3px] sm:flex-row sm:items-center sm:justify-between sm:gap-3 border-ink px-5 py-3.5 ${BANDS[(rank - 1) % BANDS.length]}`}>
+          <h3 className="min-w-0 font-display text-[22px] leading-tight [overflow-wrap:anywhere]">
             <span className="mr-2 text-ink/60">{rank}</span>
             {destination.name}
           </h3>
