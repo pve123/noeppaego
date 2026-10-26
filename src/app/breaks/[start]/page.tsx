@@ -109,6 +109,7 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
           <div className="mt-14">
             <KakaoMap
               title="출발지에서 얼마나 먼지 보기"
+              tall
               label={`${view.originName}에서 추천 지역 ${view.destinations.length}곳까지 보여 주는 지도`}
               pins={[
                 { id: "origin", ...view.origin, badge: "출발", label: view.originName, tone: "ink" },

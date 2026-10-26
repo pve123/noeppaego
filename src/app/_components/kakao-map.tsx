@@ -25,8 +25,12 @@ export type MapRoute = { tone: MapPin["tone"]; points: { lat: number; lng: numbe
 
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
 
+/** 화면에서 이보다 가까운 핀은 서로 비켜 앉힌다(px) — 배지 지름보다 조금 크게 */
+const MIN_GAP = 38;
+
 /**
  * 카카오맵에 핀을 찍고 모든 핀이 보이게 맞춘다.
+ * 가까운 핀은 겹치지 않게 비켜 앉히고 실제 위치에는 작은 점을 남긴다(확대·축소할 때마다 다시 계산).
  * 키(NEXT_PUBLIC_KAKAO_MAP_KEY)가 없거나 SDK 를 못 불러오면 지도 자리를 비운다 — 같은 정보가 카드에 있다.
  */
 export function KakaoMap({
@@ -36,16 +40,19 @@ export function KakaoMap({
   title,
   caption,
   legend = [],
+  tall = false,
 }: {
   pins: MapPin[];
   routes?: MapRoute[];
   label: string;
-  /** 지도 아래 번호표 — 핀 번호와 이름을 짝지어 읽게 한다 */
+  /** 번호표 — 핀 번호와 이름을 짝지어 읽게 한다. 데스크톱에서는 지도 오른쪽에 세로로 */
   legend?: { badge: string; text: string; tone: MapPin["tone"] }[];
   /** 지도 위 제목 — 지도가 숨으면 같이 숨는다 */
   title?: string;
   /** 지도 아래 안내 — 지도가 숨으면 같이 숨는다 */
   caption?: string;
+  /** 세로로 긴 지도 — 전국 지도처럼 위아래로 긴 곳을 크게 보여 줄 때 */
+  tall?: boolean;
 }) {
   const container = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(!APP_KEY);
@@ -62,23 +69,49 @@ export function KakaoMap({
         container.current.innerHTML = ""; // 핀이 바뀌면(일차 바꾸기) 새로 그린다
         const map = new maps.Map(container.current, { center: new maps.LatLng(pins[0].lat, pins[0].lng), level: 12 });
         const bounds = new maps.LatLngBounds();
-        for (const pin of pins) {
-          const at = new maps.LatLng(pin.lat, pin.lng);
-          bounds.extend(at);
-          new maps.CustomOverlay({ position: at, content: pinElement(pin), yAnchor: 0.5, zIndex: 2 }).setMap(map);
-        }
+
         // 선 — 잉크 테두리 위에 색 선. 핀보다 아래에 깔린다.
         for (const route of routes.filter((r) => r.points.length > 1)) {
           const path = route.points.map((p) => new maps.LatLng(p.lat, p.lng));
           new maps.Polyline({ path, strokeWeight: 8, strokeColor: "#22223b", strokeOpacity: 0.85, zIndex: 0 }).setMap(map);
           new maps.Polyline({ path, strokeWeight: 4, strokeColor: TONE[route.tone].bg, strokeOpacity: 1, zIndex: 1 }).setMap(map);
         }
+
+        const placed = pins.map((pin) => {
+          const at = new maps.LatLng(pin.lat, pin.lng);
+          bounds.extend(at);
+          new maps.CustomOverlay({ position: at, content: dotElement(pin), zIndex: 2 }).setMap(map);
+          const badge = pinElement(pin);
+          new maps.CustomOverlay({ position: at, content: badge, yAnchor: 0.5, zIndex: 3 }).setMap(map);
+          return { at, badge };
+        });
+
+        // 화면 좌표로 겹침을 보고, 겹치면 8방향으로 한 칸씩 밀어 빈자리에 앉힌다
+        const spread = () => {
+          const projection = map.getProjection();
+          const taken: { x: number; y: number }[] = [];
+          for (const { at, badge } of placed) {
+            const p = projection.containerPointFromCoords(at);
+            let dx = 0;
+            let dy = 0;
+            for (let step = 1; taken.some((q) => Math.hypot(q.x - (p.x + dx), q.y - (p.y + dy)) < MIN_GAP) && step <= 24; step++) {
+              const angle = -Math.PI / 2 + (step - 1) * (Math.PI / 4);
+              const radius = MIN_GAP * Math.ceil(step / 8);
+              dx = Math.cos(angle) * radius;
+              dy = Math.sin(angle) * radius;
+            }
+            taken.push({ x: p.x + dx, y: p.y + dy });
+            badge.style.transform = `translate(${dx}px, ${dy}px)`;
+          }
+        };
+
         // 상자 크기가 정해진 뒤, 그리고 크기가 바뀔 때마다 모든 핀이 보이게 다시 맞춘다
         const fit = () => {
           map.relayout();
-          if (pins.length > 1) map.setBounds(bounds, 56, 56, 56, 56);
+          if (pins.length > 1) map.setBounds(bounds, 40, 40, 40, 40);
           else map.setCenter(new maps.LatLng(pins[0].lat, pins[0].lng));
         };
+        maps.event.addListener(map, "idle", spread);
         requestAnimationFrame(fit);
         observer = new ResizeObserver(() => fit());
         observer.observe(container.current);
@@ -95,27 +128,31 @@ export function KakaoMap({
   return (
     <figure>
       {title && <h2 className="mb-4 font-display text-[26px]">{title}</h2>}
-      <div
-        ref={container}
-        role="img"
-        aria-label={label}
-        className="h-[360px] w-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop sm:h-[420px]"
-      />
-      {legend.length > 0 && (
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {legend.map((item) => (
-            <li key={item.badge} className="flex items-center gap-2 rounded-full border-[2.5px] border-ink bg-surface py-1 pl-1 pr-3 text-[15px]">
-              <span
-                className="flex size-7 items-center justify-center rounded-full border-2 border-ink font-display"
-                style={{ background: TONE[item.tone].bg, color: TONE[item.tone].fg }}
-              >
-                {item.badge}
-              </span>
-              {item.text}
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className={legend.length > 0 ? "grid gap-4 md:grid-cols-[1fr_320px]" : ""}>
+        <div
+          ref={container}
+          role="img"
+          aria-label={label}
+          className={`w-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop ${
+            tall ? "h-[460px] md:h-[560px]" : "h-[360px] sm:h-[420px]"
+          }`}
+        />
+        {legend.length > 0 && (
+          <ul aria-label="지도 번호" className="space-y-2 self-start">
+            {legend.map((item) => (
+              <li key={item.badge} className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface px-3 py-2.5">
+                <span
+                  className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink font-display"
+                  style={{ background: TONE[item.tone].bg, color: TONE[item.tone].fg }}
+                >
+                  {item.badge}
+                </span>
+                <span className="font-bold leading-snug [overflow-wrap:anywhere]">{item.text}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
       {caption && <figcaption className="mt-3 text-sm text-muted">{caption}</figcaption>}
     </figure>
   );
@@ -127,8 +164,15 @@ function pinElement(pin: MapPin): HTMLElement {
   const badge = document.createElement("span");
   badge.textContent = pin.badge;
   badge.title = pin.label;
-  badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 9px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-family:var(--font-jua),sans-serif;font-size:17px;box-shadow:2px 2px 0 #22223b;cursor:default;white-space:nowrap`;
+  badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-family:var(--font-jua),sans-serif;font-size:16px;box-shadow:2px 2px 0 #22223b;cursor:default;white-space:nowrap;transition:transform .15s`;
   return badge;
+}
+
+/** 실제 위치 점 — 핀이 비켜 앉아도 어디인지 남긴다 */
+function dotElement(pin: MapPin): HTMLElement {
+  const dot = document.createElement("span");
+  dot.style.cssText = `display:block;width:10px;height:10px;border-radius:999px;border:2px solid #22223b;background:${TONE[pin.tone].bg}`;
+  return dot;
 }
 
 // ── SDK 불러오기(한 번만) ────────────────────────────────
