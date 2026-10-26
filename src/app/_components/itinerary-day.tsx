@@ -57,10 +57,10 @@ function SlotCard({ slot }: { slot: SlotView }) {
         <Image
           src={slot.place.imageUrl}
           alt=""
-          width={64}
-          height={64}
+          width={160}
+          height={160}
           unoptimized
-          className="size-14 shrink-0 rounded-xl border-2 border-ink object-cover sm:size-16"
+          className="size-24 shrink-0 rounded-xl border-[2.5px] border-ink object-cover sm:size-32"
         />
       )}
       <div className="min-w-0 flex-1">

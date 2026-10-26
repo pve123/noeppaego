@@ -108,7 +108,7 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
 
           <div className="mt-14">
             <KakaoMap
-              title="지도로 보기"
+              title="출발지에서 얼마나 먼지 보기"
               label={`${view.originName}에서 추천 지역 ${view.destinations.length}곳까지 보여 주는 지도`}
               pins={[
                 { id: "origin", ...view.origin, badge: "출발", label: view.originName, tone: "ink" },
@@ -120,6 +120,16 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
                   tone: PIN_TONES[i % PIN_TONES.length],
                 })),
               ]}
+              // 출발지에서 지역마다 선을 그어 「어디서 어디까지」가 보이게 한다
+              routes={view.destinations.map((d, i) => ({
+                tone: PIN_TONES[i % PIN_TONES.length],
+                points: [view.origin, d.center],
+              }))}
+              legend={view.destinations.map((d, i) => ({
+                badge: String(i + 1),
+                text: `${d.name} ${d.driveLabel ?? `${d.distanceKm}km`}`,
+                tone: PIN_TONES[i % PIN_TONES.length],
+              }))}
             />
           </div>
         </>

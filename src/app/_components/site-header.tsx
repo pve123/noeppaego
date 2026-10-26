@@ -1,15 +1,15 @@
+import Image from "next/image";
 import Link from "next/link";
+
+function Logo({ size }: { size: number }) {
+  return <Image src="/logo.svg" alt="" width={size} height={size} unoptimized className="shrink-0" />;
+}
 
 export function SiteHeader() {
   return (
     <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
       <Link href="/" className="flex items-center gap-2.5">
-        <span className="flex size-10 items-center justify-center rounded-full border-[3px] border-ink bg-coral">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z" />
-            <circle cx="12" cy="9" r="2.5" />
-          </svg>
-        </span>
+        <Logo size={40} />
         <span className="font-display text-[22px]">연휴 여행 플래너</span>
       </Link>
       <Link href="/#breaks" className="rounded-full px-3 py-2 font-display text-[17px] hover:bg-yellow">
@@ -19,15 +19,35 @@ export function SiteHeader() {
   );
 }
 
+const SOURCES = [
+  { what: "공휴일", who: "한국천문연구원" },
+  { what: "관광 정보와 사진", who: "한국관광공사" },
+  { what: "날씨", who: "기상청" },
+  { what: "지도와 맛집", who: "카카오" },
+];
+
 export function SiteFooter() {
   return (
-    <footer className="mx-auto mt-10 flex max-w-6xl flex-wrap items-center justify-between gap-4 border-t-[3px] border-ink px-4 py-10 sm:px-6">
-      <span className="font-display text-[26px]">즐거운 연휴 보내세요</span>
-      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
-        <li>공휴일 정보는 한국천문연구원</li>
-        <li>관광 정보와 사진은 한국관광공사</li>
-        <li>날씨는 기상청</li>
-      </ul>
+    <footer className="mt-16 border-t-[3px] border-ink bg-mint">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-between gap-8 px-4 py-12 sm:px-6">
+        <div className="flex items-center gap-3">
+          <Logo size={56} />
+          <div>
+            <p className="font-display text-[26px] leading-tight">연휴 여행 플래너</p>
+            <p className="text-[15px]">즐거운 연휴 보내세요</p>
+          </div>
+        </div>
+        <div>
+          <p className="font-display text-lg">정보 출처</p>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {SOURCES.map((s) => (
+              <li key={s.who} className="rounded-full border-[2.5px] border-ink bg-surface px-3 py-1 text-sm">
+                <span className="text-muted">{s.what}</span> <span className="font-bold">{s.who}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </footer>
   );
 }
