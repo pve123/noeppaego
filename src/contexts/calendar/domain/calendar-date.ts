@@ -1,3 +1,5 @@
+import { dateLabel } from "@/shared/kernel/travel-window";
+
 const DAY_MS = 86_400_000;
 const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"] as const;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -83,9 +85,9 @@ export class CalendarDate {
     return this.iso === other.iso;
   }
 
-  /** 화면용 `10.3(토)` */
+  /** 화면용 `2026.10.03(토)` — 앱 전체 날짜 형식(공유 커널 dateLabel) */
   get label(): string {
-    return `${this.month}.${this.day}(${this.weekdayLabel})`;
+    return dateLabel(this.iso);
   }
 
   toString(): string {

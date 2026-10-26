@@ -1,6 +1,6 @@
 import { durationLabel } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
-import { TravelWindow } from "@/shared/kernel/travel-window";
+import { dotDate, TravelWindow } from "@/shared/kernel/travel-window";
 import { recommendDestinations, reachKm } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
 import { DriveTimes, ORIGINS, originOf } from "../domain/origin";
@@ -77,12 +77,10 @@ export async function findDestinations(
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,
-        dateLabel: rangeText(monthDay(f.start), monthDay(f.end)),
+        dateLabel: rangeText(dotDate(f.start), dotDate(f.end)),
         address: f.address,
         imageUrl: f.imageUrl,
       })),
     })),
   };
 }
-
-const monthDay = (iso: string) => `${Number(iso.slice(5, 7))}.${Number(iso.slice(8, 10))}`;

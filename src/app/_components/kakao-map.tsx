@@ -8,7 +8,7 @@ export type MapPin = {
   lng: number;
   /** 핀에 쓰는 짧은 글자 — 순번이나 「출발」 */
   badge: string;
-  /** 핀 옆 이름 */
+  /** 이름 — 지도 위에 쓰지 않고 마우스를 올렸을 때만 보인다(이름표가 겹치면 읽을 수 없다) */
   label: string;
   tone: "coral" | "yellow" | "mint" | "lavender" | "ink";
 };
@@ -35,10 +35,13 @@ export function KakaoMap({
   label,
   title,
   caption,
+  legend = [],
 }: {
   pins: MapPin[];
   routes?: MapRoute[];
   label: string;
+  /** 지도 아래 번호표 — 핀 번호와 이름을 짝지어 읽게 한다 */
+  legend?: { badge: string; text: string; tone: MapPin["tone"] }[];
   /** 지도 위 제목 — 지도가 숨으면 같이 숨는다 */
   title?: string;
   /** 지도 아래 안내 — 지도가 숨으면 같이 숨는다 */
@@ -50,30 +53,41 @@ export function KakaoMap({
   useEffect(() => {
     if (!APP_KEY || !container.current || pins.length === 0) return;
     let cancelled = false;
+    let observer: ResizeObserver | undefined;
 
     loadSdk(APP_KEY)
       .then((kakao) => {
         if (cancelled || !container.current) return;
         const { maps } = kakao;
+        container.current.innerHTML = ""; // 핀이 바뀌면(일차 바꾸기) 새로 그린다
         const map = new maps.Map(container.current, { center: new maps.LatLng(pins[0].lat, pins[0].lng), level: 12 });
         const bounds = new maps.LatLngBounds();
         for (const pin of pins) {
           const at = new maps.LatLng(pin.lat, pin.lng);
           bounds.extend(at);
-          new maps.CustomOverlay({ position: at, content: pinElement(pin), yAnchor: 1.1 }).setMap(map);
+          new maps.CustomOverlay({ position: at, content: pinElement(pin), yAnchor: 0.5, zIndex: 2 }).setMap(map);
         }
-        // 동선 — 잉크 테두리 위에 그날 색 점선
+        // 선 — 잉크 테두리 위에 색 선. 핀보다 아래에 깔린다.
         for (const route of routes.filter((r) => r.points.length > 1)) {
           const path = route.points.map((p) => new maps.LatLng(p.lat, p.lng));
-          new maps.Polyline({ path, strokeWeight: 7, strokeColor: "#22223b", strokeOpacity: 0.9 }).setMap(map);
-          new maps.Polyline({ path, strokeWeight: 4, strokeColor: TONE[route.tone].bg, strokeOpacity: 1, strokeStyle: "shortdash" }).setMap(map);
+          new maps.Polyline({ path, strokeWeight: 8, strokeColor: "#22223b", strokeOpacity: 0.85, zIndex: 0 }).setMap(map);
+          new maps.Polyline({ path, strokeWeight: 4, strokeColor: TONE[route.tone].bg, strokeOpacity: 1, zIndex: 1 }).setMap(map);
         }
-        if (pins.length > 1) map.setBounds(bounds, 48, 48, 48, 48);
+        // 상자 크기가 정해진 뒤, 그리고 크기가 바뀔 때마다 모든 핀이 보이게 다시 맞춘다
+        const fit = () => {
+          map.relayout();
+          if (pins.length > 1) map.setBounds(bounds, 56, 56, 56, 56);
+          else map.setCenter(new maps.LatLng(pins[0].lat, pins[0].lng));
+        };
+        requestAnimationFrame(fit);
+        observer = new ResizeObserver(() => fit());
+        observer.observe(container.current);
       })
       .catch(() => !cancelled && setFailed(true));
 
     return () => {
       cancelled = true;
+      observer?.disconnect();
     };
   }, [pins, routes]);
 
@@ -87,29 +101,34 @@ export function KakaoMap({
         aria-label={label}
         className="h-[360px] w-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop sm:h-[420px]"
       />
+      {legend.length > 0 && (
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {legend.map((item) => (
+            <li key={item.badge} className="flex items-center gap-2 rounded-full border-[2.5px] border-ink bg-surface py-1 pl-1 pr-3 text-[15px]">
+              <span
+                className="flex size-7 items-center justify-center rounded-full border-2 border-ink font-display"
+                style={{ background: TONE[item.tone].bg, color: TONE[item.tone].fg }}
+              >
+                {item.badge}
+              </span>
+              {item.text}
+            </li>
+          ))}
+        </ul>
+      )}
       {caption && <figcaption className="mt-3 text-sm text-muted">{caption}</figcaption>}
     </figure>
   );
 }
 
-/** 시안의 스티커 모양 핀 — 번호 동그라미 + 이름표 */
+/** 시안의 스티커 모양 핀 — 번호만. 이름은 마우스를 올리면 보인다 */
 function pinElement(pin: MapPin): HTMLElement {
   const { bg, fg } = TONE[pin.tone];
-  const root = document.createElement("div");
-  root.style.cssText =
-    "display:flex;align-items:center;gap:6px;font-family:var(--font-jua),sans-serif;color:#22223b;white-space:nowrap";
-
   const badge = document.createElement("span");
   badge.textContent = pin.badge;
-  badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-size:16px;box-shadow:2px 2px 0 #22223b`;
-
-  const name = document.createElement("span");
-  name.textContent = pin.label.length > 14 ? `${pin.label.slice(0, 13)}…` : pin.label;
-  name.style.cssText =
-    "padding:3px 9px;border:2.5px solid #22223b;border-radius:999px;background:#fff;font-size:14px";
-
-  root.append(badge, name);
-  return root;
+  badge.title = pin.label;
+  badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 9px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-family:var(--font-jua),sans-serif;font-size:17px;box-shadow:2px 2px 0 #22223b;cursor:default;white-space:nowrap`;
+  return badge;
 }
 
 // ── SDK 불러오기(한 번만) ────────────────────────────────

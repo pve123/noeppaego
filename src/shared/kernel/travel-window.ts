@@ -6,10 +6,15 @@ const epochDay = (iso: string) =>
   Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))) / DAY_MS;
 const isoOfEpochDay = (day: number) => new Date(day * DAY_MS).toISOString().slice(0, 10);
 
-/** 화면용 `12.25(금)` */
+/** 화면용 `2026.12.25` — 앱 전체 날짜 형식(yyyy.MM.dd) */
+export function dotDate(iso: string): string {
+  return iso.replaceAll("-", ".");
+}
+
+/** 화면용 `2026.12.25(금)` */
 export function dateLabel(iso: string): string {
   const weekday = WEEKDAY_LABELS[new Date(epochDay(iso) * DAY_MS).getUTCDay()];
-  return `${Number(iso.slice(5, 7))}.${Number(iso.slice(8, 10))}(${weekday})`;
+  return `${dotDate(iso)}(${weekday})`;
 }
 
 /**

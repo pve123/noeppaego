@@ -7,7 +7,7 @@ import { describeItinerary, planItinerary, type ItineraryView } from "@/contexts
 import { rangeText } from "@/shared/kernel/korean";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { DAY_TONES, DaySummary, DaySummarySkeleton, ItineraryDay } from "../../../_components/itinerary-day";
-import { KakaoMap, type MapPin } from "../../../_components/kakao-map";
+import { ItineraryMap, type MapDay } from "../../../_components/itinerary-map";
 import { PageBand } from "../../../_components/page-band";
 import { SiteFooter, SiteHeader } from "../../../_components/site-header";
 import { SourceError } from "../../../_components/source-error";
@@ -61,25 +61,15 @@ async function Itinerary({ params }: Pick<PageProps<"/breaks/[start]/[region]">,
   const summaries = describeItinerary(plan);
   const noWeather = plan.days.every((d) => !d.weather);
 
-  const pins: MapPin[] = plan.days.flatMap((day) =>
-    day.slots.flatMap((slot, i) =>
+  const mapDays: MapDay[] = plan.days.map((day) => ({
+    dayNumber: day.dayNumber,
+    dateLabel: day.dateLabel,
+    tone: DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length],
+    stops: day.slots.flatMap((slot) =>
       slot.place
-        ? [
-            {
-              id: `${slot.key}-${slot.place.id}`,
-              lat: slot.place.lat,
-              lng: slot.place.lng,
-              badge: `${day.dayNumber}-${i + 1}`,
-              label: slot.place.title,
-              tone: DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length],
-            },
-          ]
+        ? [{ id: `${slot.key}-${slot.place.id}`, lat: slot.place.lat, lng: slot.place.lng, title: slot.place.title, timeLabel: slot.timeLabel }]
         : [],
     ),
-  );
-  const routes = plan.days.map((day) => ({
-    tone: DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length],
-    points: day.slots.flatMap((s) => (s.place ? [{ lat: s.place.lat, lng: s.place.lng }] : [])),
   }));
 
   return (
@@ -115,13 +105,7 @@ async function Itinerary({ params }: Pick<PageProps<"/breaks/[start]/[region]">,
         </div>
 
         <div className="mt-14">
-          <KakaoMap
-            title="지도로 보기"
-            label={`${plan.regionName} 일정을 날짜별 동선으로 보여 주는 지도`}
-            pins={pins}
-            routes={routes}
-            caption="핀의 앞 숫자는 일차이고 뒤 숫자는 그날 순서예요. 선은 장소를 순서대로 이은 것이라 실제 길과 달라요."
-          />
+          <ItineraryMap days={mapDays} regionName={plan.regionName} />
         </div>
       </div>
     </>

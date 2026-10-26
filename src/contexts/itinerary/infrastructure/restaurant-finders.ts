@@ -82,14 +82,21 @@ async function searchKakaoRestaurants(lat: number, lng: number, size: number): P
   }
 }
 
+/** 카카오 분류(「음식점 > 간식 > 제과,베이커리」)에 이 말이 있으면 끼니가 아니다 */
+const NOT_A_MEAL = ["간식", "술집", "카페"];
+
 export class KakaoRestaurantFinder implements RestaurantFinder {
   /** 카카오가 실패하면 쓸 다른 방법 */
   constructor(private readonly fallback: RestaurantFinder) {}
 
   async near(at: Coordinate, limit: number): Promise<Place[]> {
-    const result = await searchKakaoRestaurants(at.lat, at.lng, limit);
+    // 빵집·디저트(간식)와 술집은 끼니로 고르지 않는다 — 걸러질 몫까지 넉넉히 받는다.
+    const result = await searchKakaoRestaurants(at.lat, at.lng, 15);
     if (!result.ok) return this.fallback.near(at, limit);
-    return result.places.map((p) => ({
+    return result.places
+      .filter((p) => !NOT_A_MEAL.some((word) => p.category_name.includes(word)))
+      .slice(0, limit)
+      .map((p) => ({
       id: `kakao:${p.id}`,
       kind: "restaurant",
       title: p.place_name,
