@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -10,6 +9,7 @@ import { KakaoMap, type MapPin } from "../../_components/kakao-map";
 import { leaveText, periodText } from "../../_components/leave-text";
 import { OriginSelect } from "../../_components/origin-select";
 import { PageBand } from "../../_components/page-band";
+import { RevealSuspense, Shimmer } from "../../_components/reveal";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
 import { SourceError } from "../../_components/source-error";
 import { Steps } from "../../_components/steps";
@@ -29,9 +29,9 @@ export default function BreakPage({ params, searchParams }: PageProps<"/breaks/[
       <SiteNotice />
       <main>
         <Steps current={2} hrefs={["/#breaks"]} />
-        <Suspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="mt-4 h-40 animate-pulse bg-ink/90" />}>
+        <RevealSuspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="shimmer-dark mt-4 h-40" />}>
           <BreakDetail params={params} searchParams={searchParams} />
-        </Suspense>
+        </RevealSuspense>
       </main>
       <SiteFooter />
     </>
@@ -68,9 +68,9 @@ async function BreakDetail({ params, searchParams }: PageProps<"/breaks/[start]"
           </>
         }
       />
-      <Suspense fallback={<DestinationsSkeleton />}>
+      <RevealSuspense fallback={<DestinationsSkeleton />}>
         <Destinations start={base.startIso} end={base.endIso} originId={typeof from === "string" ? from : undefined} />
-      </Suspense>
+      </RevealSuspense>
     </>
   );
 }
@@ -145,11 +145,11 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
 
 function DestinationsSkeleton() {
   return (
-    <div aria-busy="true" aria-label="갈 곳을 찾는 중" className="mx-auto max-w-6xl animate-pulse px-4 py-10 sm:px-6">
-      <div className="h-11 w-80 rounded-2xl bg-soft-ink" />
+    <div aria-busy="true" aria-label="갈 곳을 찾는 중" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <Shimmer className="h-11 w-80 rounded-2xl" />
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-56 rounded-3xl bg-soft-ink" />
+          <Shimmer key={i} className="h-80" />
         ))}
       </div>
     </div>

@@ -8,7 +8,7 @@ const LABELS = ["날짜", "갈 곳", "일정"] as const;
  */
 export function Steps({ current, hrefs = [] }: { current: 1 | 2 | 3; hrefs?: string[] }) {
   return (
-    <nav aria-label="진행 단계" className="mx-auto max-w-6xl px-4 sm:px-6">
+    <nav aria-label="진행 단계" className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
       <ol className="flex items-center gap-2 text-[15px]">
         {LABELS.map((label, i) => {
           const step = i + 1;

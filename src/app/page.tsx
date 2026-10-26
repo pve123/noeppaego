@@ -1,10 +1,10 @@
-import { Suspense } from "react";
 import { connection } from "next/server";
 import { CalendarDate, findLongBreaks } from "@/contexts/calendar";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { BreakList } from "./_components/break-list";
 import { BreaksSkeleton } from "./_components/breaks-skeleton";
 import { Hero } from "./_components/hero";
+import { RevealSuspense } from "./_components/reveal";
 import { NextBreak } from "./_components/next-break";
 import { SiteFooter, SiteHeader, SiteNotice } from "./_components/site-header";
 import { SourceError } from "./_components/source-error";
@@ -19,9 +19,9 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <main>
         <Steps current={1} />
         <Hero />
-        <Suspense fallback={<BreaksSkeleton />}>
+        <RevealSuspense fallback={<BreaksSkeleton />}>
           <Breaks searchParams={searchParams} />
-        </Suspense>
+        </RevealSuspense>
       </main>
       <SiteFooter />
     </>

@@ -25,7 +25,10 @@ export function ItineraryDay({
   const tone = DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length];
   return (
     <section aria-labelledby={`day-${day.dayNumber}`}>
-      <h2 id={`day-${day.dayNumber}`} className="flex flex-wrap items-baseline gap-3">
+      <h2
+        id={`day-${day.dayNumber}`}
+        className="sticky top-[68px] z-30 -mx-4 flex flex-wrap items-baseline gap-3 bg-cream/90 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6"
+      >
         <span className={`-rotate-2 rounded-2xl border-[3px] border-ink px-4 py-0.5 font-display text-[28px] ${DAY_BG[tone]}`}>
           {day.dayNumber}일차
         </span>
@@ -171,5 +174,5 @@ export async function DaySummary({ summaries, index }: { summaries: Promise<stri
 }
 
 export function DaySummarySkeleton() {
-  return <div aria-hidden className="mt-3 h-12 max-w-3xl animate-pulse rounded-xl bg-soft-ink" />;
+  return <div aria-hidden className="shimmer mt-3 h-12 max-w-3xl rounded-xl" />;
 }

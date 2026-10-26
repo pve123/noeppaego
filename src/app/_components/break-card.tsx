@@ -17,7 +17,10 @@ export function BreakCard({ item, colorIndex }: { item: LongBreakView; colorInde
     <Link href={`/breaks/${item.key}`} className="group block h-full rounded-3xl outline-offset-4">
       <article className="flex h-full flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
         <div className={`flex items-center justify-between gap-3 border-b-[3px] border-ink px-5 py-3.5 ${BANDS[colorIndex % BANDS.length]}`}>
-          <h4 className="min-w-0 font-display text-[22px] leading-tight">{item.title}</h4>
+          <div className="min-w-0">
+            <p className="text-xs font-bold text-ink/70">{item.month}월</p>
+            <h4 className="font-display text-[22px] leading-tight">{item.title}</h4>
+          </div>
           <StatusBadge status={item.status} />
         </div>
 

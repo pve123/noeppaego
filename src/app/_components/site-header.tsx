@@ -10,7 +10,8 @@ function Logo({ size }: { size: number }) {
 
 export function SiteHeader() {
   return (
-    <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-5 sm:px-6">
+    <header className="sticky top-0 z-50 border-b-2 border-ink/10 bg-cream/85 backdrop-blur-md">
+      <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
       <Link href="/" className="flex items-center gap-2.5">
         <Logo size={40} />
         <span className="font-display text-[22px]">연휴 여행 플래너</span>
@@ -23,6 +24,7 @@ export function SiteHeader() {
           <Account />
         </Suspense>
       </nav>
+      </div>
     </header>
   );
 }

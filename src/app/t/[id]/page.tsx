@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -10,6 +9,7 @@ import { CopyLinkButton } from "../../_components/copy-link-button";
 import { DAY_TONES, ItineraryDay } from "../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../_components/itinerary-map";
 import { PageBand } from "../../_components/page-band";
+import { RevealSuspense } from "../../_components/reveal";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
 
 export const metadata: Metadata = {
@@ -22,9 +22,9 @@ export default function SharedPage({ params, searchParams }: PageProps<"/t/[id]"
       <SiteHeader />
       <SiteNotice />
       <main>
-        <Suspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="mt-4 h-48 animate-pulse bg-ink/90" />}>
+        <RevealSuspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="shimmer-dark mt-4 h-48" />}>
           <Shared params={params} searchParams={searchParams} />
-        </Suspense>
+        </RevealSuspense>
       </main>
       <SiteFooter />
     </>
