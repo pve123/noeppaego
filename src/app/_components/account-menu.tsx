@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { KakaoLoginButton } from "./kakao-login-button";
 import { usePathname, useSearchParams } from "next/navigation";
 
 /** 헤더 오른쪽 — 로그인했으면 찜한 일정·로그아웃, 아니면 카카오 로그인. 로그인 뒤에는 보던 화면으로 돌아온다 */
@@ -9,17 +10,7 @@ export function AccountMenu({ loggedIn, nickname }: { loggedIn: boolean; nicknam
   const search = useSearchParams().toString();
   const here = search ? `${pathname}?${search}` : pathname;
 
-  if (!loggedIn) {
-    return (
-      <Link
-        href={`/api/auth/kakao?next=${encodeURIComponent(here)}`}
-        prefetch={false}
-        className="inline-flex h-10 items-center rounded-full bg-[#fee500] px-4 font-display text-[16px] text-[#191919] hover:brightness-95"
-      >
-        카카오로 로그인
-      </Link>
-    );
-  }
+  if (!loggedIn) return <KakaoLoginButton next={here} label="카카오 로그인" size="sm" />;
   return (
     <div className="flex items-center gap-1">
       {nickname && <span className="mr-1 hidden max-w-[10em] truncate font-bold sm:inline">{nickname}님</span>}

@@ -7,7 +7,8 @@ import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/cale
 import { describeItinerary, planItinerary, type ItineraryView } from "@/contexts/itinerary";
 import { rangeText } from "@/shared/kernel/korean";
 import { PublicDataError } from "@/shared/public-data/public-data";
-import { saveItineraryAction } from "../../../actions";
+import { currentUser } from "@/shared/auth/session";
+import { SaveBar, SaveCard } from "../../../_components/save-cta";
 import { DAY_TONES, DaySummary, DaySummarySkeleton, ItineraryDay } from "../../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../../_components/itinerary-map";
 import { PageBand } from "../../../_components/page-band";
@@ -84,6 +85,9 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
   }
   if (!plan) notFound();
 
+  const loggedIn = Boolean(await currentUser());
+  const saveTarget = { start, region, picks, here: hrefWith(base, picks, "") };
+
   // 소개 글은 기다리지 않는다 — 날마다 Suspense 로 늦게 채운다(호출은 한 번).
   // 사용자가 바꾼 일정에는 붙이지 않는다 — 바꿀 때마다 부르면 조합 수만큼 비용이 는다.
   const summaries = plan.customized ? Promise.resolve(undefined) : describeItinerary(plan);
@@ -113,23 +117,12 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
             가까운 곳끼리 이어서 짰어요.
           </>
         }
-      >
-        <form action={saveItineraryAction} className="mt-3">
-          <input type="hidden" name="start" value={start} />
-          <input type="hidden" name="region" value={region} />
-          <input type="hidden" name="picks" value={JSON.stringify(picks)} />
-          <input type="hidden" name="back" value={hrefWith(base, picks, "")} />
-          <button
-            type="submit"
-            className="inline-flex h-12 items-center gap-2 rounded-[16px] border-[3px] border-cream bg-coral px-6 font-display text-lg text-ink transition-transform hover:-translate-y-0.5"
-          >
-            일정 저장하고 공유하기
-          </button>
-          <span className="ml-3 text-sm text-soft-ink">카카오로 로그인하면 저장돼요.</span>
-        </form>
-      </PageBand>
+      />
 
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-10">
+        <div className="mb-8">
+          <SaveCard loggedIn={loggedIn} target={saveTarget} />
+        </div>
         {plan.customized && (
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border-[2.5px] border-ink bg-yellow px-4 py-3">
             <p className="font-bold">직접 바꾼 칸이 있어요. 바꾼 일정에는 AI 소개가 붙지 않아요.</p>
@@ -159,6 +152,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
           <ItineraryMap days={mapDays} regionName={plan.regionName} />
         </div>
       </div>
+      <SaveBar loggedIn={loggedIn} target={saveTarget} />
     </>
   );
 }

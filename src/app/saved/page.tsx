@@ -4,6 +4,7 @@ import Link from "next/link";
 import { listFavorites } from "@/contexts/itinerary";
 import { currentUserId } from "@/shared/auth/session";
 import { toggleFavoriteAction } from "../actions";
+import { KakaoLoginButton } from "../_components/kakao-login-button";
 import { PageBand } from "../_components/page-band";
 import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
 
@@ -37,13 +38,10 @@ async function Favorites() {
     return (
       <div className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
         <p className="font-display text-[22px]">로그인하면 찜한 일정을 볼 수 있어요.</p>
-        <Link
-          href="/api/auth/kakao?next=/saved"
-          prefetch={false}
-          className="mt-4 inline-flex h-12 items-center rounded-full bg-[#fee500] px-6 font-display text-lg text-[#191919]"
-        >
-          카카오로 로그인
-        </Link>
+        <p className="mt-2 text-muted">일정을 저장하고 찜해 두면 여기에 모여요.</p>
+        <div className="mt-5">
+          <KakaoLoginButton next="/saved" />
+        </div>
       </div>
     );
   }
