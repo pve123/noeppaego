@@ -1,7 +1,7 @@
-import Image from "next/image";
 import type { ReactNode } from "react";
 import type { DayView, PlaceView, SlotView, WeatherView } from "@/contexts/itinerary";
 import type { MapPin } from "./kakao-map";
+import { ZoomableImage } from "./zoomable-image";
 
 /** 일차별 색 — 지도 핀·동선과 같은 순서 */
 export const DAY_TONES: MapPin["tone"][] = ["yellow", "mint", "coral"];
@@ -54,18 +54,16 @@ function SlotCard({ slot }: { slot: SlotView }) {
     <article className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface p-3 sm:gap-4 sm:p-4">
       <span className="mt-0.5 w-11 shrink-0 font-display text-[17px]">{slot.timeLabel}</span>
       {slot.place?.imageUrl && (
-        <Image
+        <ZoomableImage
           src={slot.place.imageUrl}
-          alt=""
-          width={160}
-          height={160}
-          unoptimized
-          className="size-24 shrink-0 rounded-xl border-[2.5px] border-ink object-cover sm:size-32"
+          title={slot.place.title}
+          className="size-24 rounded-xl border-[2.5px] border-ink object-cover sm:size-32"
         />
       )}
       <div className="min-w-0 flex-1">
         {slot.place ? <PlaceTitle place={slot.place} /> : <p className="font-display text-lg text-muted">{slot.note}</p>}
-        {slot.place?.category && <p className="text-sm text-muted">{slot.place.category}</p>}
+        {slot.place?.category &&
+          (isMeal(slot) ? <FoodChips category={slot.place.category} /> : <p className="text-sm text-muted">{slot.place.category}</p>)}
         {slot.forRain && (
           <p className="mt-1 inline-block rounded-full bg-lavender px-2 py-0.5 text-xs font-bold">비 소식이 있어 실내로 골랐어요</p>
         )}
@@ -96,16 +94,38 @@ function SlotCard({ slot }: { slot: SlotView }) {
   );
 }
 
-function PlaceTitle({ place }: { place: PlaceView }) {
-  const title = <span className="font-display text-[19px] leading-snug sm:text-xl">{place.title}</span>;
-  if (!place.url) return <p>{title}</p>;
+const isMeal = (slot: SlotView) => slot.time === "lunch" || slot.time === "dinner";
+
+/** 음식 종류를 칩으로 — 카카오는 「돈까스,우동」처럼 쉼표로 붙여 주니 나눈다 */
+function FoodChips({ category }: { category: string }) {
+  const kinds = category.split(/[,·]/).map((k) => k.trim()).filter(Boolean);
   return (
-    <p>
-      <a href={place.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-        {title}
-        <span className="ml-1.5 text-sm text-muted">카카오맵에서 보기</span>
-      </a>
-    </p>
+    <ul aria-label="음식 종류" className="mt-1.5 flex flex-wrap gap-1.5">
+      {kinds.map((kind) => (
+        <li key={kind} className="rounded-full border-2 border-ink bg-coral px-2.5 py-0.5 text-sm font-bold">
+          {kind}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function PlaceTitle({ place }: { place: PlaceView }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <p className="font-display text-[19px] leading-snug sm:text-xl">{place.title}</p>
+      {place.url && (
+        // 카카오 로컬 API 는 별점을 주지 않는다 — 카카오맵 장소 페이지에서 별점과 리뷰를 본다
+        <a
+          href={place.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border-2 border-ink/40 px-2.5 py-0.5 text-sm hover:border-ink"
+        >
+          별점과 리뷰 보기 <span aria-hidden>↗</span>
+        </a>
+      )}
+    </div>
   );
 }
 
