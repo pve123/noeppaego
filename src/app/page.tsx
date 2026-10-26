@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
-import { CalendarDate, findLongBreaks, HolidaySourceError } from "@/contexts/calendar";
+import { CalendarDate, findLongBreaks } from "@/contexts/calendar";
+import { PublicDataError } from "@/shared/public-data/public-data";
 import { BreakList } from "./_components/break-list";
 import { BreaksSkeleton } from "./_components/breaks-skeleton";
 import { Hero } from "./_components/hero";
 import { NextBreak } from "./_components/next-break";
-import { SiteHeader } from "./_components/site-header";
+import { SiteFooter, SiteHeader } from "./_components/site-header";
 import { SourceError } from "./_components/source-error";
 import { YearTabs } from "./_components/year-tabs";
 
@@ -19,10 +20,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
           <Breaks searchParams={searchParams} />
         </Suspense>
       </main>
-      <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-4 py-14 sm:px-6">
-        <span className="font-display text-[clamp(26px,3vw,36px)]">그럼, 즐거운 연휴 보내요!</span>
-        <span className="text-sm text-muted">공휴일 자료: 한국천문연구원 특일 정보</span>
-      </footer>
+      <SiteFooter />
     </>
   );
 }
@@ -36,7 +34,7 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
   try {
     view = await findLongBreaks({ year: Number(year) || undefined, today });
   } catch (e) {
-    if (e instanceof HolidaySourceError) return <SourceError failure={e.failure} code={e.code} />;
+    if (e instanceof PublicDataError) return <SourceError subject="공휴일 정보" failure={e.failure} code={e.code} />;
     throw e;
   }
 

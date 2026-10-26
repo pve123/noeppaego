@@ -1,6 +1,7 @@
 import type { BreakStatus, LongBreakView } from "@/contexts/calendar";
 import { DayStrip } from "./day-strip";
 import { leaveText } from "./leave-text";
+import { WhereToLink } from "./where-to-link";
 
 const BANDS = ["bg-yellow", "bg-mint", "bg-coral", "bg-lavender"];
 
@@ -42,6 +43,10 @@ export function BreakCard({ item, colorIndex }: { item: LongBreakView; colorInde
             </ul>
           </div>
         )}
+
+        <div className="mt-auto pt-4">
+          <WhereToLink item={item} />
+        </div>
       </div>
     </article>
   );

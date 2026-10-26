@@ -25,6 +25,8 @@ export type DayView = {
 };
 
 export type BreakOptionView = {
+  startIso: string;
+  endIso: string;
   startLabel: string;
   endLabel: string;
   length: number;
@@ -82,6 +84,31 @@ export async function findLongBreaks(
   };
 }
 
+export type FindLongBreak = {
+  /** 연휴 기본 방법(연차를 가장 적게 쓰는)의 시작일 — LongBreakView.key */
+  start: CalendarDate;
+  today: CalendarDate;
+};
+
+/**
+ * 연휴 하나. 1월 연휴는 전년 12월 말에 시작할 수 있어 시작일의 해와 다음 해를 같이 본다.
+ * 올해·내년 밖이면 찾지 않는다.
+ */
+export async function findLongBreak(
+  query: FindLongBreak,
+  repository: HolidayCalendarRepository,
+): Promise<LongBreakView | undefined> {
+  const years = [query.start.year, query.start.year + 1].filter(
+    (y) => y >= query.today.year && y <= query.today.year + 1,
+  );
+  for (const year of years) {
+    const calendar = await repository.findByYear(year);
+    const found = planLongBreaks(calendar).find((b) => b.base.start.equals(query.start));
+    if (found) return toView(found, calendar, query.today);
+  }
+  return undefined;
+}
+
 function toView(longBreak: LongBreak, calendar: HolidayCalendar, today: CalendarDate): LongBreakView {
   const { base } = longBreak;
   return {
@@ -102,6 +129,8 @@ function statusOf(option: BreakOption, today: CalendarDate): BreakStatus {
 
 function optionView(option: BreakOption, calendar: HolidayCalendar): BreakOptionView {
   return {
+    startIso: option.start.iso,
+    endIso: option.end.iso,
     startLabel: option.start.label,
     endLabel: option.end.label,
     length: option.length,
