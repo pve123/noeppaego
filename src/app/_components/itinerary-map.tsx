@@ -59,19 +59,20 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-[1fr_300px]">
+      <div className="mt-4 grid gap-4 md:grid-cols-[1fr_340px]">
         <KakaoMap pins={pins} routes={routes} label={`${regionName} ${day.dayNumber}일차 동선 지도`} />
         <ol aria-label={`${day.dayNumber}일차 장소`} className="space-y-2 self-start">
           {day.stops.map((s, i) => (
-            <li key={s.id} className="flex items-center gap-3 rounded-2xl border-[2.5px] border-ink bg-surface px-3 py-2">
+            <li key={s.id} className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface px-3 py-2.5">
               <span
-                className={`flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink font-display ${TAB_BG[day.tone]}`}
+                className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink font-display ${TAB_BG[day.tone]}`}
               >
                 {i + 1}
               </span>
               <span className="min-w-0">
                 <span className="block text-xs text-muted">{s.timeLabel}</span>
-                <span className="block truncate font-bold">{s.title}</span>
+                {/* 이름은 자르지 않는다 — 지도 번호와 짝을 맞추려면 끝까지 읽혀야 한다 */}
+                <span className="block font-bold leading-snug [overflow-wrap:anywhere]">{s.title}</span>
               </span>
             </li>
           ))}
