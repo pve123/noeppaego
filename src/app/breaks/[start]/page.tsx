@@ -10,7 +10,7 @@ import { KakaoMap, type MapPin } from "../../_components/kakao-map";
 import { leaveText, periodText } from "../../_components/leave-text";
 import { OriginSelect } from "../../_components/origin-select";
 import { PageBand } from "../../_components/page-band";
-import { SiteFooter, SiteHeader } from "../../_components/site-header";
+import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
 import { SourceError } from "../../_components/source-error";
 import { Steps } from "../../_components/steps";
 
@@ -26,6 +26,7 @@ export default function BreakPage({ params, searchParams }: PageProps<"/breaks/[
   return (
     <>
       <SiteHeader />
+      <SiteNotice />
       <main>
         <Steps current={2} hrefs={["/#breaks"]} />
         <Suspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="mt-4 h-40 animate-pulse bg-ink/90" />}>

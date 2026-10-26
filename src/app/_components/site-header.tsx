@@ -1,5 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
+import { currentUserId } from "@/shared/auth/session";
+import { AccountMenu, LoginNotice } from "./account-menu";
 
 function Logo({ size }: { size: number }) {
   return <Image src="/logo.svg" alt="" width={size} height={size} unoptimized className="shrink-0" />;
@@ -12,10 +15,28 @@ export function SiteHeader() {
         <Logo size={40} />
         <span className="font-display text-[22px]">연휴 여행 플래너</span>
       </Link>
-      <Link href="/#breaks" className="rounded-full px-3 py-2 font-display text-[17px] hover:bg-yellow">
-        연휴 목록
-      </Link>
+      <nav aria-label="주 메뉴" className="flex items-center gap-1">
+        <Link href="/#breaks" className="hidden rounded-full px-3 py-2 font-display text-[17px] hover:bg-yellow sm:inline-block">
+          연휴 목록
+        </Link>
+        <Suspense fallback={<span className="inline-block h-10 w-28" />}>
+          <Account />
+        </Suspense>
+      </nav>
     </header>
+  );
+}
+
+async function Account() {
+  return <AccountMenu loggedIn={Boolean(await currentUserId())} />;
+}
+
+/** 로그인 실패 안내 — 헤더 아래 */
+export function SiteNotice() {
+  return (
+    <Suspense>
+      <LoginNotice />
+    </Suspense>
   );
 }
 

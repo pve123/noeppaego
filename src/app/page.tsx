@@ -6,7 +6,7 @@ import { BreakList } from "./_components/break-list";
 import { BreaksSkeleton } from "./_components/breaks-skeleton";
 import { Hero } from "./_components/hero";
 import { NextBreak } from "./_components/next-break";
-import { SiteFooter, SiteHeader } from "./_components/site-header";
+import { SiteFooter, SiteHeader, SiteNotice } from "./_components/site-header";
 import { SourceError } from "./_components/source-error";
 import { Steps } from "./_components/steps";
 import { YearTabs } from "./_components/year-tabs";
@@ -15,6 +15,7 @@ export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <>
       <SiteHeader />
+      <SiteNotice />
       <main>
         <Steps current={1} />
         <Hero />

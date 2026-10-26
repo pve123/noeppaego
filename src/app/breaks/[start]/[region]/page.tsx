@@ -7,10 +7,11 @@ import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/cale
 import { describeItinerary, planItinerary, type ItineraryView } from "@/contexts/itinerary";
 import { rangeText } from "@/shared/kernel/korean";
 import { PublicDataError } from "@/shared/public-data/public-data";
+import { saveItineraryAction } from "../../../actions";
 import { DAY_TONES, DaySummary, DaySummarySkeleton, ItineraryDay } from "../../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../../_components/itinerary-map";
 import { PageBand } from "../../../_components/page-band";
-import { SiteFooter, SiteHeader } from "../../../_components/site-header";
+import { SiteFooter, SiteHeader, SiteNotice } from "../../../_components/site-header";
 import { SourceError } from "../../../_components/source-error";
 import { Steps } from "../../../_components/steps";
 
@@ -46,6 +47,7 @@ export default function ItineraryPage({ params, searchParams }: PageProps<"/brea
   return (
     <>
       <SiteHeader />
+      <SiteNotice />
       <main>
         <Suspense fallback={<ItinerarySkeleton />}>
           <Itinerary params={params} searchParams={searchParams} />
@@ -111,7 +113,21 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
             가까운 곳끼리 이어서 짰어요.
           </>
         }
-      />
+      >
+        <form action={saveItineraryAction} className="mt-3">
+          <input type="hidden" name="start" value={start} />
+          <input type="hidden" name="region" value={region} />
+          <input type="hidden" name="picks" value={JSON.stringify(picks)} />
+          <input type="hidden" name="back" value={hrefWith(base, picks, "")} />
+          <button
+            type="submit"
+            className="inline-flex h-12 items-center gap-2 rounded-[16px] border-[3px] border-cream bg-coral px-6 font-display text-lg text-ink transition-transform hover:-translate-y-0.5"
+          >
+            일정 저장하고 공유하기
+          </button>
+          <span className="ml-3 text-sm text-soft-ink">카카오로 로그인하면 저장돼요.</span>
+        </form>
+      </PageBand>
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         {plan.customized && (
