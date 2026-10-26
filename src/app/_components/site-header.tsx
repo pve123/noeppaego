@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { currentUserId } from "@/shared/auth/session";
+import { currentUser } from "@/shared/auth/session";
 import { AccountMenu, LoginNotice } from "./account-menu";
 
 function Logo({ size }: { size: number }) {
@@ -28,7 +28,8 @@ export function SiteHeader() {
 }
 
 async function Account() {
-  return <AccountMenu loggedIn={Boolean(await currentUserId())} />;
+  const user = await currentUser();
+  return <AccountMenu loggedIn={Boolean(user)} nickname={user?.nickname} />;
 }
 
 /** 로그인 실패 안내 — 헤더 아래 */
