@@ -53,7 +53,8 @@ async function writeSummaries(regionName: string, outlineJson: string): Promise<
       model: MODEL,
       instructions: SYSTEM,
       input: `지역: ${regionName}\n일정(JSON): ${outlineJson}`,
-      max_output_tokens: 16000,
+      // 요청할 때 TPM 이 이 값까지 미리 잡힌다 — 하루 2~3문장 × 열흘이어도 4천이면 넉넉하다.
+      max_output_tokens: 4000,
       // 짧은 글쓰기라 깊게 생각할 일이 없다.
       reasoning: { effort: "low" },
       text: { format: { type: "json_schema", name: "day_summaries", strict: true, schema: OUTPUT_SCHEMA } },
