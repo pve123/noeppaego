@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const result = await signInWithKakao({ code, redirectUri: `${request.nextUrl.origin}/api/auth/kakao/callback` });
   if (!result) return fail();
 
-  await startSession(result.userId);
+  await startSession(result.userId, result.nickname);
   return NextResponse.redirect(new URL(next, request.nextUrl.origin));
 }
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 /** 헤더 오른쪽 — 로그인했으면 찜한 일정·로그아웃, 아니면 카카오 로그인. 로그인 뒤에는 보던 화면으로 돌아온다 */
-export function AccountMenu({ loggedIn }: { loggedIn: boolean }) {
+export function AccountMenu({ loggedIn, nickname }: { loggedIn: boolean; nickname?: string }) {
   const pathname = usePathname();
   const search = useSearchParams().toString();
   const here = search ? `${pathname}?${search}` : pathname;
@@ -22,6 +22,7 @@ export function AccountMenu({ loggedIn }: { loggedIn: boolean }) {
   }
   return (
     <div className="flex items-center gap-1">
+      {nickname && <span className="mr-1 hidden max-w-[10em] truncate font-bold sm:inline">{nickname}님</span>}
       <Link href="/saved" className="rounded-full px-3 py-2 font-display text-[17px] hover:bg-yellow">
         찜한 일정
       </Link>

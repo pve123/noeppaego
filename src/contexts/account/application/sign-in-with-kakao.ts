@@ -1,4 +1,4 @@
-import { KakaoAuth, UserRepository } from "../domain/user";
+import { displayNickname, KakaoAuth, UserRepository } from "../domain/user";
 
 export type SignInWithKakao = {
   code: string;
@@ -6,14 +6,17 @@ export type SignInWithKakao = {
   redirectUri: string;
 };
 
-/** 카카오 로그인 마무리(Command) — 회원 번호로 사용자를 찾거나 만든다. 실패하면 undefined */
+/**
+ * 카카오 로그인 마무리(Command) — 회원 번호로 사용자를 찾거나 만든다. 실패하면 undefined.
+ * 닉네임은 DB 에 두지 않고 돌려주기만 한다(세션에만 담는다).
+ */
 export async function signInWithKakao(
   command: SignInWithKakao,
   kakao: KakaoAuth,
   users: UserRepository,
-): Promise<{ userId: string } | undefined> {
-  const kakaoId = await kakao.kakaoIdFromCode(command.code, command.redirectUri);
-  if (kakaoId === undefined) return undefined;
-  const user = await users.findOrCreateByKakaoId(kakaoId);
-  return { userId: user.id };
+): Promise<{ userId: string; nickname?: string } | undefined> {
+  const profile = await kakao.profileFromCode(command.code, command.redirectUri);
+  if (!profile) return undefined;
+  const user = await users.findOrCreateByKakaoId(profile.kakaoId);
+  return { userId: user.id, nickname: displayNickname(profile.nickname) };
 }
