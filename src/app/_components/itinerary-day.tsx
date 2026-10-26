@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { DayView, PlaceView, SlotView, WeatherView } from "@/contexts/itinerary";
+import type { DayView, SlotView, WeatherView } from "@/contexts/itinerary";
 import type { MapPin } from "./kakao-map";
 import { ZoomableImage } from "./zoomable-image";
 
@@ -49,47 +49,75 @@ function WeatherChips({ weather }: { weather: WeatherView }) {
   );
 }
 
+/**
+ * 일정 칸 — 역할마다 자리를 나눈다.
+ * 왼쪽 시간 · 가운데 정보(사진·이름·종류) · 오른쪽 위 행동(별점과 리뷰) · 아랫단 대안(근처 다른 식당)
+ */
 function SlotCard({ slot }: { slot: SlotView }) {
+  const place = slot.place;
   return (
-    <article className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface p-3 sm:gap-4 sm:p-4">
-      <span className="mt-0.5 w-11 shrink-0 font-display text-[17px]">{slot.timeLabel}</span>
-      {slot.place?.imageUrl && (
-        <ZoomableImage
-          src={slot.place.imageUrl}
-          title={slot.place.title}
-          className="size-24 rounded-xl border-[2.5px] border-ink object-cover sm:size-32"
-        />
-      )}
-      <div className="min-w-0 flex-1">
-        {slot.place ? <PlaceTitle place={slot.place} /> : <p className="font-display text-lg text-muted">{slot.note}</p>}
-        {slot.place?.category &&
-          (isMeal(slot) ? <FoodChips category={slot.place.category} /> : <p className="text-sm text-muted">{slot.place.category}</p>)}
-        {slot.forRain && (
-          <p className="mt-1 inline-block rounded-full bg-lavender px-2 py-0.5 text-xs font-bold">비 소식이 있어 실내로 골랐어요</p>
+    <article className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-surface">
+      <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
+        <span className="w-10 shrink-0 pt-0.5 font-display text-[17px] sm:w-12">{slot.timeLabel}</span>
+
+        {place?.imageUrl && (
+          <ZoomableImage
+            src={place.imageUrl}
+            title={place.title}
+            className="size-24 rounded-xl border-[2.5px] border-ink object-cover sm:size-32"
+          />
         )}
-        {slot.alternatives.length > 0 && (
-          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-sm">
-            <span className="text-muted">다른 곳</span>
-            {slot.alternatives.map((p) =>
-              p.url ? (
-                <a
-                  key={p.id}
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-full border-2 border-ink/30 px-2.5 py-0.5 hover:border-ink"
-                >
-                  {p.title}
-                </a>
-              ) : (
-                <span key={p.id} className="rounded-full border-2 border-ink/20 px-2.5 py-0.5">
-                  {p.title}
-                </span>
-              ),
+
+        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            {place ? (
+              <p className="font-display text-[19px] leading-snug sm:text-xl">{place.title}</p>
+            ) : (
+              <p className="font-display text-lg text-muted">{slot.note}</p>
+            )}
+            {place?.category &&
+              (isMeal(slot) ? <FoodChips category={place.category} /> : <p className="mt-0.5 text-sm text-muted">{place.category}</p>)}
+            {slot.forRain && (
+              <p className="mt-2 inline-block rounded-full bg-lavender px-2.5 py-0.5 text-xs font-bold">비 소식이 있어 실내로 골랐어요</p>
             )}
           </div>
-        )}
+
+          {place?.url && (
+            // 카카오 로컬 API 는 별점을 주지 않는다 — 카카오맵 장소 페이지에서 별점과 리뷰를 본다
+            <a
+              href={place.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 shrink-0 items-center gap-1 self-start rounded-full border-2 border-ink bg-surface px-3 text-sm font-bold hover:bg-yellow"
+            >
+              별점과 리뷰 보기 <span aria-hidden>↗</span>
+            </a>
+          )}
+        </div>
       </div>
+
+      {slot.alternatives.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 border-t-2 border-dashed border-ink/25 bg-cream px-3 py-2.5 text-sm sm:px-4">
+          <span className="mr-1 font-bold text-muted">근처 다른 식당</span>
+          {slot.alternatives.map((p) =>
+            p.url ? (
+              <a
+                key={p.id}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border-2 border-ink/25 bg-surface px-2.5 py-0.5 hover:border-ink"
+              >
+                {p.title}
+              </a>
+            ) : (
+              <span key={p.id} className="rounded-full border-2 border-ink/15 bg-surface px-2.5 py-0.5">
+                {p.title}
+              </span>
+            ),
+          )}
+        </div>
+      )}
     </article>
   );
 }
@@ -107,25 +135,6 @@ function FoodChips({ category }: { category: string }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-function PlaceTitle({ place }: { place: PlaceView }) {
-  return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-      <p className="font-display text-[19px] leading-snug sm:text-xl">{place.title}</p>
-      {place.url && (
-        // 카카오 로컬 API 는 별점을 주지 않는다 — 카카오맵 장소 페이지에서 별점과 리뷰를 본다
-        <a
-          href={place.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-full border-2 border-ink/40 px-2.5 py-0.5 text-sm hover:border-ink"
-        >
-          별점과 리뷰 보기 <span aria-hidden>↗</span>
-        </a>
-      )}
-    </div>
   );
 }
 
