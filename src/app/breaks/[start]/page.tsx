@@ -9,7 +9,8 @@ import { KakaoMap, type MapPin } from "../../_components/kakao-map";
 import { leaveText, periodText } from "../../_components/leave-text";
 import { OriginSelect } from "../../_components/origin-select";
 import { PageBand } from "../../_components/page-band";
-import { RevealSuspense, Shimmer } from "../../_components/reveal";
+import { RevealSuspense } from "../../_components/reveal";
+import { BandSkeleton, DestinationsSkeleton } from "../../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
 import { SourceError } from "../../_components/source-error";
 import { Steps } from "../../_components/steps";
@@ -29,7 +30,7 @@ export default function BreakPage({ params, searchParams }: PageProps<"/breaks/[
       <SiteNotice />
       <main>
         <Steps current={2} hrefs={["/#breaks"]} />
-        <RevealSuspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="shimmer-dark mt-4 h-40" />}>
+        <RevealSuspense fallback={<BandSkeleton steps={["연휴를 확인하는 중"]} />}>
           <BreakDetail params={params} searchParams={searchParams} />
         </RevealSuspense>
       </main>
@@ -140,18 +141,5 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
         </>
       )}
     </section>
-  );
-}
-
-function DestinationsSkeleton() {
-  return (
-    <div aria-busy="true" aria-label="갈 곳을 찾는 중" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <Shimmer className="h-11 w-80 rounded-2xl" />
-      <div className="mt-6 grid gap-5 md:grid-cols-2">
-        {[0, 1, 2, 3].map((i) => (
-          <Shimmer key={i} className="h-80" />
-        ))}
-      </div>
-    </div>
   );
 }

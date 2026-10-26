@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 /**
  * 누르면 크게 보는 사진 — 브라우저 기본 dialog 라 Esc·바깥 누르기·닫기 버튼으로 닫히고 키보드로도 쓸 수 있다.
@@ -9,6 +9,7 @@ import { useRef } from "react";
  */
 export function ZoomableImage({ src, title, className }: { src: string; title: string; className: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const [loaded, setLoaded] = useState(false);
 
   return (
     <>
@@ -18,7 +19,16 @@ export function ZoomableImage({ src, title, className }: { src: string; title: s
         aria-label={`${title} 사진 크게 보기`}
         className="shrink-0 cursor-zoom-in rounded-xl transition-transform hover:-translate-y-0.5 focus-visible:outline-offset-4"
       >
-        <Image src={src} alt="" width={160} height={160} unoptimized className={className} />
+        {/* 사진이 오기 전에는 그 자리가 반짝이고, 오면 반짝임을 끈다 */}
+        <Image
+          src={src}
+          alt=""
+          width={160}
+          height={160}
+          unoptimized
+          onLoad={() => setLoaded(true)}
+          className={`${loaded ? "" : "shimmer"} ${className}`}
+        />
       </button>
 
       <dialog

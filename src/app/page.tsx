@@ -2,7 +2,7 @@ import { connection } from "next/server";
 import { CalendarDate, findLongBreaks } from "@/contexts/calendar";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { BreakList } from "./_components/break-list";
-import { BreaksSkeleton } from "./_components/breaks-skeleton";
+import { BreaksSkeleton } from "./_components/skeletons";
 import { Hero } from "./_components/hero";
 import { RevealSuspense } from "./_components/reveal";
 import { NextBreak } from "./_components/next-break";

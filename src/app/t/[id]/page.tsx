@@ -10,6 +10,7 @@ import { DAY_TONES, ItineraryDay } from "../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../_components/itinerary-map";
 import { PageBand } from "../../_components/page-band";
 import { RevealSuspense } from "../../_components/reveal";
+import { BandSkeleton } from "../../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function SharedPage({ params, searchParams }: PageProps<"/t/[id]"
       <SiteHeader />
       <SiteNotice />
       <main>
-        <RevealSuspense fallback={<div aria-busy="true" aria-label="불러오는 중" className="shimmer-dark mt-4 h-48" />}>
+        <RevealSuspense fallback={<BandSkeleton steps={["저장한 일정을 불러오는 중"]} />}>
           <Shared params={params} searchParams={searchParams} />
         </RevealSuspense>
       </main>

@@ -41,7 +41,7 @@ export function DestinationCard({
             width={640}
             height={360}
             unoptimized
-            className="aspect-[16/9] w-full border-b-[3px] border-ink object-cover"
+            className="shimmer aspect-[16/9] w-full border-b-[3px] border-ink object-cover"
           />
         )}
         <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
