@@ -5,7 +5,8 @@ import { currentUserId } from "@/shared/auth/session";
 import { toggleFavoriteAction } from "../actions";
 import { KakaoLoginButton } from "../_components/kakao-login-button";
 import { PageBand } from "../_components/page-band";
-import { RevealSuspense, Shimmer } from "../_components/reveal";
+import { RevealSuspense } from "../_components/reveal";
+import { FavoritesSkeleton } from "../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function SavedPage() {
       <main>
         <PageBand title="찜한 일정" sub="내가 저장한 일정과 공유받아 찜한 일정이에요." />
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <RevealSuspense fallback={<Shimmer className="h-40" />}>
+          <RevealSuspense fallback={<FavoritesSkeleton />}>
             <Favorites />
           </RevealSuspense>
         </div>

@@ -174,5 +174,14 @@ export async function DaySummary({ summaries, index }: { summaries: Promise<stri
 }
 
 export function DaySummarySkeleton() {
-  return <div aria-hidden className="shimmer mt-3 h-12 max-w-3xl rounded-xl" />;
+  return (
+    <div className="mt-3 max-w-3xl space-y-2">
+      <p className="inline-flex items-center gap-2 text-xs font-bold text-muted">
+        <span className="rounded-full bg-lavender px-2 py-0.5 text-ink">AI 소개</span>
+        AI가 소개를 쓰는 중
+      </p>
+      <div aria-hidden className="shimmer h-4 w-full rounded-md" />
+      <div aria-hidden className="shimmer h-4 w-2/3 rounded-md" />
+    </div>
+  );
 }

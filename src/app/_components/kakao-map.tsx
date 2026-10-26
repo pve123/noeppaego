@@ -65,6 +65,8 @@ export function KakaoMap({
 }) {
   const container = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(!APP_KEY);
+  /** 지도를 다 그렸다 — 그 전에는 「지도를 그리는 중」을 덮어 둔다 */
+  const [ready, setReady] = useState(false);
   /** 고른 번호표(badge). 없으면 전체 */
   const [focus, setFocus] = useState<string>();
   const focused = legend.find((item) => item.badge === focus);
@@ -79,6 +81,7 @@ export function KakaoMap({
     const routes = shownRoutes;
     if (!APP_KEY || !container.current || pins.length === 0) return;
     let cancelled = false;
+    setReady(false);
     let observer: ResizeObserver | undefined;
 
     loadSdk(APP_KEY)
@@ -131,6 +134,9 @@ export function KakaoMap({
           else map.setCenter(new maps.LatLng(pins[0].lat, pins[0].lng));
         };
         maps.event.addListener(map, "idle", spread);
+        maps.event.addListener(map, "tilesloaded", () => !cancelled && setReady(true));
+        // 타일 신호가 오지 않아도 덮개가 남아 있지 않게
+        setTimeout(() => !cancelled && setReady(true), 3000);
         requestAnimationFrame(fit);
         observer = new ResizeObserver(() => fit());
         observer.observe(container.current);
@@ -148,14 +154,27 @@ export function KakaoMap({
     <figure>
       {title && <h2 className="mb-4 font-display text-[26px]">{title}</h2>}
       <div className={legend.length > 0 ? "grid gap-4 md:grid-cols-[1fr_320px]" : ""}>
-        <div
-          ref={container}
-          role="img"
-          aria-label={label}
-          className={`w-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop ${
-            tall ? "h-[460px] md:h-[560px]" : "h-[360px] sm:h-[420px]"
-          }`}
-        />
+        <div className={`relative ${tall ? "h-[460px] md:h-[560px]" : "h-[360px] sm:h-[420px]"}`}>
+          <div
+            ref={container}
+            role="img"
+            aria-label={label}
+            className="size-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop"
+          />
+          {!ready && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="shimmer absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-3xl border-[3px] border-ink"
+            >
+              <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden className="loading-pin">
+                <path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z" fill="#ff6b6b" stroke="#22223b" strokeWidth="2" />
+                <circle cx="12" cy="9" r="2.5" fill="#fffbea" stroke="#22223b" strokeWidth="1.5" />
+              </svg>
+              <span className="rounded-full bg-surface px-4 py-1.5 text-[15px] font-bold">지도를 그리는 중</span>
+            </div>
+          )}
+        </div>
         {legend.length > 0 && (
           <div className="self-start">
             <p className="mb-2 text-sm text-muted">번호를 누르면 그 지역만 보여 드려요.</p>

@@ -119,3 +119,34 @@ html {
   /* 붙어 있는 헤더에 가리지 않게 — 앵커로 이동할 때 이만큼 띄운다 */
   scroll-padding-top: 84px;
 }
+
+/* ── 진행 상태 점 세 개 ─────────────────────────────── */
+.loading-dot {
+  animation: loading-dot 1s ease-in-out infinite;
+}
+@keyframes loading-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* ── 지도 그리는 중: 핀이 통통 ───────────────────────── */
+.loading-pin {
+  animation: loading-pin 0.9s ease-in-out infinite;
+}
+@keyframes loading-pin {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}

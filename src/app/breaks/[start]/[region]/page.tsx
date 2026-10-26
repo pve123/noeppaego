@@ -13,7 +13,8 @@ import { DAY_TONES, DaySummary, DaySummarySkeleton, ItineraryDay } from "../../.
 import { ItineraryMap, type MapDay } from "../../../_components/itinerary-map";
 import { Notice } from "../../../_components/notice";
 import { PageBand } from "../../../_components/page-band";
-import { RevealSuspense, Shimmer } from "../../../_components/reveal";
+import { RevealSuspense } from "../../../_components/reveal";
+import { ItinerarySkeleton } from "../../../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../../_components/site-header";
 import { SourceError } from "../../../_components/source-error";
 import { Steps } from "../../../_components/steps";
@@ -166,19 +167,5 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
       </div>
       <SaveBar loggedIn={loggedIn} target={saveTarget} />
     </>
-  );
-}
-
-function ItinerarySkeleton() {
-  return (
-    <div aria-busy="true" aria-label="일정을 짜는 중">
-      <div className="shimmer-dark mt-4 h-40" />
-      <div className="mx-auto max-w-6xl space-y-3 px-4 py-10 sm:px-6">
-        <Shimmer className="h-32" />
-        {[0, 1, 2, 3, 4].map((i) => (
-          <Shimmer key={i} className="h-24 rounded-2xl" />
-        ))}
-      </div>
-    </div>
   );
 }
