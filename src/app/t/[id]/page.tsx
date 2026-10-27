@@ -13,9 +13,27 @@ import { RevealSuspense } from "../../_components/reveal";
 import { BandSkeleton } from "../../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
 
-export const metadata: Metadata = {
-  title: "공유받은 일정 | 연휴 여행 플래너",
-};
+/**
+ * 카톡·메신저 미리보기 — 일정마다 「경기도 파주시 2박 3일 · 성탄절 연휴」로 보이게. 이미지는 옆의 opengraph-image.tsx.
+ * 공유 링크는 아는 사람만 여는 것이라 검색엔진에는 올리지 않는다.
+ */
+export async function generateMetadata({ params }: PageProps<"/t/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const view = await findSavedItinerary({ id });
+  if (!view) return { title: "공유받은 일정 | 연휴 여행 플래너", robots: { index: false } };
+
+  const { plan } = view;
+  const title = `${plan.regionName} ${plan.lengthLabel} · ${view.breakTitle} 연휴`;
+  const places = plan.days.flatMap((d) => d.slots).filter((s) => s.place).length;
+  const description = `${rangeText(plan.startLabel, plan.endLabel)} 일정이에요. 갈 곳과 맛집 ${places}곳을 날마다 정리했어요.`;
+  return {
+    title: `${title} | 연휴 여행 플래너`,
+    description,
+    robots: { index: false },
+    openGraph: { title, description, locale: "ko_KR", type: "article", siteName: "연휴 여행 플래너" },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
 
 export default function SharedPage({ params, searchParams }: PageProps<"/t/[id]">) {
   return (
