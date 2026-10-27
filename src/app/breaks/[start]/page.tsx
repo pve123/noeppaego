@@ -130,7 +130,7 @@ async function Destinations({ start, end, originId }: { start: string; end: stri
               }))}
               legend={view.destinations.map((d, i) => ({
                 badge: String(i + 1),
-                text: `${d.name} ${d.driveLabel ?? `${d.distanceKm}km`}`,
+                text: `${d.name} ${d.distanceKm}km`,
                 tone: PIN_TONES[i % PIN_TONES.length],
                 // 누르면 출발지와 이 지역, 그 사이 선만
                 pinIds: ["origin", d.code],

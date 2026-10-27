@@ -22,8 +22,3 @@ export const ORIGINS: readonly Origin[] = [
 export function originOf(id: string | undefined): Origin {
   return ORIGINS.find((o) => o.id === id) ?? ORIGINS[0];
 }
-
-/** 포트 — 자동차 이동 시간(분). 모르면 undefined */
-export interface DriveTimes {
-  minutes(from: Coordinate, to: Coordinate): Promise<number | undefined>;
-}

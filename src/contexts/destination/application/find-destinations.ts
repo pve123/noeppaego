@@ -1,9 +1,8 @@
-import { durationLabel } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dotDate, TravelWindow } from "@/shared/kernel/travel-window";
 import { recommendDestinations, reachKm } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
-import { DriveTimes, ORIGINS, originOf } from "../domain/origin";
+import { ORIGINS, originOf } from "../domain/origin";
 
 // ── 쿼리 ─────────────────────────────────────────────
 
@@ -31,9 +30,8 @@ export type DestinationView = {
   code: string;
   name: string;
   center: LatLng;
+  /** 출발지에서 직선 거리. 차 시간은 섬처럼 못 구하는 곳이 있어 카드마다 달라지므로 거리 하나로 맞춘다 */
   distanceKm: number;
-  /** 「차로 약 2시간 10분」 — 길찾기를 못 하면 undefined */
-  driveLabel?: string;
   festivals: FestivalView[];
 };
 
@@ -53,14 +51,12 @@ export type DestinationsView = {
 export async function findDestinations(
   query: FindDestinations,
   repository: FestivalRepository,
-  driveTimes: DriveTimes,
 ): Promise<DestinationsView> {
   const window = TravelWindow.of(query.start, query.end);
   const origin = originOf(query.originId);
   const festivals = await repository.findOverlapping(window);
   const reach = reachKm(window.days);
   const destinations = recommendDestinations(festivals, window, origin.at);
-  const minutes = await Promise.all(destinations.map((d) => driveTimes.minutes(origin.at, d.center)));
 
   return {
     originId: origin.id,
@@ -68,12 +64,11 @@ export async function findDestinations(
     origin: { lat: origin.at.lat, lng: origin.at.lng },
     origins: ORIGINS.map(({ id, name }) => ({ id, name })),
     reachKm: Number.isFinite(reach) ? reach : undefined,
-    destinations: destinations.map((d, i) => ({
+    destinations: destinations.map((d) => ({
       code: d.region.code,
       name: d.region.name,
       center: { lat: d.center.lat, lng: d.center.lng },
       distanceKm: Math.round(d.distanceKm),
-      driveLabel: minutes[i] === undefined ? undefined : `차로 ${durationLabel(minutes[i])}`,
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,
