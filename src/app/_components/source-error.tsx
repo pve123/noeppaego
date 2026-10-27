@@ -1,9 +1,10 @@
 import type { PublicDataFailure } from "@/shared/public-data/public-data";
 
+/** 보는 사람에게 하는 말만 — 키 설정 같은 운영자용 안내는 서버 로그(public-data.ts)에 남긴다 */
 const MESSAGE: Record<PublicDataFailure, string> = {
-  "missing-key": "서버에 공공데이터포털 인증키가 없어요. 환경변수 DATA_GO_KR_SERVICE_KEY를 확인해 주세요.",
-  rejected:
-    "공공데이터포털이 요청을 거절했어요. 키를 막 받았다면 1~2시간 뒤에 다시 해 보세요. 계속 거절되면 Decoding 키를 넣었는지 확인해 주세요.",
+  quota: "지금 찾는 사람이 많아 정보를 가져오지 못했어요. 조금 뒤에 다시 와 주세요.",
+  "missing-key": "지금은 정보를 불러올 수 없어요. 조금 뒤에 다시 와 주세요.",
+  rejected: "지금은 정보를 불러올 수 없어요. 조금 뒤에 다시 와 주세요.",
   unavailable: "정보를 가져오지 못했어요. 잠시 뒤에 다시 해 보세요.",
 };
 

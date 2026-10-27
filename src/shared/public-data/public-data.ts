@@ -1,17 +1,12 @@
 import "server-only";
+import { failureOfCode, type PublicDataFailure } from "./failure";
 
 /**
  * 공공데이터포털(apis.data.go.kr) 호출 공통 — 인증키·거절 코드·실패 처리.
  * 캐시는 여기서 하지 않는다. 각 클라이언트의 `use cache` 함수가 이걸 부르고 결과에 따라 수명을 정한다.
  */
 
-export type PublicDataFailure =
-  /** 서버에 인증키(환경변수)가 없다 */
-  | "missing-key"
-  /** 공공데이터포털이 요청을 거절했다 — 키 미등록·만료·한도 초과 등 */
-  | "rejected"
-  /** 연결 실패·5xx·알 수 없는 응답 */
-  | "unavailable";
+export type { PublicDataFailure } from "./failure";
 
 export class PublicDataError extends Error {
   constructor(
@@ -60,7 +55,10 @@ export async function requestItems<T>(
   params: Record<string, string>,
 ): Promise<PublicDataResult<T[]>> {
   const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY;
-  if (!serviceKey) return { ok: false, failure: "missing-key" };
+  if (!serviceKey) {
+    console.warn(`[${label}] DATA_GO_KR_SERVICE_KEY 가 없다`);
+    return { ok: false, failure: "missing-key" };
+  }
 
   const url = new URL(endpoint);
   url.searchParams.set("serviceKey", serviceKey);
@@ -82,8 +80,9 @@ export async function requestItems<T>(
     json?.OpenAPI_ServiceResponse?.cmmMsgHeader.returnReasonCode ??
     body.match(/<returnReasonCode>(\d+)<\/returnReasonCode>/)?.[1];
   if (rejectedCode) {
+    // 30 이면 등록 안 된 키(막 받은 키는 1~2시간 뒤 활성), Encoding/Decoding 키 혼동도 흔하다. 22 는 하루 한도 초과.
     console.warn(`[${label}] 거절 (status=${res.status}, code=${rejectedCode})`);
-    return { ok: false, failure: "rejected", code: rejectedCode };
+    return { ok: false, failure: failureOfCode(rejectedCode), code: rejectedCode };
   }
   if (!res.ok || !json?.response) {
     console.warn(`[${label}] 응답을 읽지 못했다 (status=${res.status})`);
@@ -93,7 +92,7 @@ export async function requestItems<T>(
   const { header, body: payload } = json.response;
   if (!OK_CODES.has(header.resultCode)) {
     console.warn(`[${label}] 결과 코드 ${header.resultCode}`);
-    return { ok: false, failure: "rejected", code: header.resultCode };
+    return { ok: false, failure: failureOfCode(header.resultCode), code: header.resultCode };
   }
 
   const items = payload?.items ? payload.items.item : [];
