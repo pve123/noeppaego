@@ -77,13 +77,26 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t-2 border-ink/15">
-        <nav aria-label="정책" className="mx-auto flex max-w-6xl flex-wrap gap-x-5 gap-y-1 px-4 py-4 text-[14px] sm:px-6">
-          <Link href="/privacy" className="font-bold hover:underline">
-            개인정보처리방침
-          </Link>
-          <Link href="/account#delete" className="hover:underline">
-            계정 삭제
-          </Link>
+        {/* 휴대폰에는 마우스 올림이 없어 밑줄을 늘 보여 준다 — 위 출처 칩(누르는 게 아님)과 모양으로 갈린다 */}
+        <nav aria-label="정책" className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-4 text-[14px] font-bold sm:px-6">
+          {[
+            { href: "/privacy", label: "개인정보처리방침" },
+            { href: "/account#delete", label: "계정 삭제" },
+          ].map((l, i) => (
+            <span key={l.href} className="flex items-center gap-3">
+              {i > 0 && (
+                <span aria-hidden className="text-ink/40">
+                  ·
+                </span>
+              )}
+              <Link
+                href={l.href}
+                className="-mx-1 rounded-md px-1 py-1 underline decoration-ink/30 decoration-2 underline-offset-4 transition-colors hover:bg-surface/60 hover:decoration-ink"
+              >
+                {l.label}
+              </Link>
+            </span>
+          ))}
         </nav>
       </div>
     </footer>
