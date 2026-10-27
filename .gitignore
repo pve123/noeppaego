@@ -45,3 +45,14 @@ next-env.d.ts
 
 # IDE
 .idea/
+
+# 안드로이드 앱(TWA) — 프로젝트 원본만 올리고 빌드 결과물은 뺀다. 서명 키는 저장소 밖(~/keys)에 둔다.
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/local.properties
+/android/*.aab
+/android/*.apk
+/android/*.idsig
+*.keystore
+*.jks
