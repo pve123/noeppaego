@@ -9,6 +9,7 @@ import { planItinerary as handle, type ItineraryView, type PlanItinerary } from 
 import { randomId } from "@/shared/db/random-id";
 import {
   findSavedItinerary as findSaved,
+  forgetItinerariesOf as forget,
   listFavorites as listFavs,
   saveItinerary as save,
   toggleFavorite as toggle,
@@ -64,6 +65,8 @@ export async function saveItinerary(
 export const findSavedItinerary = (query: { id: string; viewerId?: string }) => findSaved(query, saved);
 export const listFavorites = (userId: string) => listFavs(userId, saved);
 export const toggleFavorite = (command: { userId: string; itineraryId: string; favorite: boolean }) => toggle(command, saved);
+/** 탈퇴 — 계정을 지우기 전에 부른다(일정이 사용자를 가리키는 외래키라) */
+export const forgetItinerariesOf = (userId: string) => forget(userId, saved);
 
 export type { DayView, ItineraryView, PlaceView, SlotView, WeatherView } from "./application/plan-itinerary";
 export type { FavoriteView, SavedItineraryView } from "./application/saved-itineraries";

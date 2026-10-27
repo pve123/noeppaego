@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FavoriteEntry, MAX_SNAPSHOT_BYTES, SavedItinerary, SavedItineraryRepository } from "../domain/saved-itinerary";
-import { findSavedItinerary, ItinerarySnapshot, listFavorites, saveItinerary, toggleFavorite } from "./saved-itineraries";
+import { findSavedItinerary, forgetItinerariesOf, ItinerarySnapshot, listFavorites, saveItinerary, toggleFavorite } from "./saved-itineraries";
 
 class MemoryRepository implements SavedItineraryRepository {
   items = new Map<string, SavedItinerary>();
@@ -26,6 +26,11 @@ class MemoryRepository implements SavedItineraryRepository {
       .filter((f) => f.userId === userId)
       .sort((a, b) => b.at - a.at)
       .map((f) => ({ itinerary: this.items.get(f.itineraryId)!, favoritedAt: new Date(f.at) }));
+  }
+  async deleteAllOf(userId: string) {
+    const mine = new Set([...this.items.values()].filter((it) => it.ownerId === userId).map((it) => it.id));
+    this.favs = this.favs.filter((f) => f.userId !== userId && !mine.has(f.itineraryId));
+    for (const id of mine) this.items.delete(id);
   }
 }
 
@@ -95,5 +100,22 @@ describe("저장한 일정 보기(Query)", () => {
     const list = await listFavorites("u1", repo);
     expect(list.map((f) => f.title)).toEqual(["부산광역시 해운대구 2박 3일", "경기도 파주시 2박 3일"]);
     expect(list[0].period).toBe("2026.12.25(금)부터 2026.12.27(일)까지");
+  });
+});
+
+describe("탈퇴(Command)", () => {
+  it("내가 저장한 일정과 내 찜, 남이 내 일정에 한 찜까지 지우고 남의 일정은 그대로 둔다", async () => {
+    const repo = new MemoryRepository();
+    const mine = await save(repo, "u1");
+    const theirs = await save(repo, "u2");
+    await toggleFavorite({ userId: "u1", itineraryId: theirs, favorite: true }, repo);
+    await toggleFavorite({ userId: "u2", itineraryId: mine, favorite: true }, repo);
+
+    await forgetItinerariesOf("u1", repo);
+
+    expect(await repo.find(mine)).toBeUndefined();
+    expect(await repo.find(theirs)).toBeDefined();
+    expect(await listFavorites("u1", repo)).toEqual([]);
+    expect((await listFavorites("u2", repo)).map((f) => f.id)).toEqual([theirs]);
   });
 });

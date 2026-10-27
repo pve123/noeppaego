@@ -49,6 +49,14 @@ export async function toggleFavorite(
   return true;
 }
 
+/**
+ * 탈퇴한 사람의 일정 지우기 — 저장한 일정은 공유 링크도 함께 사라진다(다른 사람이 찜해 뒀어도).
+ * 일정에는 개인 정보가 없지만, 탈퇴하면 남기지 않는 쪽이 사용자가 기대하는 것이다.
+ */
+export async function forgetItinerariesOf(userId: string, repository: SavedItineraryRepository): Promise<void> {
+  await repository.deleteAllOf(userId);
+}
+
 // ── Query ────────────────────────────────────────────
 
 export type SavedItineraryView = ItinerarySnapshot & {
@@ -92,6 +100,8 @@ export type FavoriteView = {
   /** 「2026.12.25(금)부터 2026.12.27(일)까지」 */
   period: string;
   savedOn: string;
+  /** 내가 저장한 일정인지 — 탈퇴하면 공유 링크까지 사라지는 일정 */
+  mine: boolean;
 };
 
 export async function listFavorites(userId: string, repository: SavedItineraryRepository): Promise<FavoriteView[]> {
@@ -103,6 +113,7 @@ export async function listFavorites(userId: string, repository: SavedItineraryRe
       title: `${plan.regionName} ${plan.lengthLabel}`,
       period: rangeText(plan.startLabel, plan.endLabel),
       savedOn: kstDate(itinerary.createdAt),
+      mine: itinerary.ownerId === userId,
     };
   });
 }

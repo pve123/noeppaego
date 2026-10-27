@@ -14,7 +14,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
       <Link href="/" className="flex items-center gap-2.5">
         <Logo size={40} />
-        <span className="font-display text-[22px]">연휴 여행 플래너</span>
+        <span className="whitespace-nowrap font-display text-[19px] sm:text-[22px]">연휴 여행 플래너</span>
       </Link>
       <nav aria-label="주 메뉴" className="flex items-center gap-1">
         <Link href="/#breaks" className="hidden rounded-full px-3 py-2 font-display text-[17px] hover:bg-yellow sm:inline-block">
@@ -75,6 +75,16 @@ export function SiteFooter() {
             ))}
           </ul>
         </div>
+      </div>
+      <div className="border-t-2 border-ink/15">
+        <nav aria-label="정책" className="mx-auto flex max-w-6xl flex-wrap gap-x-5 gap-y-1 px-4 py-4 text-[14px] sm:px-6">
+          <Link href="/privacy" className="font-bold hover:underline">
+            개인정보처리방침
+          </Link>
+          <Link href="/account#delete" className="hover:underline">
+            계정 삭제
+          </Link>
+        </nav>
       </div>
     </footer>
   );

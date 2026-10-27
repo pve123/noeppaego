@@ -38,4 +38,6 @@ export interface SavedItineraryRepository {
   isFavorite(userId: string, itineraryId: string): Promise<boolean>;
   /** 찜한 순서 거꾸로(최근 것부터) */
   listFavorites(userId: string): Promise<FavoriteEntry[]>;
+  /** 탈퇴 — 이 사람이 저장한 일정(다른 사람이 그 일정에 한 찜까지)과 이 사람의 찜을 한꺼번에 지운다 */
+  deleteAllOf(userId: string): Promise<void>;
 }

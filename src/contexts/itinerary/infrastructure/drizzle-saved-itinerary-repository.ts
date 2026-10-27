@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { db } from "@/shared/db/client";
 import { favorites, savedItineraries } from "@/shared/db/schema";
 import { FavoriteEntry, SavedItinerary, SavedItineraryRepository } from "../domain/saved-itinerary";
@@ -58,5 +58,14 @@ export class DrizzleSavedItineraryRepository implements SavedItineraryRepository
       .orderBy(desc(favorites.createdAt))
       .limit(100);
     return rows.map((r) => ({ itinerary: toDomain(r.it), favoritedAt: r.favoritedAt }));
+  }
+
+  async deleteAllOf(userId: string): Promise<void> {
+    // 찜이 일정을 가리키는 외래키라 찜부터 — 중간에 실패하면 아무것도 지우지 않게 한 트랜잭션으로
+    await db().transaction(async (tx) => {
+      const mine = tx.select({ id: savedItineraries.id }).from(savedItineraries).where(eq(savedItineraries.ownerId, userId));
+      await tx.delete(favorites).where(or(eq(favorites.userId, userId), inArray(favorites.itineraryId, mine)));
+      await tx.delete(savedItineraries).where(eq(savedItineraries.ownerId, userId));
+    });
   }
 }

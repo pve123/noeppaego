@@ -11,6 +11,9 @@ class MemoryUsers implements UserRepository {
     if (!user) this.users.push((user = { id: `u${this.users.length + 1}`, kakaoId }));
     return user;
   }
+  async delete(id: string) {
+    this.users = this.users.filter((u) => u.id !== id);
+  }
 }
 
 const command = { code: "c", redirectUri: "http://localhost:3000/api/auth/kakao/callback" };
