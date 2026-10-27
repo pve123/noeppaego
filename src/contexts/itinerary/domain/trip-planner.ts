@@ -26,7 +26,16 @@ export type Meal = {
   /** 사용자가 직접 골랐다 */
   readonly picked?: boolean;
 };
-export type Stay = { readonly time: "night"; readonly kind: "stay"; readonly near: Coordinate; readonly choice?: Place };
+export type Stay = {
+  readonly time: "night";
+  readonly kind: "stay";
+  readonly near: Coordinate;
+  readonly choice?: Place;
+  /** 사용자가 고른 숙소 */
+  readonly picked?: boolean;
+  /** 바꿀 후보 — 같은 기준으로 그다음 숙소 */
+  readonly alternatives?: readonly Place[];
+};
 export type Home = { readonly time: "home"; readonly kind: "home" };
 export type Slot = Visit | Meal | Stay | Home;
 export type SlotTime = Slot["time"];
@@ -186,14 +195,47 @@ export function fillMeals(
   }));
 }
 
-/** 숙소는 첫 밤 근처 한 곳으로 정해 매일 같은 곳에 묵는다 — 짐 싸서 옮기지 않는다. */
-export function fillStays(days: readonly TripDay[], lodgings: readonly Place[]): TripDay[] {
+/** 첫 밤 장소에서 이 안의 숙소만 종류로 고른다 — 더 먼 호텔보다 가까운 펜션이 낫다 */
+const STAY_REACH_KM = 15;
+/** 숙소 칸에 보여 줄 바꿀 후보 수 */
+const STAY_ALTERNATIVES = 2;
+/** rank 가 없는 숙소는 가운데로 본다 */
+const MIDDLE_RANK = 2;
+
+/** 숙소 칸 키 — 연휴 내내 한 곳에 묵으니 첫 밤 칸 하나로 고른다 */
+export function stayKeyOf(days: readonly TripDay[]): string | undefined {
+  const day = days.find((d) => d.slots.some((s) => s.kind === "stay"));
+  return day && slotKeyOf(day.date, "night");
+}
+
+/**
+ * 숙소는 첫 밤 근처 한 곳으로 정해 매일 같은 곳에 묵는다 — 짐 싸서 옮기지 않는다.
+ * 첫 밤 장소에서 STAY_REACH_KM 안이면 종류(rank: 호텔·한옥 → 펜션 → 그 밖 → 모텔) 다음 거리 순, 하나도 없으면 가장 가까운 곳.
+ * 사용자가 고른 숙소(picks 의 첫 밤 칸)는 그대로 둔다.
+ */
+export function fillStays(days: readonly TripDay[], lodgings: readonly Place[], picks: Picks = new Map()): TripDay[] {
   const firstNight = days.flatMap((d) => d.slots).find((s): s is Stay => s.kind === "stay");
-  const choice = firstNight ? nearest(lodgings, firstNight.near) : undefined;
+  const key = stayKeyOf(days);
+  const pickedId = key ? picks.get(key) : undefined;
+  const ordered = firstNight ? rankStays(lodgings, firstNight.near) : [...lodgings];
+  const picked = ordered.find((p) => p.id === pickedId);
+  const choice = picked ?? ordered[0];
+  const alternatives = ordered.filter((p) => p !== choice && p.title !== choice?.title).slice(0, STAY_ALTERNATIVES);
   return days.map((day) => ({
     ...day,
-    slots: day.slots.map((slot) => (slot.kind === "stay" ? { ...slot, choice } : slot)),
+    slots: day.slots.map((slot) =>
+      slot.kind === "stay" ? { ...slot, choice, picked: picked ? true : undefined, alternatives } : slot,
+    ),
   }));
+}
+
+function rankStays(lodgings: readonly Place[], from: Coordinate): Place[] {
+  const byDistance = sortByDistance(lodgings, from);
+  const reachable = byDistance.filter((p) => from.distanceKm(p.location) <= STAY_REACH_KM);
+  if (reachable.length === 0) return byDistance;
+  // 정렬은 안정적이라 같은 종류끼리는 가까운 순이 남는다. 멀리 있는 곳은 뒤에 붙여 후보로만 쓴다.
+  const ranked = [...reachable].sort((a, b) => (a.rank ?? MIDDLE_RANK) - (b.rank ?? MIDDLE_RANK));
+  return [...ranked, ...byDistance.filter((p) => !reachable.includes(p))];
 }
 
 function nearest(places: readonly Place[], from: Coordinate | undefined): Place | undefined {

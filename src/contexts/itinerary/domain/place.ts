@@ -17,6 +17,8 @@ export type Place = {
   readonly category?: string;
   /** 실내 — 비 오는 날 바꿔 끼울 후보(3차 날씨 반영) */
   readonly indoor: boolean;
+  /** 숙소를 고르는 순서 — 작을수록 먼저(호텔·한옥 0 … 모텔 3). 없으면 가운데로 본다 */
+  readonly rank?: number;
   /** 축제 기간(YYYY-MM-DD) */
   readonly period?: { readonly start: string; readonly end: string };
 };

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { Place } from "./place";
-import { draftTrip, fillMeals, fillStays, layoutOf, mealsOf, slotKeyOf, TripDay } from "./trip-planner";
+import { draftTrip, fillMeals, fillStays, layoutOf, mealsOf, slotKeyOf, stayKeyOf, TripDay } from "./trip-planner";
 
 // 경도 0.01 ≈ 0.9km — x 값으로 동서 위치만 다르게 둔다.
 const at = (x: number) => new Coordinate(37.7, 126.7 + x * 0.01);
@@ -164,5 +164,27 @@ describe("사용자가 고른 곳(picks)", () => {
     const [lunch, dinner] = mealsOf(fillMeals(days, [shared, shared], 2, picks));
     expect(lunch.choice?.id).toBe("파스타");
     expect(dinner.choice?.id).toBe("국밥");
+  });
+});
+
+describe("fillStays — 종류와 바꾸기", () => {
+  const days = () =>
+    draftTrip(["2026-12-25", "2026-12-26", "2026-12-27"], [place("A", 0), place("B", 1), place("C", 2), place("D", 3)], []);
+  const lodging = (id: string, x: number, rank: number) => place(id, x, { kind: "lodging", rank });
+  const stays = (filled: TripDay[]) => filled.flatMap((d) => d.slots).filter((s) => s.kind === "stay");
+
+  it("15km 안이면 가까운 모텔보다 조금 먼 호텔을 먼저 고르고, 다음 후보 둘을 바꾸기로 준다", () => {
+    const filled = fillStays(days(), [lodging("모텔", 0.3, 3), lodging("호텔", 4, 0), lodging("펜션", 2, 1), lodging("한옥", 6, 0)]);
+    const [first] = stays(filled);
+    expect(first.kind === "stay" && first.choice?.id).toBe("호텔");
+    expect(first.kind === "stay" && first.alternatives?.map((p) => p.id)).toEqual(["한옥", "펜션"]);
+  });
+
+  it("고른 숙소는 첫 밤 칸 키 하나로 모든 밤에 그대로 둔다", () => {
+    const d = days();
+    const key = stayKeyOf(d)!;
+    expect(key).toBe(slotKeyOf("2026-12-25", "night"));
+    const filled = fillStays(d, [lodging("모텔", 0.3, 3), lodging("호텔", 4, 0)], new Map([[key, "모텔"]]));
+    expect(stays(filled).every((s) => s.kind === "stay" && s.choice?.id === "모텔" && s.picked)).toBe(true);
   });
 });
