@@ -24,8 +24,8 @@ def twaManifest = [
     applicationId: 'com.hosunglee.holidaytrip',
     hostName: 'holiday-trip.vercel.app', // The domain being opened in the TWA.
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
-    name: '연휴 여행 플래너', // The application name.
-    launcherName: '연휴 여행', // The name shown on the Android Launcher.
+    name: '계획은 J가', // The application name.
+    launcherName: '계획은 J가', // The name shown on the Android Launcher.
     themeColor: '#FFFBEA', // The color used for the status bar.
     themeColorDark: '#000000', // The color used for the dark status bar.
     navigationColor: '#FFFBEA', // The color used for the navigation bar.
