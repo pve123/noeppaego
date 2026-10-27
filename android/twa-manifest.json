@@ -1,8 +1,8 @@
 {
   "packageId": "com.hosunglee.holidaytrip",
   "host": "holiday-trip.vercel.app",
-  "name": "연휴 여행 플래너",
-  "launcherName": "연휴 여행",
+  "name": "계획은 J가",
+  "launcherName": "계획은 J가",
   "display": "standalone",
   "themeColor": "#FFFBEA",
   "themeColorDark": "#000000",
