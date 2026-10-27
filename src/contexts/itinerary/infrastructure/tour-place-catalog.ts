@@ -12,6 +12,7 @@ import {
   type TourItem,
 } from "@/shared/tour-api/tour-api";
 import { Place, PlaceCatalog, PlaceKind } from "../domain/place";
+import { lodgingTypeOf } from "./lodging-types";
 
 /** 관광공사 지역 조회로 장소를 고른다. 한 지역 볼거리는 관광지 40 + 문화시설 20 곳이면 3일 일정에 넉넉하다. */
 export class TourPlaceCatalog implements PlaceCatalog {
@@ -40,8 +41,12 @@ export class TourPlaceCatalog implements PlaceCatalog {
     });
   }
 
+  /** 그 지역 숙소 — 분류로 고르는 순서와 종류(호텔·한옥·모텔 …)를 붙인다. 고를 몫이 넉넉하게 40곳 */
   async lodgingsIn(regionCode: string): Promise<Place[]> {
-    return toPlaces(unwrap(await fetchAreaItems(regionCode, ContentType.lodging, 20)), "lodging");
+    return unwrap(await fetchAreaItems(regionCode, ContentType.lodging, 40)).flatMap((item) => {
+      const type = lodgingTypeOf(item.lclsSystm3);
+      return toPlaces([item], "lodging", type.label).map((p) => ({ ...p, rank: type.rank }));
+    });
   }
 }
 

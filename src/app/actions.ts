@@ -8,7 +8,7 @@ import { currentUserId, endSession } from "@/shared/auth/session";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const REGION_CODE = /^\d+(-\d+)?$/;
-const PICK_KEY = /^\d{4}-\d{2}-\d{2}-(?:morning|lunch|afternoon|dinner)$/;
+const PICK_KEY = /^\d{4}-\d{2}-\d{2}-(?:morning|lunch|afternoon|dinner|night)$/;
 const PICK_ID = /^[\w:.-]{1,80}$/;
 
 const loginFirst = (back: string) => redirect(`/api/auth/kakao?next=${encodeURIComponent(back)}`);

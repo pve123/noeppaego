@@ -6,6 +6,7 @@ import {
   draftTrip,
   fillMeals,
   fillStays,
+  stayKeyOf,
   MAX_TRIP_DAYS,
   mealsOf,
   slotKeyOf,
@@ -132,12 +133,13 @@ export async function planItinerary(
   );
 
   const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
-  const days = fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings);
+  const days = fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks);
+  const stayKey = stayKeyOf(days);
   const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
 
   return {
     regionName,
-    customized: days.some((d) => d.slots.some((s) => (s.kind === "visit" || s.kind === "meal") && s.picked)),
+    customized: days.some((d) => d.slots.some((s) => (s.kind === "visit" || s.kind === "meal" || s.kind === "stay") && s.picked)),
     lengthLabel: dates.length === 1 ? "당일치기" : `${dates.length - 1}박 ${dates.length}일`,
     startLabel: dateLabel(dates[0]),
     endLabel: dateLabel(dates.at(-1)!),
@@ -173,7 +175,11 @@ export async function planItinerary(
           case "stay":
             return {
               ...base,
+              // 연휴 내내 같은 숙소라 어느 밤에서 바꿔도 첫 밤 칸 하나로 고른다
+              key: stayKey ?? base.key,
               place: slot.choice && placeView(slot.choice),
+              picked: slot.picked,
+              alternatives: (slot.alternatives ?? []).map(placeView),
               note: slot.choice ? undefined : "이 지역에 등록된 숙소가 없어요",
             };
           case "home":
