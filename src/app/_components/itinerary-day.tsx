@@ -8,6 +8,38 @@ import { ZoomableImage } from "./zoomable-image";
 export const DAY_TONES: MapPin["tone"][] = ["yellow", "mint", "coral"];
 const DAY_BG = { yellow: "bg-yellow", mint: "bg-mint", coral: "bg-coral", lavender: "bg-lavender", ink: "bg-ink" };
 
+/**
+ * 앞 장소에서 오는 길 — 카드 사이를 점선으로 잇고 그 위에 「🚗 약 12분」 알약. 차 아이콘 바탕은 그날 색.
+ * 지금은 늘 「차로 약 N분」이지만, 예전에 저장한 일정에는 「직선 1.2km」가 남아 있을 수 있어 그때는 거리 아이콘으로 그린다.
+ */
+function TravelLeg({ label, tone }: { label: string; tone: MapPin["tone"] }) {
+  const byCar = label.startsWith("차로 ");
+  const text = byCar ? label.slice(3) : label;
+  return (
+    <div className="mb-1.5 flex items-center gap-2.5 pl-7">
+      <span aria-hidden className="h-9 border-l-[3px] border-dashed border-ink/25" />
+      <p className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink/15 bg-surface py-0.5 pl-0.5 pr-3 text-[13px] font-bold tabular-nums text-ink/80">
+        <span aria-hidden className={`flex size-7 items-center justify-center rounded-full border-2 border-ink ${DAY_BG[tone]}`}>
+          {byCar ? (
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 16v-3.5l2-4.5h9l3.5 4.5H20a1 1 0 0 1 1 1V16" />
+              <path d="M5.5 12.5h12" />
+              <circle cx="7" cy="16.5" r="1.8" fill="currentColor" />
+              <circle cx="17" cy="16.5" r="1.8" fill="currentColor" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <path d="M5 19L19 5" strokeDasharray="3 3" />
+            </svg>
+          )}
+        </span>
+        {byCar && <span className="sr-only">다음 장소까지 차로</span>}
+        {text}
+      </p>
+    </div>
+  );
+}
+
 /** 칸 하나를 바꾸는(placeId 가 없으면 되돌리는) 주소 */
 export type HrefFor = (slotKey: string, placeId?: string) => string;
 
@@ -40,12 +72,7 @@ export function ItineraryDay({
       <ol className="mt-5 space-y-3">
         {day.slots.map((slot) => (
           <li key={slot.key}>
-            {slot.travelLabel && (
-              <p className="mb-2 ml-4 flex items-center gap-1.5 text-sm text-muted">
-                <span aria-hidden className="h-4 w-[2.5px] rounded bg-ink/30" />
-                {slot.travelLabel}
-              </p>
-            )}
+            {slot.travelLabel && <TravelLeg label={slot.travelLabel} tone={tone} />}
             <SlotCard slot={slot} hrefFor={hrefFor} />
           </li>
         ))}

@@ -1,4 +1,4 @@
-import { durationLabel } from "@/shared/kernel/duration";
+import { durationLabel, estimateDriveMinutes } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
 import { DriveTimes, Place, PlaceCatalog, RestaurantFinder } from "../domain/place";
@@ -54,7 +54,7 @@ export type SlotView = {
   alternatives: PlaceView[];
   /** 장소가 없을 때 안내 */
   note?: string;
-  /** 같은 날 앞 장소에서 오는 길 — 「차로 약 12분」, 길찾기를 못 하면 「직선 1.2km」 */
+  /** 같은 날 앞 장소에서 오는 길 — 「차로 약 12분」. 길찾기를 못 하면 직선 거리로 어림한 같은 모양(예전에 저장한 일정은 「직선 1.2km」일 수 있다) */
   travelLabel?: string;
   /** 비 소식이 있어 실내 장소로 골랐다 */
   forRain?: boolean;
@@ -215,10 +215,10 @@ async function travelLabels(
       return Promise.all(
         legs.map(async (leg) => {
           if (!leg) return undefined;
-          const minutes = await driveTimes.minutes(leg.from.location, leg.to.location);
-          return minutes === undefined
-            ? `직선 ${leg.from.location.distanceKm(leg.to.location).toFixed(1)}km`
-            : `차로 ${durationLabel(minutes)}`;
+          const minutes =
+            (await driveTimes.minutes(leg.from.location, leg.to.location)) ??
+            estimateDriveMinutes(leg.from.location.distanceKm(leg.to.location));
+          return `차로 ${durationLabel(minutes)}`;
         }),
       );
     }),
