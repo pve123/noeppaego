@@ -40,9 +40,9 @@ export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextY
 function MonthGroups({ breaks }: { breaks: LongBreakView[] }) {
   return (
     <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {breaks.map((item, i) => (
+      {breaks.map((item) => (
         <li key={item.key} className="min-w-0">
-          <BreakCard item={item} colorIndex={i} />
+          <BreakCard item={item} />
         </li>
       ))}
     </ul>

@@ -24,7 +24,7 @@ export function Hero() {
         <div className="relative aspect-square w-[min(100%,400px)]">
           <div className="absolute inset-[6%] rounded-full border-[3px] border-ink bg-yellow" />
           <svg viewBox="0 0 200 200" className="absolute inset-0 size-full" aria-hidden="true">
-            <path d="M24 150 C 60 128, 84 160, 116 138 S 164 126, 180 96" fill="none" stroke="#22223B" strokeWidth="3" strokeDasharray="6 6" strokeLinecap="round" />
+            <path d="M24 162 C 60 174, 110 172, 140 158 S 174 126, 176 104" fill="none" stroke="#22223B" strokeWidth="3" strokeDasharray="6 6" strokeLinecap="round" />
             <rect x="58" y="62" width="84" height="80" rx="14" fill="#FFFFFF" stroke="#22223B" strokeWidth="4" />
             <path d="M58 88 h84" stroke="#22223B" strokeWidth="4" />
             <rect x="58" y="62" width="84" height="26" rx="14" fill="#FF6B6B" stroke="#22223B" strokeWidth="4" />
