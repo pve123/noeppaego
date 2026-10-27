@@ -5,8 +5,8 @@ import { PageBand } from "../_components/page-band";
 import { SiteFooter, SiteHeader } from "../_components/site-header";
 
 export const metadata: Metadata = {
-  title: "개인정보처리방침 | 연휴 여행 플래너",
-  description: "연휴 여행 플래너가 어떤 정보를 왜 받고, 언제 지우는지 알려 드려요.",
+  title: "개인정보처리방침 | 계획은 J가",
+  description: "어떤 정보를 왜 받고, 언제 지우는지 알려 드려요.",
 };
 
 /** 시행일 — 내용을 바꾸면 날짜도 바꾸고 「바뀐 내용」에 한 줄 남긴다 */
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
 
           <div className="mt-10 flex flex-col gap-10 text-[16px] leading-[1.8]">
             <Section n={1}>
-              <p>연휴 여행 플래너(이하 「서비스」)는 일정을 저장하고 찜하는 기능을 쓰려고 카카오로 로그인할 때만 아래 정보를 받아요.</p>
+              <p>계획은 J가(이하 「서비스」)는 일정을 저장하고 찜하는 기능을 쓰려고 카카오로 로그인할 때만 아래 정보를 받아요.</p>
               <Table
                 head={["정보", "언제", "필수"]}
                 rows={[
@@ -132,7 +132,7 @@ export default function PrivacyPage() {
                 <b>남는 것:</b> 없어요. 접속 기록만 위 보관 기간 동안 남았다가 지워져요.
               </p>
               <p>
-                카카오 쪽 연결까지 끊으려면 카카오계정 설정의 「연결된 서비스 관리」에서 「연휴 여행 플래너」를 지워 주세요. 로그인할 수 없어 탈퇴하지 못하는 경우에는{" "}
+                카카오 쪽 연결까지 끊으려면 카카오계정 설정의 「연결된 서비스 관리」에서 「계획은 J가」를 지워 주세요. 로그인할 수 없어 탈퇴하지 못하는 경우에는{" "}
                 <a href={`mailto:${CONTACT_EMAIL}`} className="font-bold underline underline-offset-4">
                   {CONTACT_EMAIL}
                 </a>

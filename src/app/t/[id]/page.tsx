@@ -20,17 +20,17 @@ import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-heade
 export async function generateMetadata({ params }: PageProps<"/t/[id]">): Promise<Metadata> {
   const { id } = await params;
   const view = await findSavedItinerary({ id });
-  if (!view) return { title: "공유받은 일정 | 연휴 여행 플래너", robots: { index: false } };
+  if (!view) return { title: "공유받은 일정 | 계획은 J가", robots: { index: false } };
 
   const { plan } = view;
   const title = `${plan.regionName} ${plan.lengthLabel} · ${view.breakTitle} 연휴`;
   const places = plan.days.flatMap((d) => d.slots).filter((s) => s.place).length;
   const description = `${rangeText(plan.startLabel, plan.endLabel)} 일정이에요. 갈 곳과 맛집 ${places}곳을 날마다 정리했어요.`;
   return {
-    title: `${title} | 연휴 여행 플래너`,
+    title: `${title} | 계획은 J가`,
     description,
     robots: { index: false },
-    openGraph: { title, description, locale: "ko_KR", type: "article", siteName: "연휴 여행 플래너" },
+    openGraph: { title, description, locale: "ko_KR", type: "article", siteName: "계획은 J가" },
     twitter: { card: "summary_large_image", title, description },
   };
 }

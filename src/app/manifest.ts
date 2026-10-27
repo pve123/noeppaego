@@ -7,8 +7,8 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "연휴 여행 플래너",
-    short_name: "연휴 여행",
+    name: "계획은 J가",
+    short_name: "계획은 J가",
     description: "공휴일과 주말을 이어서 연차는 적게 쓰고 오래 쉬는 날을 찾아 드려요.",
     lang: "ko",
     start_url: "/",
