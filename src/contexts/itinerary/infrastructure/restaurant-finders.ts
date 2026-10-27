@@ -3,6 +3,7 @@ import { cacheLife } from "next/cache";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { ContentType, fetchNearbyItems } from "@/shared/tour-api/tour-api";
 import { Place, RestaurantFinder } from "../domain/place";
+import { isChainBranch, isMeal } from "./restaurant-filters";
 import { toPlaces } from "./tour-place-catalog";
 
 const RADIUS_M = 2_000;
@@ -46,10 +47,12 @@ type KakaoPlace = {
 type KakaoResult = { ok: true; places: KakaoPlace[] } | { ok: false };
 
 /**
- * 카카오 로컬 카테고리 검색(음식점 FD6) — 거리순. 키(KAKAO_REST_API_KEY)는 서버에서만 쓴다.
+ * 카카오 로컬 음식점(FD6) 검색. 키(KAKAO_REST_API_KEY)는 서버에서만 쓴다.
+ * - `popular`: 「맛집」 키워드·정확도순 — 카카오가 많이 찾는 곳을 위로 올린다
+ * - `nearby`: 분류 검색·거리순 — 맛집 결과가 모자랄 때 채운다
  * 카카오 장소 정보는 오래 쌓아 두지 않는다 — 몇 시간만 캐시. 실패는 몇 초만.
  */
-async function searchKakaoRestaurants(lat: number, lng: number, size: number): Promise<KakaoResult> {
+async function searchKakaoRestaurants(lat: number, lng: number, by: "popular" | "nearby"): Promise<KakaoResult> {
   "use cache";
   const key = process.env.KAKAO_REST_API_KEY;
   if (!key) {
@@ -57,13 +60,14 @@ async function searchKakaoRestaurants(lat: number, lng: number, size: number): P
     return { ok: false };
   }
 
-  const url = new URL("https://dapi.kakao.com/v2/local/search/category.json");
+  const url = new URL(`https://dapi.kakao.com/v2/local/search/${by === "popular" ? "keyword" : "category"}.json`);
+  if (by === "popular") url.searchParams.set("query", "맛집");
   url.searchParams.set("category_group_code", "FD6");
   url.searchParams.set("x", String(lng));
   url.searchParams.set("y", String(lat));
   url.searchParams.set("radius", String(RADIUS_M));
-  url.searchParams.set("sort", "distance");
-  url.searchParams.set("size", String(Math.min(size, 15)));
+  url.searchParams.set("sort", by === "popular" ? "accuracy" : "distance");
+  url.searchParams.set("size", "15");
 
   try {
     const res = await fetch(url, { headers: { Authorization: `KakaoAK ${key}` }, signal: AbortSignal.timeout(5_000) });
@@ -82,19 +86,33 @@ async function searchKakaoRestaurants(lat: number, lng: number, size: number): P
   }
 }
 
-/** 카카오 분류(「음식점 > 간식 > 제과,베이커리」)에 이 말이 있으면 끼니가 아니다 */
-const NOT_A_MEAL = ["간식", "술집", "카페"];
+/** 맛집 결과가 이보다 적으면 가까운 식당으로 채운다 — 고를 곳 하나 + 바꿀 후보 둘 + 여유 하나 */
+const ENOUGH = 4;
 
 export class KakaoRestaurantFinder implements RestaurantFinder {
   /** 카카오가 실패하면 쓸 다른 방법 */
   constructor(private readonly fallback: RestaurantFinder) {}
 
+  /**
+   * 많이 찾는 집부터, 끼니가 아닌 곳(빵집·디저트·술집·카페)과 체인 지점은 빼고 넘긴다.
+   * 그중 어디를 고를지는 도메인(fillMeals)이 식사 칸에서 가까운 순으로 정한다 — 「많이 찾는 집 중 가까운 곳」.
+   * 거르고 나서 하나도 없으면 거르기 전 목록을 쓴다(식사 칸을 비우지 않는다).
+   */
   async near(at: Coordinate, limit: number): Promise<Place[]> {
-    // 빵집·디저트(간식)와 술집은 끼니로 고르지 않는다 — 걸러질 몫까지 넉넉히 받는다.
-    const result = await searchKakaoRestaurants(at.lat, at.lng, 15);
-    if (!result.ok) return this.fallback.near(at, limit);
-    return result.places
-      .filter((p) => !NOT_A_MEAL.some((word) => p.category_name.includes(word)))
+    const popular = await searchKakaoRestaurants(at.lat, at.lng, "popular");
+    if (!popular.ok) return this.fallback.near(at, limit);
+
+    const meals = popular.places.filter((p) => isMeal(p.category_name));
+    let picks = meals.filter((p) => !isChainBranch(p.place_name));
+    if (picks.length < ENOUGH) {
+      const nearby = await searchKakaoRestaurants(at.lat, at.lng, "nearby");
+      const seen = new Set(picks.map((p) => p.id));
+      const more = nearby.ok ? nearby.places.filter((p) => isMeal(p.category_name) && !isChainBranch(p.place_name) && !seen.has(p.id)) : [];
+      picks = [...picks, ...more];
+    }
+    if (picks.length === 0) picks = meals;
+
+    return picks
       .slice(0, limit)
       .map((p) => ({
       id: `kakao:${p.id}`,
