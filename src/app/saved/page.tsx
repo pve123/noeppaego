@@ -13,8 +13,6 @@ export const metadata: Metadata = {
   title: "찜한 일정 | 연휴 여행 플래너",
 };
 
-const BANDS = ["bg-yellow", "bg-mint", "bg-coral", "bg-lavender"];
-
 export default function SavedPage() {
   return (
     <>
@@ -62,9 +60,9 @@ async function Favorites() {
 
   return (
     <ul className="grid gap-5 md:grid-cols-2">
-      {favorites.map((f, i) => (
+      {favorites.map((f) => (
         <li key={f.id} className="flex flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop">
-          <Link href={`/t/${f.id}`} className={`border-b-[3px] border-ink px-5 py-3.5 ${BANDS[i % BANDS.length]}`}>
+          <Link href={`/t/${f.id}`} className="border-b-[3px] border-ink bg-mint px-5 py-3.5">
             <p className="text-sm font-bold">{f.breakTitle} 연휴</p>
             <p className="font-display text-[22px] leading-tight">{f.title}</p>
           </Link>
