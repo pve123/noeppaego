@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.hosunglee.holidaytrip",
+      "sha256_cert_fingerprints": [
+        "D0:C5:8C:D9:C4:CA:2C:7E:7C:38:A6:C2:F9:0C:72:5B:9D:92:21:FD:BD:40:10:B0:EC:79:72:60:EC:19:2D:56"
+      ]
+    }
+  }
+]
