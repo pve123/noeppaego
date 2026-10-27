@@ -59,9 +59,16 @@ describe("recommendDestinations", () => {
   });
 
   it("사흘 연휴는 제주를 빼고, 나흘 이상이면 넣는다", () => {
-    const jeju = [festival("제주", JEJU, "2026-12-01", "2027-01-31")];
+    const jeju = [festival("50-110", JEJU, "2026-12-01", "2027-01-31")];
     expect(codes(threeDays, jeju)).toEqual([]);
-    expect(codes(TravelWindow.of("2026-12-24", "2026-12-27"), jeju)).toEqual(["제주"]);
+    expect(codes(TravelWindow.of("2026-12-24", "2026-12-27"), jeju)).toEqual(["50-110"]);
+  });
+
+  it("남쪽 출발지에서 직선 400km 안이어도 사흘 연휴엔 제주를 뺀다", () => {
+    const GWANGJU = new Coordinate(35.1595, 126.8526); // 제주까지 약 180km
+    const jeju = [festival("50-110", JEJU, "2026-12-01", "2027-01-31")];
+    expect(recommendDestinations(jeju, threeDays, GWANGJU)).toEqual([]);
+    expect(recommendDestinations(jeju, TravelWindow.of("2026-12-24", "2026-12-27"), GWANGJU)).toHaveLength(1);
   });
 
   it("이틀 연휴는 150km 안만 — 강릉은 빠진다", () => {

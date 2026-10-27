@@ -22,6 +22,14 @@ export function reachKm(days: number): number {
   return Number.POSITIVE_INFINITY;
 }
 
+/**
+ * 제주는 비행기·배를 예약해야 해서 직선 거리와 상관없이 나흘 이상일 때만 — 광주에서 약 180km라 사흘 거리(400km)에 들어와 버린다.
+ * 코드는 법정동 시·도 코드(제주특별자치도 50).
+ */
+const JEJU_SIDO = "50";
+const JEJU_MIN_DAYS = 4;
+const isJeju = (code: string) => code.split("-")[0] === JEJU_SIDO;
+
 /** 출발지에서 이보다 가까운 곳은 여행지가 아니라 동네다 — 서울시청에서 서울 끝까지 약 15km. */
 export const MIN_DISTANCE_KM = 20;
 
@@ -55,6 +63,7 @@ export function recommendDestinations(
       ),
     }))
     .filter((d) => d.distanceKm >= MIN_DISTANCE_KM && d.distanceKm <= reach)
+    .filter((d) => window.days >= JEJU_MIN_DAYS || !isJeju(d.region.code))
     .sort(
       (a, b) =>
         b.festivals.length - a.festivals.length ||
