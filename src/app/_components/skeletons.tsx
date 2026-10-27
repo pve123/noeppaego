@@ -69,7 +69,7 @@ export function BreaksSkeleton() {
 export function DestinationsSkeleton() {
   return (
     <div aria-busy="true" aria-label="갈 곳을 찾는 중" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <LoadingStatus steps={["이 연휴에 열리는 축제를 찾는 중", "출발지에서 거리를 재는 중", "차로 걸리는 시간을 묻는 중"]} />
+      <LoadingStatus steps={["이 연휴에 열리는 축제를 찾는 중", "출발지에서 거리를 재는 중"]} />
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} aria-hidden className="overflow-hidden rounded-3xl border-[3px] border-ink/10 bg-surface">

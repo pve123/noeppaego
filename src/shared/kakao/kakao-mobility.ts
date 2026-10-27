@@ -48,7 +48,7 @@ async function fetchDriveMinutes(fromLat: number, fromLng: number, toLat: number
 const round = (n: number) => Math.round(n * 10_000) / 10_000;
 
 /**
- * destination·itinerary 의 DriveTimes 포트 구현(두 포트 모양이 같다).
+ * itinerary 의 DriveTimes 포트 구현.
  * 키가 없거나 실패하면 undefined — 화면은 직선 거리만 보여 준다.
  */
 export class KakaoDriveTimes {
