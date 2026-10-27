@@ -20,7 +20,7 @@ import { SourceError } from "../../../_components/source-error";
 import { Steps } from "../../../_components/steps";
 
 export const metadata: Metadata = {
-  title: "여행 일정 | 연휴 여행 플래너",
+  title: "여행 일정 | 계획은 J가",
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;

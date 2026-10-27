@@ -9,7 +9,7 @@ import { rangeText } from "@/shared/kernel/korean";
  * 글꼴은 그림에 쓰는 글자만 Google Fonts 에서 잘라 받는다(한글 글꼴 전체는 수 MB).
  * 일정을 못 찾거나 글꼴을 못 받으면 사이트 기본 미리보기(og.png)를 대신 보낸다.
  */
-export const alt = "연휴 여행 플래너에서 저장한 일정";
+export const alt = "계획은 J가에서 저장한 일정";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -31,7 +31,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     .map((t) => ([...t].length > 13 ? `${[...t].slice(0, 12).join("")}…` : t));
   const chip = `${view.breakTitle} 연휴`;
   const period = rangeText(plan.startLabel, plan.endLabel);
-  const brand = "연휴 여행 플래너";
+  const brand = "계획은 J가";
   const regionSize = [...plan.regionName].length > 8 ? 76 : 92;
 
   const font = await loadJua([chip, plan.regionName, plan.lengthLabel, period, brand, ...places, "…"].join(""));

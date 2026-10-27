@@ -18,10 +18,11 @@ const DESCRIPTION = "공휴일과 주말을 이어서 연차는 적게 쓰고 �
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://holiday-trip.vercel.app"),
-  title: "연휴 여행 플래너",
+  title: "계획은 J가",
   description: DESCRIPTION,
   openGraph: {
-    title: "연휴 여행 플래너",
+    title: "계획은 J가",
+    siteName: "계획은 J가",
     description: DESCRIPTION,
     locale: "ko_KR",
     type: "website",

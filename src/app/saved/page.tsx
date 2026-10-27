@@ -10,7 +10,7 @@ import { FavoritesSkeleton } from "../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
 
 export const metadata: Metadata = {
-  title: "찜한 일정 | 연휴 여행 플래너",
+  title: "찜한 일정 | 계획은 J가",
 };
 
 export default function SavedPage() {

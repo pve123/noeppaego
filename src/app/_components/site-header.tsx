@@ -4,6 +4,15 @@ import { Suspense } from "react";
 import { currentUser } from "@/shared/auth/session";
 import { AccountMenu, LoginNotice } from "./account-menu";
 
+/** 서비스 이름 — 「J」만 노랑으로 띄워 MBTI 의 J(계획형)가 눈에 들어오게 */
+function BrandName() {
+  return (
+    <>
+      계획은 <span className="rounded-lg bg-yellow px-1.5">J</span>가
+    </>
+  );
+}
+
 function Logo({ size }: { size: number }) {
   return <Image src="/logo.svg" alt="" width={size} height={size} unoptimized className="shrink-0" />;
 }
@@ -14,7 +23,9 @@ export function SiteHeader() {
       <div className="mx-auto flex h-[68px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
       <Link href="/" className="flex items-center gap-2.5">
         <Logo size={40} />
-        <span className="whitespace-nowrap font-display text-[19px] sm:text-[22px]">연휴 여행 플래너</span>
+        <span className="whitespace-nowrap font-display text-[20px] sm:text-[22px]">
+          <BrandName />
+        </span>
       </Link>
       <nav aria-label="주 메뉴" className="flex items-center gap-1">
         <Link href="/#breaks" className="hidden rounded-full px-3 py-2 font-display text-[17px] hover:bg-yellow sm:inline-block">
@@ -57,8 +68,10 @@ export function SiteFooter() {
         <div className="flex items-center gap-3">
           <Logo size={56} />
           <div>
-            <p className="font-display text-[26px] leading-tight">연휴 여행 플래너</p>
-            <p className="text-[15px]">즐거운 연휴 보내세요</p>
+            <p className="font-display text-[26px] leading-tight">
+              <BrandName />
+            </p>
+            <p className="text-[15px]">너 P야? 계획은 맡겨 주세요</p>
           </div>
         </div>
         <div className="w-full sm:w-auto">
