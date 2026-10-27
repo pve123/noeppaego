@@ -7,6 +7,8 @@ export type User = {
 /** 포트 — 처음 로그인하면 만든다 */
 export interface UserRepository {
   findOrCreateByKakaoId(kakaoId: number): Promise<User>;
+  /** 탈퇴 — 없으면 아무 일도 하지 않는다 */
+  delete(id: string): Promise<void>;
 }
 
 /** 카카오가 알려 준 사람 — 닉네임은 선택 동의라 없을 수 있다 */

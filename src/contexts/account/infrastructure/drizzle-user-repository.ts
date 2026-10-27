@@ -12,4 +12,8 @@ export class DrizzleUserRepository implements UserRepository {
     const [row] = await db().select().from(users).where(eq(users.kakaoId, kakaoId));
     return { id: row.id, kakaoId: row.kakaoId };
   }
+
+  async delete(id: string): Promise<void> {
+    await db().delete(users).where(eq(users.id, id));
+  }
 }
