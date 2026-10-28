@@ -152,14 +152,11 @@ export async function planItinerary(
     prefs,
   );
 
-  // 식사·카페 칸마다 근처 후보 — 그날 먹고 싶은 음식으로 찾고, 못 먹는 음식은 뺀다(mealsOf 와 같은 순서)
+  // 식사·카페 칸마다 근처 후보 — 그날 못 먹는 음식은 뺀다(mealsOf 와 같은 순서)
   const meals = draft.flatMap((d) => d.slots.filter((s): s is Meal => s.kind === "meal").map((meal) => ({ date: d.date, meal })));
   const candidates = await Promise.all(
     meals.map(async ({ date, meal }) => {
-      const found =
-        meal.time === "cafe"
-          ? await cafes.near(meal.near, MEAL_CANDIDATES)
-          : await restaurants.near(meal.near, MEAL_CANDIDATES, prefs.days?.[date]?.cuisine);
+      const found = await (meal.time === "cafe" ? cafes : restaurants).near(meal.near, MEAL_CANDIDATES);
       return fittingMeals(found, meal.time, prefs, date);
     }),
   );
@@ -209,7 +206,7 @@ export async function planItinerary(
                 ? undefined
                 : slot.time === "cafe"
                   ? "근처에 등록된 카페를 찾지 못했어요"
-                  : prefs.avoid?.length
+                  : prefs.days?.[day.date]?.avoid?.length
                     ? "못 먹는 음식을 빼니 근처에 맞는 식당이 없어요"
                     : "근처에 등록된 식당을 찾지 못했어요",
             };

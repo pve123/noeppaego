@@ -7,7 +7,6 @@ import type { TripPrefs } from "@/contexts/itinerary";
 import {
   AVOIDS,
   COMPANIONS,
-  CUISINES,
   DEFAULT_DESSERT,
   DESSERTS,
   INTERESTS,
@@ -15,7 +14,6 @@ import {
   parsePrefs,
   prefsEntries,
   prefsSummary,
-  STAYS,
   type Option,
 } from "./trip-prefs";
 
@@ -52,9 +50,7 @@ export function TripPrefsSheet({
       with: one("with"),
       pace: one("pace"),
       like: data.getAll("like").map(String),
-      avoid: data.getAll("avoid").map(String),
-      stay: one("stay"),
-      food: days.flatMap((d) => (one(`food-${d.date}`) ? [`${d.date}~${one(`food-${d.date}`)}`] : [])),
+      avoid: days.flatMap((d) => data.getAll(`avoid-${d.date}`).map((v) => `${d.date}~${v}`)),
       dessert: days.flatMap((d) => (one(`dessert-${d.date}`) ? [`${d.date}~${one(`dessert-${d.date}`)}`] : [])),
     });
   };
@@ -83,7 +79,7 @@ export function TripPrefsSheet({
         </p>
 
         <ul aria-label={chosen ? "고른 취향" : "고를 수 있는 것 예시"} className="mt-4 flex flex-wrap gap-1.5">
-          {(chosen ? summary : ["🧒 누구와", "🐢 속도", "🌿 좋아하는 것", "🍜 음식", "🍰 디저트", "🏠 숙소"]).map((s) => (
+          {(chosen ? summary : ["🧒 누구와", "🐢 속도", "🌿 좋아하는 것", "🚫 못 먹는 음식", "🍰 디저트"]).map((s) => (
             <li
               key={s}
               className={`rounded-full border-2 px-3 py-1 text-[13px] font-bold ${
@@ -180,21 +176,6 @@ export function TripPrefsSheet({
               ))}
             </Group>
 
-            <Group title="못 먹는 음식" hint="고르면 그 음식점은 빼요">
-              {AVOIDS.map((o) => (
-                <OptionChip key={o.value} type="checkbox" name="avoid" option={o} tone="coral" defaultChecked={prefs.avoid?.includes(o.value)} />
-              ))}
-            </Group>
-
-            <Group title="어떤 숙소가 좋아요?" hint="매일 같은 숙소에 묵어요">
-              <Chip type="radio" name="stay" value="" defaultChecked={!prefs.stay}>
-                상관없음
-              </Chip>
-              {STAYS.map((o) => (
-                <OptionChip key={o.value} type="radio" name="stay" option={o} defaultChecked={prefs.stay === o.value} />
-              ))}
-            </Group>
-
             <section aria-labelledby="prefs-days" className="space-y-4">
               <h3 id="prefs-days" className="font-display text-[19px]">
                 날마다 고르기
@@ -210,12 +191,16 @@ export function TripPrefsSheet({
                       <span className="font-display text-[15px] text-muted">{day.dateLabel}</span>
                     </p>
 
-                    <Group title="먹고 싶은 음식" small scroll>
-                      <Chip type="radio" name={`food-${day.date}`} value="" defaultChecked={!p?.cuisine}>
-                        상관없음
-                      </Chip>
-                      {CUISINES.map((o) => (
-                        <OptionChip key={o.value} type="radio" name={`food-${day.date}`} option={o} defaultChecked={p?.cuisine === o.value} />
+                    <Group title="못 먹는 음식" small scroll hint="이날 식당에서 빼요">
+                      {AVOIDS.map((o) => (
+                        <OptionChip
+                          key={o.value}
+                          type="checkbox"
+                          name={`avoid-${day.date}`}
+                          option={o}
+                          tone="coral"
+                          defaultChecked={p?.avoid?.includes(o.value)}
+                        />
                       ))}
                     </Group>
 

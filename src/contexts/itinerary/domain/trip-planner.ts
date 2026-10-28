@@ -224,7 +224,8 @@ export function fillMeals(
     }
   }
 
-  const chosen = new Set<string>();
+  // 관광지로 이미 넣은 곳은 식사·카페로 다시 고르지 않는다 — 관광공사 관광지와 카카오 카페가 같은 곳일 때가 있다
+  const chosen = new Set<string>(days.flatMap((d) => d.slots).flatMap((s) => (s.kind === "visit" ? [s.place.title] : [])));
   index = 0;
   const filled = days.map((day) => ({
     ...day,
