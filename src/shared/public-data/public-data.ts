@@ -84,7 +84,7 @@ export async function requestItems<T>(
     console.warn(`[${label}] 거절 (status=${res.status}, code=${rejectedCode})`);
     return { ok: false, failure: failureOfCode(rejectedCode), code: rejectedCode };
   }
-  if (!res.ok || !json?.response) {
+  if (!res.ok || !json?.response?.header) {
     console.warn(`[${label}] 응답을 읽지 못했다 (status=${res.status})`);
     return { ok: false, failure: "unavailable", code: String(res.status) };
   }
@@ -95,7 +95,8 @@ export async function requestItems<T>(
     return { ok: false, failure: failureOfCode(header.resultCode), code: header.resultCode };
   }
 
-  const items = payload?.items ? payload.items.item : [];
+  // 결과가 없으면 items 가 "" 이거나 item 키가 없는 {} 로 온다
+  const items = (payload?.items || undefined)?.item ?? [];
   return { ok: true, value: Array.isArray(items) ? items : [items] };
 }
 

@@ -147,6 +147,33 @@ describe("사용자가 고른 곳(picks)", () => {
     expect(used).not.toContain("E");
   });
 
+  it("축제 칸을 다른 곳으로 바꾸면 축제는 빠지고 다음 칸으로 밀려나지 않는다", () => {
+    const festival = place("축제", 40, { kind: "festival", period: { start: "2026-12-26", end: "2026-12-27" } });
+    const before = visitIds(draftTrip(dates, sights, [festival]));
+    expect(before[1][0]).toBe("morning:축제");
+    const picks = new Map([[slotKeyOf("2026-12-26", "morning"), "E"]]);
+    const after = visitIds(draftTrip(dates, sights, [festival], () => false, picks));
+    expect(after[1][0]).toBe("morning:E");
+    expect(after.flat().some((v) => v.endsWith(":축제"))).toBe(false);
+  });
+
+  it("식사 칸 후보에는 다른 끼니가 이미 쓰는 식당을 넣지 않는다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 0.2)], []);
+    const shared = ["R1", "R2", "R3", "R4"].map((id, i) => place(id, 0.1 * (i + 1), { kind: "restaurant" }));
+    const [lunch, dinner] = mealsOf(fillMeals(days, [shared, shared], 3));
+    expect(lunch.choice?.id).toBe("R1");
+    expect(dinner.choice?.id).toBe("R2");
+    expect(lunch.alternatives.map((p) => p.id)).toEqual(["R3", "R4"]);
+  });
+
+  it("고른 식당이 근처가 바뀌어 후보에서 빠졌으면 다른 끼니가 써도 된다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 0.2)], []);
+    const near = [place("국밥", 0.1, { kind: "restaurant" }), place("파스타", 0.3, { kind: "restaurant" })];
+    const picks = new Map([[slotKeyOf("2026-12-25", "dinner"), "국밥"]]);
+    const [lunch] = mealsOf(fillMeals(days, [near, []], 2, picks));
+    expect(lunch.choice?.id).toBe("국밥");
+  });
+
   it("식사 칸을 고른 식당으로 바꾸면 원래 식당은 후보로 내려간다", () => {
     const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
     const near = [place("국밥", 0.1, { kind: "restaurant" }), place("파스타", 0.5, { kind: "restaurant" })];

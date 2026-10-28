@@ -79,7 +79,8 @@ export function KakaoMap({
   useEffect(() => {
     const pins = shownPins;
     const routes = shownRoutes;
-    if (!APP_KEY || !container.current || pins.length === 0) return;
+    const element = container.current;
+    if (!APP_KEY || !element || pins.length === 0) return;
     let cancelled = false;
     setReady(false);
     let observer: ResizeObserver | undefined;
@@ -146,6 +147,7 @@ export function KakaoMap({
     return () => {
       cancelled = true;
       observer?.disconnect();
+      element.innerHTML = ""; // 다음 핀이 없어도(장소 없는 날) 앞 지도가 남지 않게
     };
   }, [shownPins, shownRoutes]);
 
@@ -161,7 +163,12 @@ export function KakaoMap({
             aria-label={label}
             className="size-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop"
           />
-          {!ready && (
+          {shownPins.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-3xl border-[3px] border-ink bg-surface">
+              <span className="px-4 text-center text-[15px] font-bold text-muted">지도에 표시할 장소가 없어요</span>
+            </div>
+          )}
+          {!ready && shownPins.length > 0 && (
             <div
               role="status"
               aria-live="polite"

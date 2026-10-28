@@ -41,8 +41,9 @@ export class LongBreak {
     return this.options[0];
   }
 
+  /** 연차를 더 써서 늘리는 방법 — 기본과 연차 수가 같은 다른 방법(수요일 공휴일의 앞·뒤)은 넣지 않는다 */
   get extensions(): readonly BreakOption[] {
-    return this.options.slice(1);
+    return this.options.slice(1).filter((o) => o.leaveCount > this.base.leaveCount);
   }
 
   /** 연차 없이 쉬는 연휴 */

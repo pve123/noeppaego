@@ -52,7 +52,11 @@ export async function currentUserId(): Promise<string | undefined> {
   return (await currentUser())?.id;
 }
 
-/** 로그인 뒤 돌아갈 곳 — 우리 사이트 안의 경로만(다른 사이트로 보내는 주소는 버린다) */
+/**
+ * 로그인 뒤 돌아갈 곳 — 우리 사이트 안의 경로만(다른 사이트로 보내는 주소는 버린다).
+ * 주소 해석기는 탭·줄바꿈을 지우고 `\` 를 `/` 로 읽어 `/\t/evil.example` 도 다른 사이트가 되니, 그런 글자가 있으면 버린다.
+ */
 export function safeNext(next: string | null | undefined): string {
-  return next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : "/";
+  if (!next || !next.startsWith("/") || /[\u0000-\u001f\u007f\\]/.test(next)) return "/";
+  return next.startsWith("//") ? "/" : next;
 }
