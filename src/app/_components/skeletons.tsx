@@ -1,4 +1,5 @@
 import { LoadingStatus } from "./loading-status";
+import { Steps } from "./steps";
 
 /**
  * 실제 화면을 닮은 불러오는 자리 — 같은 자리에 같은 크기로 그려 내용이 들어올 때 화면이 흔들리지 않게 한다.
@@ -101,9 +102,14 @@ function SlotSkeleton({ withImage }: { withImage: boolean }) {
   );
 }
 
+/**
+ * 일정 — 다 그려진 화면과 같은 자리에 단계 표시를 먼저 둬 불러온 뒤 화면이 밀리지 않게 한다.
+ * 화면 높이만큼은 채워 불러오는 동안 푸터(정보 출처)가 끼어들지 않게 한다.
+ */
 export function ItinerarySkeleton() {
   return (
-    <div aria-busy="true" aria-label="일정을 짜는 중">
+    <div aria-busy="true" aria-label="일정을 짜는 중" className="min-h-[100dvh]">
+      <Steps current={3} />
       <BandSkeleton steps={["관광지를 고르는 중", "근처 식당을 찾는 중", "날씨를 확인하는 중", "이동 시간을 계산하는 중"]} />
       <div className="mx-auto max-w-6xl space-y-3 px-4 py-10 sm:px-6">
         <Bar className="h-28 rounded-3xl" />
