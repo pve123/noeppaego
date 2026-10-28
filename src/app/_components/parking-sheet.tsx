@@ -2,11 +2,12 @@
 
 import { useRef, useState } from "react";
 import type { ParkingView } from "@/contexts/itinerary";
+import { fetchParking } from "./parking-client";
 
 type Lots = "loading" | "failed" | ParkingView[];
 
 /** 주차 표지판 색 — 글을 읽지 않아도 알아본다 */
-function ParkingMark({ className = "size-4 text-[10px]" }: { className?: string }) {
+export function ParkingMark({ className = "size-4 text-[10px]" }: { className?: string }) {
   return (
     <span aria-hidden className={`inline-flex shrink-0 items-center justify-center rounded-[4px] bg-[#1d5fd6] font-black leading-none text-white ${className}`}>
       P
@@ -26,9 +27,7 @@ export function ParkingChip({ placeName, lat, lng, pill }: { placeName: string; 
   const load = async () => {
     setLots("loading");
     try {
-      const res = await fetch(`/api/parking?lat=${lat}&lng=${lng}`);
-      if (!res.ok) throw new Error(String(res.status));
-      setLots((await res.json()) as ParkingView[]);
+      setLots(await fetchParking(lat, lng));
     } catch {
       setLots("failed");
     }
@@ -100,12 +99,13 @@ export function ParkingChip({ placeName, lat, lng, pill }: { placeName: string; 
               <ul className="space-y-2">
                 {lots.map((lot) => (
                   <li key={`${lot.name}-${lot.lat}`} className="flex items-center gap-3 rounded-2xl border-2 border-ink/15 bg-surface px-4 py-3">
+                    {/* 이름은 자르지 않는다(어느 주차장인지가 핵심) — 걷는 시간은 아랫줄로 내려 이름 자리를 넓힌다 */}
                     <div className="min-w-0 flex-1">
-                      <p className="flex items-baseline gap-2">
-                        <span className="truncate font-bold">{lot.name}</span>
-                        <span className="shrink-0 text-sm text-muted">걸어서 {lot.walkMinutes}분</span>
+                      <p className="font-bold leading-snug [overflow-wrap:anywhere]">{lot.name}</p>
+                      <p className="mt-0.5 text-[13px] text-muted">
+                        <span className="font-bold text-ink/80">걸어서 {lot.walkMinutes}분</span>
+                        <span className="block truncate">{lot.address}</span>
                       </p>
-                      <p className="truncate text-[13px] text-muted">{lot.address}</p>
                     </div>
                     <a
                       href={`https://map.kakao.com/link/to/${encodeURIComponent(lot.name.replaceAll(",", " "))},${lot.lat},${lot.lng}`}

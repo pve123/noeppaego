@@ -53,7 +53,8 @@ export function AddressBar({ address, place }: { address: string; place?: { titl
       >
         지도 <span aria-hidden className="ml-0.5">↗</span>
       </a>
-      {place && <ParkingChip placeName={place.title} lat={place.lat} lng={place.lng} pill={pill} />}
+      {/* 칸의 장소를 바꾸면 좌표가 바뀐다 — key 로 새로 만들어 앞 장소의 주차장 목록이 남지 않게 */}
+      {place && <ParkingChip key={`${place.lat},${place.lng}`} placeName={place.title} lat={place.lat} lng={place.lng} pill={pill} />}
     </div>
   );
 }

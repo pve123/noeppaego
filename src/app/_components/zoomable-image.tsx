@@ -17,7 +17,8 @@ export function ZoomableImage({ src, title, className }: { src: string; title: s
         type="button"
         onClick={() => dialog.current?.showModal()}
         aria-label={`${title} 사진 크게 보기`}
-        className="shrink-0 cursor-zoom-in rounded-xl transition-transform hover:-translate-y-0.5 focus-visible:outline-offset-4"
+        // self-start: 옆 글이 「더보기」로 길어져도 버튼이 늘어나지 않게 — 늘어나면 버튼이 사진을 가운데로 내린다
+        className="shrink-0 self-start cursor-zoom-in rounded-xl transition-transform hover:-translate-y-0.5 focus-visible:outline-offset-4"
       >
         {/* 사진이 오기 전에는 그 자리가 반짝이고, 오면 반짝임을 끈다 */}
         <Image

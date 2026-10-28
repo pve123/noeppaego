@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { KakaoMap, type MapPin } from "./kakao-map";
+import { fetchParking } from "./parking-client";
+import { ParkingMark } from "./parking-sheet";
 
 export type MapDay = {
   dayNumber: number;
@@ -18,17 +20,56 @@ const TAB_BG: Record<MapPin["tone"], string> = {
   ink: "bg-ink text-cream",
 };
 
+/** 그날 주차장 핀 — 불러오는 중·실패도 일차마다 따로 */
+type DayParking = "loading" | "failed" | MapPin[];
+
+/** 그날 장소마다 근처 주차장을 모아 P 핀으로 — 같은 주차장은 한 번만 */
+async function parkingPinsOf(day: MapDay): Promise<MapPin[]> {
+  const lots = (await Promise.all(day.stops.map((s) => fetchParking(s.lat, s.lng)))).flat();
+  const pins = new Map<string, MapPin>();
+  for (const lot of lots) {
+    const id = `parking-${lot.name}-${lot.lat}`;
+    pins.set(id, { id, lat: lot.lat, lng: lot.lng, badge: "P", label: `${lot.name} · 주차장`, tone: day.tone, parking: true });
+  }
+  return [...pins.values()];
+}
+
 /**
  * 일정 지도 — 하루씩 본다. 그날 장소만 1, 2, 3… 으로 찍고 그날 동선만 잇는다.
  * 이름은 지도 옆 목록에서 같은 번호로 읽는다(지도 위 이름표는 겹쳐서 못 읽는다).
+ * 「주차장 보기」를 켜면 그날 장소 근처 주차장을 작은 파란 P 로 더한다(켤 때·일차를 바꿀 때만 불러온다).
  */
 export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName: string }) {
   const [selected, setSelected] = useState(days[0]?.dayNumber ?? 1);
   const day = days.find((d) => d.dayNumber === selected) ?? days[0]!;
+  const [showParking, setShowParking] = useState(false);
+  const [parking, setParking] = useState<Record<number, DayParking>>({});
+  const dayParking = showParking ? parking[day.dayNumber] : undefined;
+
+  const loadParking = (target: MapDay) => {
+    const current = parking[target.dayNumber];
+    if (current === "loading" || Array.isArray(current)) return;
+    setParking((p) => ({ ...p, [target.dayNumber]: "loading" }));
+    parkingPinsOf(target).then(
+      (pins) => setParking((p) => ({ ...p, [target.dayNumber]: pins })),
+      () => setParking((p) => ({ ...p, [target.dayNumber]: "failed" })),
+    );
+  };
+  const selectDay = (d: MapDay) => {
+    setSelected(d.dayNumber);
+    if (showParking) loadParking(d);
+  };
+  const toggleParking = () => {
+    if (!showParking) loadParking(day);
+    setShowParking((v) => !v);
+  };
 
   const pins = useMemo<MapPin[]>(
-    () => day.stops.map((s, i) => ({ id: s.id, lat: s.lat, lng: s.lng, badge: String(i + 1), label: s.title, tone: day.tone })),
-    [day],
+    () => [
+      ...day.stops.map((s, i) => ({ id: s.id, lat: s.lat, lng: s.lng, badge: String(i + 1), label: s.title, tone: day.tone })),
+      ...(Array.isArray(dayParking) ? dayParking : []),
+    ],
+    [day, dayParking],
   );
   const routes = useMemo(() => [{ tone: day.tone, points: day.stops.map(({ lat, lng }) => ({ lat, lng })) }], [day]);
 
@@ -47,7 +88,7 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setSelected(d.dayNumber)}
+                onClick={() => selectDay(d)}
                 className={`h-11 rounded-full border-[2.5px] border-ink px-4 font-display text-[17px] transition-transform ${
                   active ? `-rotate-2 shadow-pop-sm ${TAB_BG[d.tone]}` : "bg-surface hover:-translate-y-0.5"
                 }`}
@@ -57,6 +98,24 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
             );
           })}
         </div>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+        <button
+          type="button"
+          aria-pressed={showParking}
+          onClick={toggleParking}
+          className={`inline-flex h-10 items-center gap-1.5 rounded-full border-[2.5px] border-ink px-4 text-[15px] font-bold transition-colors ${
+            showParking ? "bg-[#1d5fd6] text-white" : "bg-surface hover:bg-cream"
+          }`}
+        >
+          <ParkingMark className={`size-5 text-[12px] ${showParking ? "ring-2 ring-white" : ""}`} />
+          주차장 보기
+        </button>
+        <span aria-live="polite" className="text-sm text-muted">
+          {dayParking === "loading" && "근처 주차장을 찾는 중이에요"}
+          {dayParking === "failed" && "주차장을 불러오지 못했어요. 다시 켜 보세요."}
+          {Array.isArray(dayParking) && (dayParking.length > 0 ? `파란 P가 장소 근처 주차장이에요(${dayParking.length}곳).` : "이날 장소 근처(500m)에 주차장이 없어요.")}
+        </span>
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-[1fr_340px]">
