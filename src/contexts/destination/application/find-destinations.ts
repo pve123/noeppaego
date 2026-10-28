@@ -1,6 +1,6 @@
 import { rangeText } from "@/shared/kernel/korean";
 import { dotDate, TravelWindow } from "@/shared/kernel/travel-window";
-import { recommendDestinations, reachKm } from "../domain/destination-recommender";
+import { recommendDestinations, reachKm, type ReachPreference } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
 import { ORIGINS, originOf } from "../domain/origin";
 
@@ -12,6 +12,8 @@ export type FindDestinations = {
   end: string;
   /** 출발지 id — 모르면 서울 */
   originId?: string;
+  /** 얼마나 멀리 — 없으면 연휴 길이대로 */
+  reach?: ReachPreference;
 };
 
 // ── 읽기 모델 ─────────────────────────────────────────
@@ -43,6 +45,8 @@ export type DestinationsView = {
   origins: { id: string; name: string }[];
   /** 「400km 안」 같은 거리 안내. 제한이 없으면 undefined */
   reachKm?: number;
+  /** 고른 거리 */
+  reach: ReachPreference;
   destinations: DestinationView[];
 };
 
@@ -55,8 +59,9 @@ export async function findDestinations(
   const window = TravelWindow.of(query.start, query.end);
   const origin = originOf(query.originId);
   const festivals = await repository.findOverlapping(window);
-  const reach = reachKm(window.days);
-  const destinations = recommendDestinations(festivals, window, origin.at);
+  const preference = query.reach ?? "auto";
+  const reach = reachKm(window.days, preference);
+  const destinations = recommendDestinations(festivals, window, origin.at, undefined, preference);
 
   return {
     originId: origin.id,
@@ -64,6 +69,7 @@ export async function findDestinations(
     origin: { lat: origin.at.lat, lng: origin.at.lng },
     origins: ORIGINS.map(({ id, name }) => ({ id, name })),
     reachKm: Number.isFinite(reach) ? reach : undefined,
+    reach: preference,
     destinations: destinations.map((d) => ({
       code: d.region.code,
       name: d.region.name,
