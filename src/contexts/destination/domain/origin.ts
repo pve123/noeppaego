@@ -21,6 +21,11 @@ export const ORIGINS: readonly Origin[] = [
   { id: "cheongju", name: "청주", at: new Coordinate(36.6424, 127.489) },
   { id: "jeonju", name: "전주", at: new Coordinate(35.8242, 127.148) },
   { id: "changwon", name: "창원", at: new Coordinate(35.228, 128.6811) },
+  // 기존 출발지에서 50km 넘게 떨어진 생활권 — 강원 남부·동해안, 경북 동해안, 전남 동부
+  { id: "wonju", name: "원주", at: new Coordinate(37.3422, 127.9202) },
+  { id: "gangneung", name: "강릉", at: new Coordinate(37.7519, 128.8761) },
+  { id: "pohang", name: "포항", at: new Coordinate(36.019, 129.3435) },
+  { id: "suncheon", name: "순천", at: new Coordinate(34.9507, 127.4872) },
 ];
 
 /** 모르는 id 면 서울 */
