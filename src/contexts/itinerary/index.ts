@@ -21,6 +21,7 @@ import { DrizzleSavedItineraryRepository } from "./infrastructure/drizzle-saved-
 import { KmaWeatherOutlook } from "./infrastructure/kma-weather-outlook";
 import { PreviewWeatherOutlook, weatherPreviewOf } from "./infrastructure/preview-weather-outlook";
 import { KakaoPlacePages } from "./infrastructure/kakao-place-pages";
+import { TourPlaceIntros } from "./infrastructure/tour-place-intros";
 import { KakaoRestaurantFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
 import { TourPlaceCatalog } from "./infrastructure/tour-place-catalog";
 
@@ -32,13 +33,14 @@ const restaurants = process.env.KAKAO_REST_API_KEY
 
 const driveTimes = new KakaoDriveTimes();
 const pages = new KakaoPlacePages();
+const intros = new TourPlaceIntros();
 
 const writer = new OpenAiTripWriter();
 // 로컬에서 날씨 화면을 볼 때만 가짜 예보(WEATHER_PREVIEW=rain|mixed). Vercel(VERCEL=1)에서는 값이 있어도 진짜 예보.
 const preview = process.env.VERCEL ? undefined : weatherPreviewOf(process.env.WEATHER_PREVIEW);
 const outlook = preview ? new PreviewWeatherOutlook(preview) : new KmaWeatherOutlook();
 
-export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, driveTimes, outlook, pages);
+export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, driveTimes, outlook, pages, intros);
 /** 하루마다 AI 소개 글 — 못 쓰면 undefined */
 export const describeItinerary = (plan: ItineraryView) => describe(plan, writer);
 

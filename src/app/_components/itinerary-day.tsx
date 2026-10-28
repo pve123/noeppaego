@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
-import type { DayView, SlotView, WeatherView } from "@/contexts/itinerary";
+import type { DayView, PlaceView, SlotView, WeatherView } from "@/contexts/itinerary";
 import type { MapPin } from "./kakao-map";
+import { AddressBar } from "./place-address";
 import { ZoomableImage } from "./zoomable-image";
 
 /** 일차별 색 — 지도 핀·동선과 같은 순서 */
@@ -126,14 +127,13 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
               ) : (
                 <p className="font-display text-lg text-muted">{slot.note}</p>
               )}
-              {place?.category &&
-                (isMeal(slot) ? (
-                  <FoodChips category={place.category} />
-                ) : (
-                  <p className="mt-0.5 text-sm text-muted">
-                    <WordWrap text={place.category} />
-                  </p>
-                ))}
+              {place && <KindBadges slot={slot} place={place} />}
+              {place && periodOf(place) && (
+                <p className="mt-1.5 text-[13px] text-muted">
+                  <WordWrap text={periodOf(place)!} />
+                </p>
+              )}
+              {place?.intro && <p className="mt-1.5 line-clamp-2 text-[14px] leading-relaxed text-ink/80">{place.intro}</p>}
               {(slot.picked || slot.forRain) && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {slot.picked && <p className="rounded-full bg-yellow px-2.5 py-0.5 text-xs font-bold">직접 고른 곳</p>}
@@ -151,6 +151,8 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
           </div>
         </div>
       </div>
+
+      {place?.address && <AddressBar address={place.address} />}
 
       {hrefFor && (slot.alternatives.length > 0 || slot.picked) && (
         <div className="flex flex-col gap-2 border-t-2 border-dashed border-ink/25 bg-cream py-2.5 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-1.5 sm:px-4">
@@ -220,14 +222,37 @@ function WordWrap({ text }: { text: string }) {
 
 const isMeal = (slot: SlotView) => slot.time === "lunch" || slot.time === "dinner";
 
-/** 음식 종류를 칩으로 — 카카오는 「돈까스,우동」처럼 쉼표로 붙여 주니 나눈다 */
-function FoodChips({ category }: { category: string }) {
-  const kinds = category.split(/[,·]/).map((k) => k.trim()).filter(Boolean);
+/** 예전에 저장한 축제는 분류 칸에 「…부터 …까지 축제」로 기간이 들어 있다 */
+const OLD_FESTIVAL = / 축제$/;
+const isOldFestival = (place: PlaceView) => !place.kind && !!place.category && OLD_FESTIVAL.test(place.category) && place.category.includes("까지");
+const periodOf = (place: PlaceView) => place.period ?? (isOldFestival(place) ? place.category!.replace(OLD_FESTIVAL, "") : undefined);
+
+const KIND_LABEL: Partial<Record<NonNullable<PlaceView["kind"]>, string>> = { sight: "관광지", culture: "문화시설", festival: "축제", lodging: "숙소" };
+/** 종류마다 뱃지 색 — 식당 코랄 · 관광지 민트 · 축제 노랑 · 숙소 라벤더 */
+const KIND_TONE: Record<NonNullable<PlaceView["kind"]>, string> = {
+  restaurant: "bg-coral",
+  sight: "bg-mint",
+  culture: "bg-mint",
+  festival: "bg-yellow",
+  lodging: "bg-lavender",
+};
+
+/**
+ * 종류 뱃지 — 모든 장소가 같은 모양, 색으로 종류를 가른다.
+ * 식당은 카카오가 「돈까스,우동」처럼 쉼표로 붙여 주니 나눠서 여러 개로.
+ */
+function KindBadges({ slot, place }: { slot: SlotView; place: PlaceView }) {
+  const kind = place.kind ?? (isMeal(slot) ? "restaurant" : slot.time === "night" ? "lodging" : isOldFestival(place) ? "festival" : "sight");
+  const labels =
+    kind === "restaurant"
+      ? (place.category ?? "").split(/[,·]/).map((k) => k.trim()).filter(Boolean)
+      : [isOldFestival(place) ? "축제" : (place.category ?? KIND_LABEL[kind] ?? "")].filter(Boolean);
+  if (labels.length === 0) return null;
   return (
-    <ul aria-label="음식 종류" className="mt-1.5 flex flex-wrap gap-1.5">
-      {kinds.map((kind) => (
-        <li key={kind} className="rounded-full border-2 border-ink bg-coral px-2.5 py-0.5 text-sm font-bold">
-          {kind}
+    <ul aria-label="종류" className="mt-1.5 flex flex-wrap gap-1.5">
+      {labels.map((label) => (
+        <li key={label} className={`rounded-full border-2 border-ink px-2.5 py-0.5 text-[13px] font-bold ${KIND_TONE[kind]}`}>
+          {label}
         </li>
       ))}
     </ul>
