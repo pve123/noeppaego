@@ -159,7 +159,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
         <div className="flex flex-col gap-2 border-t-2 border-dashed border-ink/25 bg-cream py-2.5 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-1.5 sm:px-4">
           {/* 휴대폰: 제목 줄(라벨 · 원래대로) 아래 후보를 옆으로 민다 / 넓은 화면: 한 줄에 이어 놓는다 */}
           <div className="flex items-center justify-between px-3 sm:contents">
-            <span className="font-bold text-muted sm:mr-1">{isMeal(slot) ? "다른 식당으로 바꾸기" : slot.time === "night" ? "다른 숙소로 바꾸기" : "다른 곳으로 바꾸기"}</span>
+            <span className="font-bold text-muted sm:mr-1">{slot.time === "cafe" ? "다른 카페로 바꾸기" : isMeal(slot) ? "다른 식당으로 바꾸기" : slot.time === "night" ? "다른 숙소로 바꾸기" : "다른 곳으로 바꾸기"}</span>
             {slot.picked && (
               <Link
                 href={hrefFor(slot.key)}
@@ -230,9 +230,10 @@ const isOldFestival = (place: PlaceView) => !place.kind && !!place.category && O
 const periodOf = (place: PlaceView) => place.period ?? (isOldFestival(place) ? place.category!.replace(OLD_FESTIVAL, "") : undefined);
 
 const KIND_LABEL: Partial<Record<NonNullable<PlaceView["kind"]>, string>> = { sight: "관광지", culture: "문화시설", festival: "축제", lodging: "숙소" };
-/** 종류마다 뱃지 색 — 식당 코랄 · 관광지 민트 · 축제 노랑 · 숙소 라벤더 */
+/** 종류마다 뱃지 색 — 식당 코랄 · 카페 피치 · 관광지 민트 · 축제 노랑 · 숙소 라벤더 */
 const KIND_TONE: Record<NonNullable<PlaceView["kind"]>, string> = {
   restaurant: "bg-coral",
+  cafe: "bg-peach",
   sight: "bg-mint",
   culture: "bg-mint",
   festival: "bg-yellow",
@@ -241,12 +242,12 @@ const KIND_TONE: Record<NonNullable<PlaceView["kind"]>, string> = {
 
 /**
  * 종류 뱃지 — 모든 장소가 같은 모양, 색으로 종류를 가른다.
- * 식당은 카카오가 「돈까스,우동」처럼 쉼표로 붙여 주니 나눠서 여러 개로.
+ * 식당·카페는 카카오가 「돈까스,우동」「제과,베이커리」처럼 쉼표로 붙여 주니 나눠서 여러 개로.
  */
 function KindBadges({ slot, place }: { slot: SlotView; place: PlaceView }) {
   const kind = place.kind ?? (isMeal(slot) ? "restaurant" : slot.time === "night" ? "lodging" : isOldFestival(place) ? "festival" : "sight");
   const labels =
-    kind === "restaurant"
+    kind === "restaurant" || kind === "cafe"
       ? (place.category ?? "").split(/[,·]/).map((k) => k.trim()).filter(Boolean)
       : [isOldFestival(place) ? "축제" : (place.category ?? KIND_LABEL[kind] ?? "")].filter(Boolean);
   if (labels.length === 0) return null;

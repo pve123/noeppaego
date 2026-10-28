@@ -1,7 +1,7 @@
 import { durationLabel, estimateDriveMinutes } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
-import { DriveTimes, Place, PlaceCatalog, PlaceIntros, PlaceKind, PlacePages, RestaurantFinder } from "../domain/place";
+import { CafeFinder, DriveTimes, Place, PlaceCatalog, PlaceIntros, PlaceKind, PlacePages, RestaurantFinder } from "../domain/place";
 import {
   draftTrip,
   fillMeals,
@@ -32,7 +32,7 @@ export type PlanItinerary = {
 
 export type PlaceView = {
   id: string;
-  /** 관광지·문화시설·축제·식당·숙소 — 뱃지 색. 예전에 저장한 일정에는 없다 */
+  /** 관광지·문화시설·축제·식당·카페·숙소 — 뱃지 색. 예전에 저장한 일정에는 없다 */
   kind?: PlaceKind;
   title: string;
   address: string;
@@ -57,7 +57,7 @@ export type SlotView = {
   time: SlotTime;
   timeLabel: string;
   place?: PlaceView;
-  /** 이 칸을 바꿀 수 있는 후보 — 식사 칸은 근처 다른 식당, 관광지 칸은 근처 다른 볼거리 */
+  /** 이 칸을 바꿀 수 있는 후보 — 식사 칸은 근처 다른 식당, 카페 칸은 근처 다른 카페, 관광지 칸은 근처 다른 볼거리 */
   alternatives: PlaceView[];
   /** 장소가 없을 때 안내 */
   note?: string;
@@ -95,15 +95,16 @@ export type ItineraryView = {
 const TIME_LABEL: Record<SlotTime, string> = {
   morning: "오전",
   lunch: "점심",
+  cafe: "카페",
   afternoon: "오후",
   dinner: "저녁",
   night: "숙소",
   home: "귀가",
 };
 
-/** 근처 식당 후보 수 — 고른 곳 + 바꿀 후보 + 앞 끼니와 겹칠 여유 */
+/** 근처 식당·카페 후보 수 — 고른 곳 + 바꿀 후보 + 앞 칸과 겹칠 여유 */
 const MEAL_CANDIDATES = 10;
-/** 식사 칸마다 보여 줄 바꿀 후보 수 */
+/** 식사·카페 칸마다 보여 줄 바꿀 후보 수 */
 const MEAL_ALTERNATIVES = 3;
 
 // ── 핸들러 ────────────────────────────────────────────
@@ -113,6 +114,7 @@ export async function planItinerary(
   query: PlanItinerary,
   catalog: PlaceCatalog,
   restaurants: RestaurantFinder,
+  cafes: CafeFinder,
   driveTimes: DriveTimes,
   outlook: WeatherOutlook,
   pages: PlacePages,
@@ -140,7 +142,9 @@ export async function planItinerary(
     picks,
   );
 
-  const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
+  const candidates = await Promise.all(
+    mealsOf(draft).map((m) => (m.time === "cafe" ? cafes : restaurants).near(m.near, MEAL_CANDIDATES)),
+  );
   const days = await withStayPage(fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks), pages);
   const introOf = await introsOf(days, intros);
   const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
@@ -178,7 +182,7 @@ export async function planItinerary(
               place: slot.choice && placeView(slot.choice, introOf.get(slot.choice.id)),
               picked: slot.picked,
               alternatives: slot.alternatives.map((p) => placeView(p)),
-              note: slot.choice ? undefined : "근처에 등록된 식당을 찾지 못했어요",
+              note: slot.choice ? undefined : `근처에 등록된 ${slot.time === "cafe" ? "카페" : "식당"}을 찾지 못했어요`,
             };
           case "stay":
             return {

@@ -11,6 +11,7 @@
   --yellow: #ffd84d;
   --mint: #3ccfb4;
   --lavender: #b8b5ff;
+  --peach: #ffb38a;
   --soft-ink: #e6e4f5;
 }
 
@@ -23,6 +24,7 @@
   --color-yellow: var(--yellow);
   --color-mint: var(--mint);
   --color-lavender: var(--lavender);
+  --color-peach: var(--peach);
   --color-soft-ink: var(--soft-ink);
   --font-sans: var(--font-noto), system-ui, sans-serif;
   --font-display: var(--font-jua), var(--font-noto), sans-serif;

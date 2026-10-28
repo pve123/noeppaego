@@ -15,8 +15,9 @@ export type Visit = {
   /** 바꿀 수 있는 근처 볼거리 */
   readonly alternatives: readonly Place[];
 };
+/** 식사 칸과 점심 뒤 카페 칸 — 근처에서 고르고 바꿀 후보를 두는 방식이 같다 */
 export type Meal = {
-  readonly time: "lunch" | "dinner";
+  readonly time: "lunch" | "cafe" | "dinner";
   readonly kind: "meal";
   /** 이 근처에서 먹는다 — 앞(없으면 뒤) 방문지 */
   readonly near: Coordinate;
@@ -53,13 +54,13 @@ const VISIT_ALTERNATIVES = 3;
 
 /**
  * 하루의 칸 — 첫날은 오는 데 오전을 쓰고, 마지막 날은 점심 먹고 돌아간다.
- * 하루짜리는 오전부터 저녁까지 돌고 돌아간다.
+ * 하루짜리는 오전부터 저녁까지 돌고 돌아간다. 매일 점심 뒤엔 카페에 들른다.
  */
 export function layoutOf(dayIndex: number, totalDays: number): SlotTime[] {
-  if (totalDays === 1) return ["morning", "lunch", "afternoon", "dinner", "home"];
-  if (dayIndex === 0) return ["lunch", "afternoon", "dinner", "night"];
-  if (dayIndex === totalDays - 1) return ["morning", "lunch", "home"];
-  return ["morning", "lunch", "afternoon", "dinner", "night"];
+  if (totalDays === 1) return ["morning", "lunch", "cafe", "afternoon", "dinner", "home"];
+  if (dayIndex === 0) return ["lunch", "cafe", "afternoon", "dinner", "night"];
+  if (dayIndex === totalDays - 1) return ["morning", "lunch", "cafe", "home"];
+  return ["morning", "lunch", "cafe", "afternoon", "dinner", "night"];
 }
 
 /**
@@ -130,7 +131,7 @@ export function draftTrip(
       if (time === "morning" || time === "afternoon") {
         const visit = visits.get(time);
         if (visit) slots.push(visit);
-      } else if (time === "lunch" || time === "dinner") {
+      } else if (time === "lunch" || time === "cafe" || time === "dinner") {
         const before = placesOf(times.slice(0, i)).at(-1);
         const after = placesOf(times.slice(i + 1))[0];
         const near = (before ?? after)?.location ?? lastVisit;
@@ -161,13 +162,13 @@ export function draftTrip(
   }));
 }
 
-/** 식사 칸을 앞에서부터 센 순서 — 후보 목록을 이 순서로 넘긴다 */
+/** 식사·카페 칸을 앞에서부터 센 순서 — 후보 목록을 이 순서로 넘긴다 */
 export function mealsOf(days: readonly TripDay[]): Meal[] {
   return days.flatMap((d) => d.slots.filter((s): s is Meal => s.kind === "meal"));
 }
 
 /**
- * 식사 칸마다 가장 가까운 식당을 고른다. 이미 고른 곳(같은 id·같은 이름)은 다시 고르지 않는다.
+ * 식사·카페 칸마다 가장 가까운 곳을 고른다. 이미 고른 곳(같은 id·같은 이름)은 다시 고르지 않는다.
  * 사용자가 고른 곳(picks)은 그 칸에 고정하고 다른 칸이 먼저 가져가지 않게 예약해 둔다.
  * @param candidates mealsOf 순서대로, 칸마다 근처 식당 목록
  */

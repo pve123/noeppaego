@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isChainBranch, isMeal } from "./restaurant-filters";
+import { cafeCategoryOf, isChainBranch, isMeal } from "./restaurant-filters";
 
 describe("isChainBranch", () => {
   it("이름 끝이 「…점」이면 체인 지점", () => {
@@ -22,5 +22,13 @@ describe("isMeal", () => {
     expect(isMeal("음식점 > 카페")).toBe(false);
     expect(isMeal("음식점 > 간식 > 제과,베이커리")).toBe(false);
     expect(isMeal("음식점 > 술집 > 호프,요리주점")).toBe(false);
+  });
+});
+
+describe("cafeCategoryOf", () => {
+  it("「카페」 다음 분류를 쓰고, 상호는 붙이지 않는다", () => {
+    expect(cafeCategoryOf("음식점 > 카페 > 디저트카페")).toBe("디저트카페");
+    expect(cafeCategoryOf("음식점 > 카페 > 커피전문점 > 스타벅스")).toBe("커피전문점");
+    expect(cafeCategoryOf("음식점 > 카페")).toBe("카페");
   });
 });
