@@ -59,7 +59,8 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
         </div>
         {!view.notPublished && (
           <ul className="mt-4 flex flex-wrap gap-2 text-[15px]">
-            <li className="rounded-full bg-surface px-3 py-1">공휴일 {view.holidayCount}일</li>
+            {/* 아래 범례와 같은 색 — 공휴일은 코랄 */}
+            <li className="rounded-full bg-coral px-3 py-1 font-bold">공휴일 {view.holidayCount}일</li>
             <li className="rounded-full bg-yellow px-3 py-1 font-bold">연차 없이 3일 이상 쉬는 연휴 {view.freeBreakCount}번</li>
           </ul>
         )}
