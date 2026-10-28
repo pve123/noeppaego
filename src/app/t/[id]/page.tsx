@@ -7,6 +7,7 @@ import { rangeText } from "@/shared/kernel/korean";
 import { toggleFavoriteAction } from "../../actions";
 import { DAY_TONES, ItineraryDay } from "../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../_components/itinerary-map";
+import { BAND_BUTTON, BAND_LINE, BAND_OUTLINE, BAND_ROW } from "../../_components/band-button";
 import { PageBand } from "../../_components/page-band";
 import { ShareButtons } from "../../_components/share-buttons";
 import { RevealSuspense } from "../../_components/reveal";
@@ -89,14 +90,15 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
         title={`${plan.regionName} ${plan.lengthLabel}`}
         sub={
           <>
-            {rangeText(plan.startLabel, plan.endLabel)} 일정이에요.
-            <br />
-            {view.savedOn}에 저장한 일정이라 그 뒤 바뀐 관광 정보는 들어 있지 않아요.
+            <span className="block">{rangeText(plan.startLabel, plan.endLabel)} 일정이에요.</span>
+            {/* 문장마다 줄을 나눈다 — 한 덩어리로 두면 「그 뒤 / 바뀐」처럼 문장 중간에서 끊긴다 */}
+            <span className="mt-1 block text-[14px]">{view.savedOn}에 저장했어요.</span>
+            <span className="block text-[14px]">그 뒤 바뀐 관광 정보는 들어 있지 않아요.</span>
           </>
         }
       >
-        {justSaved && view.mine && <p className="mt-2 font-bold text-yellow">저장했어요. 카카오톡으로 보내거나 캘린더에 넣어 보세요.</p>}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        {justSaved && view.mine && <p className="mt-2 font-bold text-yellow">저장했어요. 카톡으로 보내거나 캘린더에 추가해 보세요.</p>}
+        <div className={`mt-4 ${BAND_LINE}`}>
           <ShareButtons
             id={view.id}
             {...share}
@@ -111,23 +113,27 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
               })),
             }}
           />
-          <form action={toggleFavoriteAction}>
-            <input type="hidden" name="id" value={view.id} />
-            <input type="hidden" name="favorite" value={view.favorite ? "0" : "1"} />
-            <input type="hidden" name="back" value={`/t/${view.id}`} />
-            <button
-              type="submit"
-              aria-pressed={view.favorite}
-              className={`inline-flex h-11 items-center rounded-full border-[2.5px] border-cream px-5 font-display text-[17px] ${
-                view.favorite ? "bg-coral text-ink" : "bg-transparent text-cream hover:bg-cream/10"
-              }`}
-            >
-              {view.favorite ? "찜했어요" : "찜하기"}
-            </button>
-          </form>
-          <Link href={replan} className="inline-flex h-11 items-center rounded-full px-0 text-[15px] text-soft-ink underline underline-offset-4 sm:px-4">
-            이 일정으로 다시 짜기
-          </Link>
+          {/* 넓은 화면에서 한 줄로 설 때 보내기 버튼과 내 버튼 사이를 나눈다 */}
+          <span aria-hidden className="hidden sm:mx-1 sm:block sm:h-7 sm:w-0.5 sm:rounded-full sm:bg-cream/30" />
+          <div className={BAND_ROW}>
+            <form action={toggleFavoriteAction} className="sm:contents">
+              <input type="hidden" name="id" value={view.id} />
+              <input type="hidden" name="favorite" value={view.favorite ? "0" : "1"} />
+              <input type="hidden" name="back" value={`/t/${view.id}`} />
+              <button
+                type="submit"
+                aria-pressed={view.favorite}
+                className={`${BAND_BUTTON} ${view.favorite ? "bg-coral text-ink" : BAND_OUTLINE}`}
+              >
+                <span aria-hidden>{view.favorite ? "♥" : "♡"}</span>
+                {view.favorite ? "찜했어요" : "찜하기"}
+              </button>
+            </form>
+            <Link href={replan} className={`${BAND_BUTTON} ${BAND_OUTLINE}`}>
+              <span className="sm:hidden">다시 짜기</span>
+              <span className="hidden sm:inline">이 일정으로 다시 짜기</span>
+            </Link>
+          </div>
         </div>
         {!viewerId && <p className="mt-2 text-sm text-soft-ink">카카오로 로그인하면 이 일정을 찜해 둘 수 있어요.</p>}
       </PageBand>
