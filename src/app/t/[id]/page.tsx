@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { findSavedItinerary } from "@/contexts/itinerary";
+import { findSavedItinerary, type SavedItineraryView } from "@/contexts/itinerary";
 import { currentUserId } from "@/shared/auth/session";
 import { rangeText } from "@/shared/kernel/korean";
 import { toggleFavoriteAction } from "../../actions";
-import { CopyLinkButton } from "../../_components/copy-link-button";
 import { DAY_TONES, ItineraryDay } from "../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../_components/itinerary-map";
 import { PageBand } from "../../_components/page-band";
+import { ShareButtons } from "../../_components/share-buttons";
 import { RevealSuspense } from "../../_components/reveal";
 import { BandSkeleton } from "../../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
@@ -22,16 +22,23 @@ export async function generateMetadata({ params }: PageProps<"/t/[id]">): Promis
   const view = await findSavedItinerary({ id });
   if (!view) return { title: "공유받은 일정 | 계획은 J가", robots: { index: false } };
 
-  const { plan } = view;
-  const title = `${plan.regionName} ${plan.lengthLabel} · ${view.breakTitle} 연휴`;
-  const places = plan.days.flatMap((d) => d.slots).filter((s) => s.place).length;
-  const description = `${rangeText(plan.startLabel, plan.endLabel)} 일정이에요. 갈 곳과 맛집 ${places}곳을 날마다 정리했어요.`;
+  const { title, description } = shareTextOf(view);
   return {
     title: `${title} | 계획은 J가`,
     description,
     robots: { index: false },
     openGraph: { title, description, locale: "ko_KR", type: "article", siteName: "계획은 J가" },
     twitter: { card: "summary_large_image", title, description },
+  };
+}
+
+/** 미리보기·카톡 카드에 같이 쓰는 제목과 설명 */
+function shareTextOf(view: SavedItineraryView): { title: string; description: string } {
+  const { plan } = view;
+  const places = plan.days.flatMap((d) => d.slots).filter((s) => s.place).length;
+  return {
+    title: `${plan.regionName} ${plan.lengthLabel} · ${view.breakTitle} 연휴`,
+    description: `${rangeText(plan.startLabel, plan.endLabel)} 일정이에요. 갈 곳과 맛집 ${places}곳을 날마다 정리했어요.`,
   };
 }
 
@@ -58,6 +65,7 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
   if (!view) notFound();
 
   const { plan } = view;
+  const share = shareTextOf(view);
   const replan = `/breaks/${view.breakStart}/${view.regionCode}${
     Object.keys(view.picks).length > 0
       ? `?${new URLSearchParams(Object.entries(view.picks).map(([k, v]) => ["pick", `${k}~${v}`]))}`
@@ -87,9 +95,22 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
           </>
         }
       >
-        {justSaved && view.mine && <p className="mt-2 font-bold text-yellow">저장했어요. 링크를 복사해서 공유해 보세요.</p>}
+        {justSaved && view.mine && <p className="mt-2 font-bold text-yellow">저장했어요. 카카오톡으로 보내거나 캘린더에 넣어 보세요.</p>}
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <CopyLinkButton />
+          <ShareButtons
+            id={view.id}
+            {...share}
+            calendar={{
+              title: share.title,
+              startIso: view.breakStart,
+              regionName: plan.regionName,
+              days: plan.days.map((d) => ({
+                dayNumber: d.dayNumber,
+                dateLabel: d.dateLabel,
+                slots: d.slots.map((s) => ({ timeLabel: s.timeLabel, place: s.place && { title: s.place.title } })),
+              })),
+            }}
+          />
           <form action={toggleFavoriteAction}>
             <input type="hidden" name="id" value={view.id} />
             <input type="hidden" name="favorite" value={view.favorite ? "0" : "1"} />
