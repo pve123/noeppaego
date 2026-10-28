@@ -6,7 +6,7 @@ import { allowedSights, DessertTime, fittingSights, Pace, preferredStays, TripPr
 export const MAX_TRIP_DAYS = 3;
 
 /** 방문 칸 — 오전·오후, 「꽉 차게」면 저녁 뒤 밤 산책 */
-export type VisitTime = "morning" | "afternoon" | "evening";
+type VisitTime = "morning" | "afternoon" | "evening";
 
 export type Visit = {
   readonly time: VisitTime;
@@ -267,7 +267,7 @@ const MIDDLE_RANK = 2;
 /**
  * 처음엔 첫 밤 근처 한 곳을 골라 매일 같은 곳에 묵는다 — 짐 싸서 옮기지 않는다.
  * 첫 밤 장소에서 STAY_REACH_KM 안이면 종류(rank: 호텔·한옥 → 펜션 → 그 밖 → 모텔) 다음 거리 순, 하나도 없으면 가장 가까운 곳.
- * 숙소 종류를 골랐으면 그 종류를 먼저(가까운 순), 아이·부모님과 가면 실속형은 뒤로(preferredStays).
+ * 아이·부모님과 가면 실속형(모텔 등)은 뒤로(preferredStays).
  * 사용자가 고른 숙소(picks)는 그 밤에만 둔다 — 첫날 숙소를 바꿔도 다른 밤은 그대로다.
  */
 export function fillStays(

@@ -17,7 +17,7 @@ import {
   type Option,
 } from "./trip-prefs";
 
-export type PrefsDay = { date: string; dayNumber: number; dateLabel: string; hasDinner: boolean; toneClass: string };
+type PrefsDay = { date: string; dayNumber: number; dateLabel: string; hasDinner: boolean; toneClass: string };
 
 /**
  * 여행 취향 카드 + 시트 — 카드는 고른 취향을 칩으로 보여 주고, 누르면 시트가 열린다(휴대폰은 아래에서, 넓은 화면은 가운데).
