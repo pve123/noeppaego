@@ -120,16 +120,14 @@ export function ParkingChip({
               <ul className="space-y-2">
                 {lots.map((lot) => (
                   <li key={`${lot.name}-${lot.lat}`} className="flex items-center gap-3 rounded-2xl border-2 border-ink/15 bg-surface py-3 pl-4 pr-3">
-                    {/* 두 줄로 고정 — 이름 한 줄, 걷는 시간과 주소 한 줄. 넘치면 … (길찾기 버튼을 줄여 이름 자리를 넓혔다) */}
+                    {/* 세 줄 — 이름, 걷는 시간, 주소. 줄마다 넘치면 … (길찾기 버튼을 줄여 이름 자리를 넓혔다) */}
                     <div className="min-w-0 flex-1">
                       <p title={lot.name} className="truncate font-bold">
                         {lot.name}
                       </p>
-                      <p className="mt-0.5 flex gap-2 text-[13px] text-muted">
-                        <span className="shrink-0 font-bold text-ink/80">걸어서 {lot.walkMinutes}분</span>
-                        <span title={lot.address} className="truncate">
-                          {lot.address}
-                        </span>
+                      <p className="mt-0.5 text-[13px] font-bold text-ink/80">걸어서 {lot.walkMinutes}분</p>
+                      <p title={lot.address} className="truncate text-[13px] text-muted">
+                        {lot.address}
                       </p>
                     </div>
                     <a
