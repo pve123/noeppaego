@@ -107,6 +107,18 @@ export async function fetchNearbyItems(
   return result;
 }
 
+/** 장소 소개(overview) — 거의 안 바뀌어 며칠 캐시한다. 소개가 비었으면 빈 문자열 */
+export async function fetchOverview(contentId: string): Promise<PublicDataResult<string>> {
+  "use cache";
+  const result = await requestItems<{ overview?: string }>("tour:overview", `${BASE}/detailCommon2`, { ...COMMON, contentId });
+  if (!result.ok) {
+    cacheLife("seconds");
+    return result;
+  }
+  cacheLife("days");
+  return { ok: true, value: result.value[0]?.overview ?? "" };
+}
+
 // ── 항목 해석 ─────────────────────────────────────────
 
 /** 세종은 시·군·구가 없어 시·도 코드 하나로 온다 */

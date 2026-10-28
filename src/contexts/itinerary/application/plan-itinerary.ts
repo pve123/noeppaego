@@ -1,7 +1,7 @@
 import { durationLabel, estimateDriveMinutes } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
-import { DriveTimes, Place, PlaceCatalog, PlacePages, RestaurantFinder } from "../domain/place";
+import { DriveTimes, Place, PlaceCatalog, PlaceIntros, PlaceKind, PlacePages, RestaurantFinder } from "../domain/place";
 import {
   draftTrip,
   fillMeals,
@@ -33,13 +33,20 @@ export type PlanItinerary = {
 
 export type PlaceView = {
   id: string;
+  /** 관광지·문화시설·축제·식당·숙소 — 뱃지 색. 예전에 저장한 일정에는 없다 */
+  kind?: PlaceKind;
   title: string;
   address: string;
   lat: number;
   lng: number;
   imageUrl?: string;
   url?: string;
+  /** 「한식」「한옥」「문화시설」 같은 짧은 분류. 예전에 저장한 축제는 「…부터 …까지 축제」 */
   category?: string;
+  /** 축제 기간 — 「2026.10.31(토)부터 2026.12.31(목)까지」 */
+  period?: string;
+  /** 한 줄 소개(관광공사 소개 첫 문장) — 일정에 고른 관광지·축제·숙소만 */
+  intro?: string;
   indoor: boolean;
 };
 
@@ -110,6 +117,7 @@ export async function planItinerary(
   driveTimes: DriveTimes,
   outlook: WeatherOutlook,
   pages: PlacePages,
+  intros: PlaceIntros,
 ): Promise<ItineraryView | undefined> {
   const window = TravelWindow.of(query.start, query.end);
   const dates = window.dates(MAX_TRIP_DAYS);
@@ -136,6 +144,7 @@ export async function planItinerary(
   const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
   const days = await withStayPage(fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks), pages);
   const stayKey = stayKeyOf(days);
+  const introOf = await introsOf(days, intros);
   const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
 
   return {
@@ -160,17 +169,17 @@ export async function planItinerary(
           case "visit":
             return {
               ...base,
-              place: placeView(slot.place),
+              place: placeView(slot.place, introOf.get(slot.place.id)),
               forRain: slot.forRain,
               picked: slot.picked,
-              alternatives: slot.alternatives.map(placeView),
+              alternatives: slot.alternatives.map((p) => placeView(p)),
             };
           case "meal":
             return {
               ...base,
-              place: slot.choice && placeView(slot.choice),
+              place: slot.choice && placeView(slot.choice, introOf.get(slot.choice.id)),
               picked: slot.picked,
-              alternatives: slot.alternatives.map(placeView),
+              alternatives: slot.alternatives.map((p) => placeView(p)),
               note: slot.choice ? undefined : "근처에 등록된 식당을 찾지 못했어요",
             };
           case "stay":
@@ -178,9 +187,9 @@ export async function planItinerary(
               ...base,
               // 연휴 내내 같은 숙소라 어느 밤에서 바꿔도 첫 밤 칸 하나로 고른다
               key: stayKey ?? base.key,
-              place: slot.choice && placeView(slot.choice),
+              place: slot.choice && placeView(slot.choice, introOf.get(slot.choice.id)),
               picked: slot.picked,
-              alternatives: (slot.alternatives ?? []).map(placeView),
+              alternatives: (slot.alternatives ?? []).map((p) => placeView(p)),
               note: slot.choice ? undefined : "이 지역에 등록된 숙소가 없어요",
             };
           case "home":
@@ -249,16 +258,29 @@ async function withStayPage(days: TripDay[], pages: PlacePages): Promise<TripDay
   }));
 }
 
-function placeView(place: Place): PlaceView {
+/** 일정에 고른 장소(바꾸기 후보 말고)의 한 줄 소개 — 장소 id → 소개 */
+async function introsOf(days: TripDay[], intros: PlaceIntros): Promise<Map<string, string>> {
+  const chosen = new Map(days.flatMap((d) => d.slots.flatMap((s) => {
+    const p = placeOf(s);
+    return p ? [[p.id, p] as const] : [];
+  })));
+  const found = await Promise.all([...chosen.values()].map(async (p) => [p.id, await intros.introOf(p)] as const));
+  return new Map(found.flatMap(([id, intro]) => (intro ? [[id, intro] as const] : [])));
+}
+
+function placeView(place: Place, intro?: string): PlaceView {
   return {
     id: place.id,
+    kind: place.kind,
     title: place.title,
     address: place.address,
     lat: place.location.lat,
     lng: place.location.lng,
     imageUrl: place.imageUrl,
     url: place.url,
-    category: place.period ? `${rangeText(dateLabel(place.period.start), dateLabel(place.period.end))} 축제` : place.category,
+    category: place.period ? "축제" : place.category,
+    period: place.period ? rangeText(dateLabel(place.period.start), dateLabel(place.period.end)) : undefined,
+    intro,
     indoor: place.indoor,
   };
 }
