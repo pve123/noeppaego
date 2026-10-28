@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { BAND_BUTTON, BAND_OUTLINE, BAND_ROW } from "./band-button";
 import { CopyLinkButton } from "./copy-link-button";
 import { googleCalendarUrl, type CalendarTrip } from "./google-calendar";
 
@@ -46,10 +47,9 @@ const useCanShare = () =>
     () => false,
   );
 
-const BUTTON = "inline-flex h-11 items-center gap-1.5 rounded-full border-[2.5px] border-cream px-5 font-display text-[17px]";
 
 /**
- * 공유 페이지의 보내기 버튼 — 카카오톡으로 보내기 · 휴대폰 공유 창(없으면 링크 복사) · 구글 캘린더에 넣기.
+ * 공유 페이지의 보내기 버튼 — 휴대폰에서는 카톡을 한 줄 가득, 아래에 링크·캘린더를 반씩(360px 에서도 줄바꿈 없이). 카톡 보내기 · 링크 공유(휴대폰은 공유 창, 없으면 복사) · 캘린더에 추가(구글 캘린더).
  * 주소는 누를 때 지금 페이지 주소로 만든다(서버는 배포 주소를 모른다).
  */
 export function ShareButtons({
@@ -98,26 +98,26 @@ export function ShareButtons({
   };
 
   return (
-    <>
+    <div className={BAND_ROW}>
       {APP_KEY && !kakaoFailed && (
-        <button type="button" onClick={sendKakao} className={`${BUTTON} bg-[#fee500] text-[#191919]`}>
-          카카오톡으로 보내기
+        <button type="button" onClick={sendKakao} className={`${BAND_BUTTON} col-span-2 bg-[#fee500] text-[#191919]`}>
+          카톡 보내기
         </button>
       )}
       {nativeShare ? (
-        <button type="button" onClick={shareNative} className={`${BUTTON} bg-yellow text-ink`}>
-          공유하기
+        <button type="button" onClick={shareNative} className={`${BAND_BUTTON} ${BAND_OUTLINE}`}>
+          링크 공유
         </button>
       ) : (
-        <CopyLinkButton />
+        <CopyLinkButton className={`${BAND_BUTTON} ${BAND_OUTLINE}`} />
       )}
       <button
         type="button"
         onClick={() => window.open(googleCalendarUrl({ ...calendar, url: shareUrl() }), "_blank", "noopener")}
-        className={`${BUTTON} bg-transparent text-cream hover:bg-cream/10`}
+        className={`${BAND_BUTTON} ${BAND_OUTLINE}`}
       >
-        구글 캘린더에 넣기
+        캘린더에 추가
       </button>
-    </>
+    </div>
   );
 }
