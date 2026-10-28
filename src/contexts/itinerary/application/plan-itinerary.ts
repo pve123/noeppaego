@@ -2,12 +2,13 @@ import { durationLabel, estimateDriveMinutes } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
 import { CafeFinder, DriveTimes, Place, PlaceCatalog, PlaceIntros, PlaceKind, PlacePages, RestaurantFinder } from "../domain/place";
+import { fittingMeals, hasPrefs, TripPrefs } from "../domain/preferences";
 import {
   draftTrip,
   fillMeals,
   fillStays,
   MAX_TRIP_DAYS,
-  mealsOf,
+  Meal,
   slotKeyOf,
   SlotTime,
   TripDay,
@@ -26,6 +27,8 @@ export type PlanItinerary = {
   today: string;
   /** 사용자가 바꾼 칸 — 칸 키(`2026-12-25-lunch`) → 장소 id */
   picks?: Record<string, string>;
+  /** 여행 취향 — 고른 것만 반영한다 */
+  prefs?: TripPrefs;
 };
 
 // ── 읽기 모델 ─────────────────────────────────────────
@@ -75,6 +78,8 @@ export type WeatherView = {
 
 export type DayView = {
   dayNumber: number;
+  /** YYYY-MM-DD — 날마다 취향을 받을 때 쓴다. 예전에 저장한 일정에는 없다 */
+  date?: string;
   dateLabel: string;
   /** 예보가 없는 날(10일 넘게 남음)은 undefined */
   weather?: WeatherView;
@@ -85,6 +90,8 @@ export type ItineraryView = {
   regionName: string;
   /** 사용자가 바꾼 칸이 하나라도 있다 */
   customized: boolean;
+  /** 여행 취향을 하나라도 골랐다. 예전에 저장한 일정에는 없다 */
+  tailored?: boolean;
   /** 「2박 3일」 */
   lengthLabel: string;
   startLabel: string;
@@ -98,6 +105,7 @@ const TIME_LABEL: Record<SlotTime, string> = {
   cafe: "카페",
   afternoon: "오후",
   dinner: "저녁",
+  evening: "밤",
   night: "숙소",
   home: "귀가",
 };
@@ -133,6 +141,7 @@ export async function planItinerary(
   if (!regionName || !center) return undefined;
 
   const picks = new Map(Object.entries(query.picks ?? {}));
+  const prefs = query.prefs ?? {};
   const weather = await outlook.forecast(center, query.regionCode, dates, query.today);
   const draft = draftTrip(
     dates,
@@ -140,23 +149,37 @@ export async function planItinerary(
     festivals,
     (date, time) => isWet(time === "morning" ? weather.get(date)?.am : weather.get(date)?.pm),
     picks,
+    prefs,
   );
 
+  // 식사·카페 칸마다 근처 후보 — 그날 먹고 싶은 음식으로 찾고, 못 먹는 음식은 뺀다(mealsOf 와 같은 순서)
+  const meals = draft.flatMap((d) => d.slots.filter((s): s is Meal => s.kind === "meal").map((meal) => ({ date: d.date, meal })));
   const candidates = await Promise.all(
-    mealsOf(draft).map((m) => (m.time === "cafe" ? cafes : restaurants).near(m.near, MEAL_CANDIDATES)),
+    meals.map(async ({ date, meal }) => {
+      const found =
+        meal.time === "cafe"
+          ? await cafes.near(meal.near, MEAL_CANDIDATES)
+          : await restaurants.near(meal.near, MEAL_CANDIDATES, prefs.days?.[date]?.cuisine);
+      return fittingMeals(found, meal.time, prefs, date);
+    }),
   );
-  const days = await withStayPage(fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks), pages);
+  const days = await withStayPage(
+    fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks, prefs),
+    pages,
+  );
   const introOf = await introsOf(days, intros);
   const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
 
   return {
     regionName,
     customized: days.some((d) => d.slots.some((s) => (s.kind === "visit" || s.kind === "meal" || s.kind === "stay") && s.picked)),
+    tailored: hasPrefs(prefs),
     lengthLabel: dates.length === 1 ? "당일치기" : `${dates.length - 1}박 ${dates.length}일`,
     startLabel: dateLabel(dates[0]),
     endLabel: dateLabel(dates.at(-1)!),
     days: days.map((day, i) => ({
       dayNumber: i + 1,
+      date: day.date,
       dateLabel: dateLabel(day.date),
       weather: weatherView(weather.get(day.date)),
       slots: day.slots.map((slot, j) => {
@@ -182,7 +205,13 @@ export async function planItinerary(
               place: slot.choice && placeView(slot.choice, introOf.get(slot.choice.id)),
               picked: slot.picked,
               alternatives: slot.alternatives.map((p) => placeView(p)),
-              note: slot.choice ? undefined : `근처에 등록된 ${slot.time === "cafe" ? "카페" : "식당"}을 찾지 못했어요`,
+              note: slot.choice
+                ? undefined
+                : slot.time === "cafe"
+                  ? "근처에 등록된 카페를 찾지 못했어요"
+                  : prefs.avoid?.length
+                    ? "못 먹는 음식을 빼니 근처에 맞는 식당이 없어요"
+                    : "근처에 등록된 식당을 찾지 못했어요",
             };
           case "stay":
             return {

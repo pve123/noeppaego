@@ -13,8 +13,12 @@ import {
 } from "@/shared/tour-api/tour-api";
 import { Place, PlaceCatalog, PlaceKind } from "../domain/place";
 import { lodgingTypeOf } from "./lodging-types";
+import { sightTagsOf } from "./place-tags";
 
-/** 관광공사 지역 조회로 장소를 고른다. 한 지역 볼거리는 관광지 40 + 문화시설 20 곳이면 3일 일정에 넉넉하다. */
+/**
+ * 관광공사 지역 조회로 장소를 고른다. 한 지역 볼거리는 관광지 40 + 문화시설 20 곳이면 3일 일정에 넉넉하다.
+ * 쇼핑·시장 20 곳은 뒤에 붙인다 — 「쇼핑」을 고른 사람에게만 일정에 들어간다(preferences).
+ */
 export class TourPlaceCatalog implements PlaceCatalog {
   async regionName(regionCode: string): Promise<string | undefined> {
     const items = unwrap(await fetchAreaItems(regionCode, ContentType.sight, 40));
@@ -22,12 +26,17 @@ export class TourPlaceCatalog implements PlaceCatalog {
   }
 
   async sightsIn(regionCode: string): Promise<Place[]> {
-    const [sights, cultures] = await Promise.all([
+    const [sights, cultures, shops] = await Promise.all([
       fetchAreaItems(regionCode, ContentType.sight, 40),
       fetchAreaItems(regionCode, ContentType.culture, 20),
+      fetchAreaItems(regionCode, ContentType.shopping, 20),
     ]);
     // 관광지 사이사이에 문화시설을 섞는다 — 목록 앞쪽이 먼저 뽑힌다.
-    return interleave(toPlaces(unwrap(sights), "sight"), toPlaces(unwrap(cultures), "culture"));
+    // 쇼핑은 실패해도 일정은 짠다 — 실패는 public-data 가 warn 으로 남겼다
+    const shopping = shops.ok
+      ? shops.value.flatMap((item) => toPlaces([item], "sight", item.lclsSystm3?.startsWith("SH06") ? "시장" : "쇼핑"))
+      : [];
+    return [...interleave(toPlaces(unwrap(sights), "sight"), toPlaces(unwrap(cultures), "culture")), ...shopping];
   }
 
   async festivalsIn(regionCode: string, window: TravelWindow): Promise<Place[]> {
@@ -45,7 +54,7 @@ export class TourPlaceCatalog implements PlaceCatalog {
   async lodgingsIn(regionCode: string): Promise<Place[]> {
     return unwrap(await fetchAreaItems(regionCode, ContentType.lodging, 40)).flatMap((item) => {
       const type = lodgingTypeOf(item.lclsSystm3);
-      return toPlaces([item], "lodging", type.label).map((p) => ({ ...p, rank: type.rank }));
+      return toPlaces([item], "lodging", type.label).map((p) => ({ ...p, rank: type.rank, tags: type.tag ? [type.tag] : undefined }));
     });
   }
 }
@@ -70,6 +79,7 @@ export function toPlaces(items: TourItem[], kind: PlaceKind, category = KIND_CAT
         imageUrl: item.firstimage || undefined,
         category,
         indoor: kind === "culture",
+        tags: kind === "sight" || kind === "culture" ? sightTagsOf(item.lclsSystm3) : undefined,
       },
     ];
   });
