@@ -111,8 +111,41 @@ async function searchKakaoPlaces(
   }
 }
 
-/** 맛집 결과가 이보다 적으면 가까운 식당으로 채운다 — 고를 곳 하나 + 바꿀 후보 둘 + 여유 하나 */
+/** 많이 찾는 곳이 이보다 적으면 가까운 곳으로 채운다 — 고를 곳 하나 + 바꿀 후보 둘 + 여유 하나 */
 const ENOUGH = 4;
+
+/**
+ * 카카오에서 많이 찾는 곳부터 고를 후보 — fits(끼니인지 등)에 맞고 체인 지점이 아닌 곳.
+ * 모자라면 가까운 곳으로 채우고, 거르고 나서 하나도 없으면 fits 만 맞는 곳(체인 지점 포함)이라도.
+ * 카카오가 실패했거나 그것도 없으면 undefined — 다른 방법(fallback)을 쓰라는 뜻(칸을 비우지 않는다).
+ */
+async function kakaoPicks(at: Coordinate, group: keyof typeof KAKAO_GROUP, fits: (p: KakaoPlace) => boolean): Promise<KakaoPlace[] | undefined> {
+  const popular = await searchKakaoPlaces(at.lat, at.lng, group, "popular");
+  if (!popular.ok) return undefined;
+
+  const fitting = popular.places.filter(fits);
+  let picks = fitting.filter((p) => !isChainBranch(p.place_name));
+  if (picks.length < ENOUGH) {
+    const nearby = await searchKakaoPlaces(at.lat, at.lng, group, "nearby");
+    const seen = new Set(picks.map((p) => p.id));
+    const more = nearby.ok ? nearby.places.filter((p) => fits(p) && !isChainBranch(p.place_name) && !seen.has(p.id)) : [];
+    picks = [...picks, ...more];
+  }
+  if (picks.length === 0) picks = fitting;
+  return picks.length > 0 ? picks : undefined;
+}
+
+const toPlace = (p: KakaoPlace, kind: "restaurant" | "cafe", category: string, tags?: Place["tags"]): Place => ({
+  id: `kakao:${p.id}`,
+  kind,
+  title: p.place_name,
+  location: new Coordinate(Number(p.y), Number(p.x)),
+  address: p.road_address_name || p.address_name,
+  url: p.place_url,
+  category,
+  indoor: true,
+  tags,
+});
 
 export class KakaoRestaurantFinder implements RestaurantFinder {
   /** 카카오가 실패하면 쓸 다른 방법 */
@@ -121,39 +154,15 @@ export class KakaoRestaurantFinder implements RestaurantFinder {
   /**
    * 많이 찾는 집부터, 끼니가 아닌 곳(빵집·디저트·술집·카페)과 체인 지점은 빼고 넘긴다.
    * 그중 어디를 고를지는 도메인(fillMeals)이 식사 칸에서 가까운 순으로 정한다 — 「많이 찾는 집 중 가까운 곳」.
-   * 거르고 나서 하나도 없으면 거르기 전 목록을, 그것도 없으면 다른 방법(fallback)을 쓴다(식사 칸을 비우지 않는다).
    * 고기·해산물·매운 음식은 tags 로 붙인다(못 먹는 음식을 뺄 때 쓴다).
    */
   async near(at: Coordinate, limit: number): Promise<Place[]> {
-    const popular = await searchKakaoPlaces(at.lat, at.lng, "restaurant", "popular");
-    if (!popular.ok) return this.fallback.near(at, limit);
-
-    const meals = popular.places.filter((p) => isMeal(p.category_name));
-    let picks = meals.filter((p) => !isChainBranch(p.place_name));
-    if (picks.length < ENOUGH) {
-      const nearby = await searchKakaoPlaces(at.lat, at.lng, "restaurant", "nearby");
-      const seen = new Set(picks.map((p) => p.id));
-      const more = nearby.ok ? nearby.places.filter((p) => isMeal(p.category_name) && !isChainBranch(p.place_name) && !seen.has(p.id)) : [];
-      picks = [...picks, ...more];
-    }
-    if (picks.length === 0) picks = meals;
-    // 카카오에 근처 식당이 하나도 없으면 관광공사 음식점이라도 — 식사 칸을 비우지 않는다
-    if (picks.length === 0) return this.fallback.near(at, limit);
-
-    return picks
-      .slice(0, limit)
-      .map((p) => ({
-      id: `kakao:${p.id}`,
-      kind: "restaurant",
-      title: p.place_name,
-      location: new Coordinate(Number(p.y), Number(p.x)),
-      address: p.road_address_name || p.address_name,
-      url: p.place_url,
+    const picks = await kakaoPicks(at, "restaurant", (p) => isMeal(p.category_name));
+    if (!picks) return this.fallback.near(at, limit); // 관광공사 음식점이라도 — 식사 칸을 비우지 않는다
+    return picks.slice(0, limit).map((p) =>
       // 「음식점 > 한식 > 해장국」 → 「해장국」
-      category: p.category_name.split(">").at(-1)?.trim() || "음식점",
-      indoor: true,
-      tags: foodTagsOf(p.category_name, p.place_name),
-    }));
+      toPlace(p, "restaurant", p.category_name.split(">").at(-1)?.trim() || "음식점", foodTagsOf(p.category_name, p.place_name)),
+    );
   }
 }
 
@@ -161,34 +170,10 @@ export class KakaoCafeFinder implements CafeFinder {
   /** 카카오가 실패하면 쓸 다른 방법 */
   constructor(private readonly fallback: CafeFinder) {}
 
-  /**
-   * 많이 찾는 카페부터, 체인 지점은 빼고 넘긴다 — 그 동네에서만 갈 수 있는 곳이 낫다.
-   * 어디를 고를지는 도메인(fillMeals)이 카페 칸에서 가까운 순으로 정한다.
-   * 거르고 나서 하나도 없으면 체인 지점이라도, 그것도 없으면 다른 방법(fallback)을 쓴다.
-   */
+  /** 많이 찾는 카페부터, 체인 지점은 빼고 넘긴다 — 그 동네에서만 갈 수 있는 곳이 낫다. 고르는 건 도메인(fillMeals) */
   async near(at: Coordinate, limit: number): Promise<Place[]> {
-    const popular = await searchKakaoPlaces(at.lat, at.lng, "cafe", "popular");
-    if (!popular.ok) return this.fallback.near(at, limit);
-
-    let picks = popular.places.filter((p) => !isChainBranch(p.place_name));
-    if (picks.length < ENOUGH) {
-      const nearby = await searchKakaoPlaces(at.lat, at.lng, "cafe", "nearby");
-      const seen = new Set(picks.map((p) => p.id));
-      const more = nearby.ok ? nearby.places.filter((p) => !isChainBranch(p.place_name) && !seen.has(p.id)) : [];
-      picks = [...picks, ...more];
-    }
-    if (picks.length === 0) picks = popular.places;
-    if (picks.length === 0) return this.fallback.near(at, limit);
-
-    return picks.slice(0, limit).map((p) => ({
-      id: `kakao:${p.id}`,
-      kind: "cafe",
-      title: p.place_name,
-      location: new Coordinate(Number(p.y), Number(p.x)),
-      address: p.road_address_name || p.address_name,
-      url: p.place_url,
-      category: cafeCategoryOf(p.category_name),
-      indoor: true,
-    }));
+    const picks = await kakaoPicks(at, "cafe", () => true);
+    if (!picks) return this.fallback.near(at, limit);
+    return picks.slice(0, limit).map((p) => toPlace(p, "cafe", cafeCategoryOf(p.category_name)));
   }
 }
