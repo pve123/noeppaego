@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { ParkingView } from "@/contexts/itinerary";
-import { fetchParking } from "./parking-client";
+import type { FacilityParkingView, ParkingView } from "@/contexts/itinerary";
+import { fetchFacilityParking, fetchParking, hasFacilityParking, parkingRouteUrl } from "./parking-client";
 
 type Lots = "loading" | "failed" | ParkingView[];
 
@@ -18,14 +18,24 @@ export function ParkingMark({ className = "size-4 text-[10px]" }: { className?: 
 /**
  * 주소 줄의 「주차」 칩 — 누르면 근처 주차장 시트(휴대폰은 아래에서 올라오고, 넓은 화면은 가운데)를 연다.
  * 목록은 처음 열 때만 불러온다(아무도 안 누르면 카카오를 부르지 않는다).
- * 핵심은 「여기로 길찾기」 — 장소 대신 주차장으로 바로 내비를 찍는다.
+ * 핵심은 「길찾기」 — 장소 대신 주차장으로 바로 내비를 찍는다.
  */
-export function ParkingChip({ placeName, lat, lng, pill }: { placeName: string; lat: number; lng: number; pill: string }) {
+export function ParkingChip({
+  place,
+  pill,
+}: {
+  place: { id: string; kind?: string; title: string; lat: number; lng: number };
+  pill: string;
+}) {
+  const { title: placeName, lat, lng } = place;
   const dialog = useRef<HTMLDialogElement>(null);
   const [lots, setLots] = useState<Lots>();
+  /** 시설 자체 주차 안내(관광공사) — 없거나 아직 모르면 null */
+  const [facility, setFacility] = useState<FacilityParkingView | null>(null);
 
   const load = async () => {
     setLots("loading");
+    if (hasFacilityParking(place.id, place.kind)) void fetchFacilityParking(place.id, place.kind!).then(setFacility);
     try {
       setLots(await fetchParking(lat, lng));
     } catch {
@@ -45,10 +55,11 @@ export function ParkingChip({ placeName, lat, lng, pill }: { placeName: string; 
         onClick={open}
         aria-haspopup="dialog"
         aria-label={`${placeName} 근처 주차장 보기`}
-        className={`${pill} gap-1 border-ink/25 bg-surface text-ink/75 hover:border-ink hover:text-ink`}
+        className={`${pill} sm:gap-1 border-ink/25 bg-surface text-ink/75 hover:border-ink hover:text-ink`}
       >
         <ParkingMark />
-        주차
+        {/* 휴대폰은 P 만 — 주소 자리를 넓힌다 */}
+        <span className="hidden sm:inline">주차</span>
       </button>
 
       <dialog
@@ -76,6 +87,16 @@ export function ParkingChip({ placeName, lat, lng, pill }: { placeName: string; 
           </div>
           <p className="truncate text-sm text-muted">{placeName}에서 가까운 순이에요.</p>
 
+          {/* 시설 자체 주차 — 근처 주차장과 출처가 달라 따로 둔다 */}
+          {facility && (
+            <div className="mt-4 rounded-2xl border-2 border-[#1d5fd6]/30 bg-[#1d5fd6]/5 px-4 py-3">
+              <p className="text-[13px] font-bold text-[#1d5fd6]">시설 주차</p>
+              <p className="mt-0.5 text-[15px] leading-snug">{facility.text}</p>
+              {facility.fee && <p className="mt-0.5 text-[13px] text-muted">요금: {facility.fee}</p>}
+              <p className="mt-1 text-[12px] text-muted">한국관광공사 안내예요.</p>
+            </div>
+          )}
+
           <div className="mt-4" aria-live="polite" aria-busy={lots === "loading"}>
             {lots === "loading" && (
               <ul className="space-y-2">
@@ -98,23 +119,27 @@ export function ParkingChip({ placeName, lat, lng, pill }: { placeName: string; 
             {Array.isArray(lots) && lots.length > 0 && (
               <ul className="space-y-2">
                 {lots.map((lot) => (
-                  <li key={`${lot.name}-${lot.lat}`} className="flex items-center gap-3 rounded-2xl border-2 border-ink/15 bg-surface px-4 py-3">
-                    {/* 이름은 자르지 않는다(어느 주차장인지가 핵심) — 걷는 시간은 아랫줄로 내려 이름 자리를 넓힌다 */}
+                  <li key={`${lot.name}-${lot.lat}`} className="flex items-center gap-3 rounded-2xl border-2 border-ink/15 bg-surface py-3 pl-4 pr-3">
+                    {/* 두 줄로 고정 — 이름 한 줄, 걷는 시간과 주소 한 줄. 넘치면 … (길찾기 버튼을 줄여 이름 자리를 넓혔다) */}
                     <div className="min-w-0 flex-1">
-                      <p className="font-bold leading-snug [overflow-wrap:anywhere]">{lot.name}</p>
-                      <p className="mt-0.5 text-[13px] text-muted">
-                        <span className="font-bold text-ink/80">걸어서 {lot.walkMinutes}분</span>
-                        <span className="block truncate">{lot.address}</span>
+                      <p title={lot.name} className="truncate font-bold">
+                        {lot.name}
+                      </p>
+                      <p className="mt-0.5 flex gap-2 text-[13px] text-muted">
+                        <span className="shrink-0 font-bold text-ink/80">걸어서 {lot.walkMinutes}분</span>
+                        <span title={lot.address} className="truncate">
+                          {lot.address}
+                        </span>
                       </p>
                     </div>
                     <a
-                      href={`https://map.kakao.com/link/to/${encodeURIComponent(lot.name.replaceAll(",", " "))},${lot.lat},${lot.lng}`}
+                      href={parkingRouteUrl(lot)}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${lot.name}로 길찾기`}
-                      className="inline-flex h-11 shrink-0 items-center rounded-full border-[2.5px] border-ink bg-yellow px-4 font-display text-[15px]"
+                      className="inline-flex h-11 shrink-0 items-center rounded-full border-[2.5px] border-ink bg-yellow px-3.5 font-display text-[15px]"
                     >
-                      여기로 길찾기
+                      길찾기
                     </a>
                   </li>
                 ))}

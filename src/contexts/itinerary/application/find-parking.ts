@@ -1,5 +1,5 @@
 import { Coordinate } from "@/shared/kernel/coordinate";
-import { ParkingFinder } from "../domain/place";
+import { FacilityParkingSource, ParkingFinder, PlaceKind } from "../domain/place";
 
 /** 보여 줄 주차장 수 — 더 많으면 고르기만 어렵다 */
 const SHOWN = 3;
@@ -32,4 +32,16 @@ export async function findParking(at: Coordinate, finder: ParkingFinder): Promis
     lng: lot.location.lng,
     walkMinutes: Math.max(1, Math.round(lot.distanceM / WALK_M_PER_MIN)),
   }));
+}
+
+export type FacilityParkingView = { text: string; fee?: string };
+
+/** 장소 자체 주차 안내(Query) — 관광지·문화시설·숙소만. 없으면 null */
+export async function findFacilityParking(
+  placeId: string,
+  kind: PlaceKind,
+  source: FacilityParkingSource,
+): Promise<FacilityParkingView | null> {
+  const found = await source.parkingOf(placeId, kind);
+  return found ? { text: found.text, fee: found.fee } : null;
 }

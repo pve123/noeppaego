@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { KakaoMap, type MapPin } from "./kakao-map";
-import { fetchParking } from "./parking-client";
+import { fetchParking, parkingRouteUrl } from "./parking-client";
 import { ParkingMark } from "./parking-sheet";
 
 export type MapDay = {
@@ -10,6 +10,15 @@ export type MapDay = {
   dateLabel: string;
   tone: MapPin["tone"];
   stops: { id: string; lat: number; lng: number; title: string; timeLabel: string }[];
+};
+
+/** 안내 칩의 선 색 — 그날 동선 선과 같은 색 */
+const TONE_TEXT: Record<MapPin["tone"], string> = {
+  yellow: "text-yellow",
+  mint: "text-mint",
+  coral: "text-coral",
+  lavender: "text-lavender",
+  ink: "text-ink",
 };
 
 const TAB_BG: Record<MapPin["tone"], string> = {
@@ -29,7 +38,16 @@ async function parkingPinsOf(day: MapDay): Promise<MapPin[]> {
   const pins = new Map<string, MapPin>();
   for (const lot of lots) {
     const id = `parking-${lot.name}-${lot.lat}`;
-    pins.set(id, { id, lat: lot.lat, lng: lot.lng, badge: "P", label: `${lot.name} · 주차장`, tone: day.tone, parking: true });
+    pins.set(id, {
+      id,
+      lat: lot.lat,
+      lng: lot.lng,
+      badge: "P",
+      label: `${lot.name} (걸어서 ${lot.walkMinutes}분)`,
+      tone: day.tone,
+      parking: true,
+      link: { href: parkingRouteUrl(lot), text: "길찾기" },
+    });
   }
   return [...pins.values()];
 }
@@ -114,12 +132,24 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
         <span aria-live="polite" className="text-sm text-muted">
           {dayParking === "loading" && "근처 주차장을 찾는 중이에요"}
           {dayParking === "failed" && "주차장을 불러오지 못했어요. 다시 켜 보세요."}
-          {Array.isArray(dayParking) && (dayParking.length > 0 ? `파란 P가 장소 근처 주차장이에요(${dayParking.length}곳).` : "이날 장소 근처(500m)에 주차장이 없어요.")}
+          {Array.isArray(dayParking) && dayParking.length === 0 && "이날 장소 근처(500m)에 주차장이 없어요."}
         </span>
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-[1fr_340px]">
-        <KakaoMap pins={pins} routes={routes} label={`${regionName} ${day.dayNumber}일차 동선 지도`} />
+        {/* 선이 길처럼 보여 헷갈리지 않게 — 지도 아래 작은 글 대신 지도 위에 붙여 둔다 */}
+        <div className="relative">
+          <KakaoMap pins={pins} routes={routes} label={`${regionName} ${day.dayNumber}일차 동선 지도`} />
+          {pins.length > 1 && (
+            <p className="pointer-events-none absolute left-3 top-3 z-[5] flex items-center gap-2 rounded-full border-2 border-ink bg-surface/95 py-1 pl-2 pr-3 text-[13px] font-bold shadow-pop-sm">
+              <svg viewBox="0 0 28 12" aria-hidden className="h-3 w-7 shrink-0">
+                <path d="M2 9 L10 3 L18 8 L26 3" fill="none" stroke="#22223b" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 9 L10 3 L18 8 L26 3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={TONE_TEXT[day.tone]} />
+              </svg>
+              방문 순서예요. 실제 길과 달라요.
+            </p>
+          )}
+        </div>
         <ol aria-label={`${day.dayNumber}일차 장소`} className="space-y-2 self-start">
           {day.stops.map((s, i) => (
             <li key={s.id} className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface px-3 py-2.5">
@@ -137,7 +167,6 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
           ))}
         </ol>
       </div>
-      <p className="mt-3 text-sm text-muted">선은 장소를 순서대로 이은 것이라 실제 길과 달라요.</p>
     </section>
   );
 }

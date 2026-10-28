@@ -13,6 +13,8 @@ export type MapPin = {
   tone: "coral" | "yellow" | "mint" | "lavender" | "ink";
   /** 주차장 — 일정 장소보다 작은 파란 네모 P(주차 표지판 모양) */
   parking?: boolean;
+  /** 누르면 핀 위에 이름과 이 링크(「여기로 길찾기」 등)를 말풍선으로 띄운다 — 휴대폰엔 마우스 올림이 없다 */
+  link?: { href: string; text: string };
 };
 
 const TONE: Record<MapPin["tone"], { bg: string; fg: string }> = {
@@ -102,11 +104,24 @@ export function KakaoMap({
           new maps.Polyline({ path, strokeWeight: 4, strokeColor: TONE[route.tone].bg, strokeOpacity: 1, zIndex: 1 }).setMap(map);
         }
 
+        // 링크가 있는 핀을 누르면 뜨는 말풍선 — 하나만 두고 옮겨 쓴다. 지도 빈 곳을 누르면 닫는다
+        const bubble = new maps.CustomOverlay({ yAnchor: 1, zIndex: 5 });
+        maps.event.addListener(map, "click", () => bubble.setMap(null));
+
         const placed = pins.map((pin) => {
           const at = new maps.LatLng(pin.lat, pin.lng);
           bounds.extend(at);
           new maps.CustomOverlay({ position: at, content: dotElement(pin), zIndex: 2 }).setMap(map);
           const badge = pinElement(pin);
+          if (pin.link) {
+            const link = pin.link;
+            badge.addEventListener("click", (e) => {
+              e.stopPropagation();
+              bubble.setContent(bubbleElement(pin.label, link, () => bubble.setMap(null)));
+              bubble.setPosition(at);
+              bubble.setMap(map);
+            });
+          }
           new maps.CustomOverlay({ position: at, content: badge, yAnchor: 0.5, zIndex: 3 }).setMap(map);
           return { at, badge };
         });
@@ -237,12 +252,48 @@ function pinElement(pin: MapPin): HTMLElement {
   badge.textContent = pin.badge;
   badge.title = pin.label;
   if (pin.parking) {
-    badge.style.cssText = `display:flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border:2px solid #fff;border-radius:6px;background:${PARKING_BLUE};color:#fff;font:900 14px/1 sans-serif;box-shadow:0 0 0 1.5px #22223b;cursor:default`;
+    badge.style.cssText = `display:flex;align-items:center;justify-content:center;width:28px;height:28px;box-sizing:border-box;border:2px solid #fff;border-radius:6px;background:${PARKING_BLUE};color:#fff;font:900 15px/1 sans-serif;box-shadow:0 0 0 1.5px #22223b;cursor:${pin.link ? "pointer" : "default"}`;
+    if (pin.link) {
+      badge.setAttribute("role", "button");
+      badge.setAttribute("aria-label", `${pin.label} — ${pin.link.text}`);
+    }
     return badge;
   }
   const { bg, fg } = TONE[pin.tone];
   badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-family:var(--font-jua),sans-serif;font-size:16px;box-shadow:2px 2px 0 #22223b;cursor:default;white-space:nowrap;transition:transform .15s`;
   return badge;
+}
+
+/** 핀 위 말풍선 — 이름과 링크 버튼, 닫기. 지도 위라 Tailwind 대신 인라인 스타일 */
+function bubbleElement(label: string, link: { href: string; text: string }, close: () => void): HTMLElement {
+  const box = document.createElement("div");
+  box.style.cssText =
+    "position:relative;margin-bottom:22px;display:flex;flex-direction:column;gap:8px;max-width:220px;padding:10px 12px;border:2.5px solid #22223b;border-radius:14px;background:#fffbea;color:#22223b;box-shadow:2px 2px 0 #22223b;font:600 14px/1.35 sans-serif";
+  const head = document.createElement("div");
+  head.style.cssText = "display:flex;align-items:flex-start;gap:8px";
+  const name = document.createElement("span");
+  name.textContent = label;
+  name.style.cssText = "flex:1;word-break:keep-all;overflow-wrap:anywhere";
+  const x = document.createElement("button");
+  x.type = "button";
+  x.textContent = "×";
+  x.setAttribute("aria-label", "닫기");
+  x.style.cssText = "flex:none;width:28px;height:28px;margin:-6px -6px 0 0;border:0;background:none;font-size:20px;line-height:1;color:#22223b99;cursor:pointer";
+  x.addEventListener("click", (e) => {
+    e.stopPropagation();
+    close();
+  });
+  head.append(name, x);
+  const a = document.createElement("a");
+  a.href = link.href;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.textContent = link.text;
+  a.style.cssText =
+    "display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 14px;border:2.5px solid #22223b;border-radius:999px;background:#ffd84d;color:#22223b;font-weight:700;text-decoration:none";
+  box.append(head, a);
+  box.addEventListener("click", (e) => e.stopPropagation());
+  return box;
 }
 
 /** 실제 위치 점 — 핀이 비켜 앉아도 어디인지 남긴다 */
