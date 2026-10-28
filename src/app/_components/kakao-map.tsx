@@ -11,6 +11,8 @@ export type MapPin = {
   /** 이름 — 지도 위에 쓰지 않고 마우스를 올렸을 때만 보인다(이름표가 겹치면 읽을 수 없다) */
   label: string;
   tone: "coral" | "yellow" | "mint" | "lavender" | "ink";
+  /** 주차장 — 일정 장소보다 작은 파란 네모 P(주차 표지판 모양) */
+  parking?: boolean;
 };
 
 const TONE: Record<MapPin["tone"], { bg: string; fg: string }> = {
@@ -228,11 +230,17 @@ export function KakaoMap({
 }
 
 /** 시안의 스티커 모양 핀 — 번호만. 이름은 마우스를 올리면 보인다 */
+const PARKING_BLUE = "#1d5fd6";
+
 function pinElement(pin: MapPin): HTMLElement {
-  const { bg, fg } = TONE[pin.tone];
   const badge = document.createElement("span");
   badge.textContent = pin.badge;
   badge.title = pin.label;
+  if (pin.parking) {
+    badge.style.cssText = `display:flex;align-items:center;justify-content:center;width:24px;height:24px;box-sizing:border-box;border:2px solid #fff;border-radius:6px;background:${PARKING_BLUE};color:#fff;font:900 14px/1 sans-serif;box-shadow:0 0 0 1.5px #22223b;cursor:default`;
+    return badge;
+  }
+  const { bg, fg } = TONE[pin.tone];
   badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-family:var(--font-jua),sans-serif;font-size:16px;box-shadow:2px 2px 0 #22223b;cursor:default;white-space:nowrap;transition:transform .15s`;
   return badge;
 }
@@ -240,7 +248,7 @@ function pinElement(pin: MapPin): HTMLElement {
 /** 실제 위치 점 — 핀이 비켜 앉아도 어디인지 남긴다 */
 function dotElement(pin: MapPin): HTMLElement {
   const dot = document.createElement("span");
-  dot.style.cssText = `display:block;width:10px;height:10px;border-radius:999px;border:2px solid #22223b;background:${TONE[pin.tone].bg}`;
+  dot.style.cssText = `display:block;width:10px;height:10px;border-radius:999px;border:2px solid #22223b;background:${pin.parking ? PARKING_BLUE : TONE[pin.tone].bg}`;
   return dot;
 }
 
