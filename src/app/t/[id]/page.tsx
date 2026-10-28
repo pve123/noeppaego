@@ -104,7 +104,7 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
               {view.favorite ? "찜했어요" : "찜하기"}
             </button>
           </form>
-          <Link href={replan} className="inline-flex h-11 items-center rounded-full px-4 text-[15px] text-soft-ink underline underline-offset-4">
+          <Link href={replan} className="inline-flex h-11 items-center rounded-full px-0 text-[15px] text-soft-ink underline underline-offset-4 sm:px-4">
             이 일정으로 다시 짜기
           </Link>
         </div>

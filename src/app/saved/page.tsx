@@ -36,7 +36,7 @@ async function Favorites() {
   if (!userId) {
     return (
       <div className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
-        <p className="font-display text-[22px]">로그인하면 찜한 일정을 볼 수 있어요.</p>
+        <p className="font-display text-[22px] text-balance">로그인하면 찜한 일정을 볼 수 있어요.</p>
         <p className="mt-2 text-muted">일정을 저장하고 찜해 두면 여기에 모여요.</p>
         <div className="mt-5">
           <KakaoLoginButton next="/saved" />
@@ -49,7 +49,7 @@ async function Favorites() {
   if (favorites.length === 0) {
     return (
       <div className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
-        <p className="font-display text-[22px]">아직 찜한 일정이 없어요.</p>
+        <p className="font-display text-[22px] text-balance">아직 찜한 일정이 없어요.</p>
         <p className="mt-2 text-muted">일정 화면에서 「일정 저장하고 공유하기」를 눌러 보세요.</p>
         <Link href="/#breaks" className="mt-4 inline-flex h-12 items-center rounded-full border-[3px] border-ink bg-yellow px-6 font-display text-lg">
           연휴 고르러 가기

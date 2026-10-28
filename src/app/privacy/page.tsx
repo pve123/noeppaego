@@ -39,7 +39,8 @@ export default function PrivacyPage() {
       <main>
         <PageBand eyebrow={`시행일 ${EFFECTIVE}`} title="개인정보처리방침" sub="필요한 것만 받고, 탈퇴하면 바로 지워요." />
 
-        <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+        {/* 왼쪽 끝은 제목 띠와 맞추고(6xl), 읽기 폭은 좁게(3xl) */}
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 [&>*]:max-w-3xl">
           <section aria-labelledby="summary-title">
             <h2 id="summary-title" className="font-display text-[24px]">
               한눈에 보기
