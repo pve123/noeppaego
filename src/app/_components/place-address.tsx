@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { ParkingChip } from "./parking-sheet";
 
 /**
- * 카드 아래 주소 줄 — 📍 주소(한 줄, 넘치면 … · 누르면 전체) · 복사 · 지도.
+ * 카드 아래 주소 줄 — 📍 주소(한 줄, 넘치면 … · 누르면 전체) · 복사 · 지도 · 주차(좌표가 있을 때).
  * 주소는 읽기보다 내비·지도 앱에 넘기려고 찾는다. 지도는 주소로 카카오맵 검색을 연다(키 없이 된다).
  * 복사가 막힌 브라우저에서는 직접 복사하도록 창을 띄운다(링크 복사 버튼과 같은 방식).
  */
-export function AddressBar({ address }: { address: string }) {
+export function AddressBar({ address, place }: { address: string; place?: { title: string; lat: number; lng: number } }) {
   const [copied, setCopied] = useState(false);
   const [full, setFull] = useState(false);
   const pill = "inline-flex h-7 shrink-0 items-center rounded-full border-[1.5px] px-2.5 text-[12px] font-bold transition-colors";
@@ -52,6 +53,7 @@ export function AddressBar({ address }: { address: string }) {
       >
         지도 <span aria-hidden className="ml-0.5">↗</span>
       </a>
+      {place && <ParkingChip placeName={place.title} lat={place.lat} lng={place.lng} pill={pill} />}
     </div>
   );
 }
