@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { Place } from "./place";
-import { draftTrip, fillMeals, fillStays, layoutOf, mealsOf, slotKeyOf, stayKeyOf, TripDay } from "./trip-planner";
+import { draftTrip, fillMeals, fillStays, layoutOf, mealsOf, slotKeyOf, TripDay } from "./trip-planner";
 
 // 경도 0.01 ≈ 0.9km — x 값으로 동서 위치만 다르게 둔다.
 const at = (x: number) => new Coordinate(37.7, 126.7 + x * 0.01);
@@ -180,11 +180,17 @@ describe("fillStays — 종류와 바꾸기", () => {
     expect(first.kind === "stay" && first.alternatives?.map((p) => p.id)).toEqual(["한옥", "펜션"]);
   });
 
-  it("고른 숙소는 첫 밤 칸 키 하나로 모든 밤에 그대로 둔다", () => {
-    const d = days();
-    const key = stayKeyOf(d)!;
-    expect(key).toBe(slotKeyOf("2026-12-25", "night"));
-    const filled = fillStays(d, [lodging("모텔", 0.3, 3), lodging("호텔", 4, 0)], new Map([[key, "모텔"]]));
-    expect(stays(filled).every((s) => s.kind === "stay" && s.choice?.id === "모텔" && s.picked)).toBe(true);
+  it("고른 숙소는 그 밤에만 두고 다른 밤은 그대로다", () => {
+    const filled = fillStays(days(), [lodging("모텔", 0.3, 3), lodging("호텔", 4, 0)], new Map([[slotKeyOf("2026-12-25", "night"), "모텔"]]));
+    const [first, second] = stays(filled);
+    expect(first.kind === "stay" && first.choice?.id).toBe("모텔");
+    expect(first.kind === "stay" && first.picked).toBe(true);
+    expect(second.kind === "stay" && second.choice?.id).toBe("호텔");
+    expect(second.kind === "stay" && second.picked).toBeUndefined();
+  });
+
+  it("둘째 밤만 바꿀 수도 있다", () => {
+    const filled = fillStays(days(), [lodging("모텔", 0.3, 3), lodging("호텔", 4, 0)], new Map([[slotKeyOf("2026-12-26", "night"), "모텔"]]));
+    expect(stays(filled).map((s) => s.kind === "stay" && s.choice?.id)).toEqual(["호텔", "모텔"]);
   });
 });

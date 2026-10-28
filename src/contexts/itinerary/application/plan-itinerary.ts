@@ -6,7 +6,6 @@ import {
   draftTrip,
   fillMeals,
   fillStays,
-  stayKeyOf,
   MAX_TRIP_DAYS,
   mealsOf,
   slotKeyOf,
@@ -143,7 +142,6 @@ export async function planItinerary(
 
   const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
   const days = await withStayPage(fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks), pages);
-  const stayKey = stayKeyOf(days);
   const introOf = await introsOf(days, intros);
   const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
 
@@ -185,8 +183,6 @@ export async function planItinerary(
           case "stay":
             return {
               ...base,
-              // 연휴 내내 같은 숙소라 어느 밤에서 바꿔도 첫 밤 칸 하나로 고른다
-              key: stayKey ?? base.key,
               place: slot.choice && placeView(slot.choice, introOf.get(slot.choice.id)),
               picked: slot.picked,
               alternatives: (slot.alternatives ?? []).map((p) => placeView(p)),
@@ -243,18 +239,21 @@ async function travelLabels(
 
 /**
  * 고른 숙소에 카카오맵 페이지를 붙인다 — 관광공사 숙소엔 별점·리뷰가 없어 식당처럼 「별점과 리뷰」로 보낸다.
- * 연휴 내내 한 숙소라 한 번만 찾는다. 못 찾으면 버튼 없이 둔다.
+ * 여러 밤이 같은 숙소면 한 번만 찾는다. 못 찾으면 버튼 없이 둔다.
  */
 async function withStayPage(days: TripDay[], pages: PlacePages): Promise<TripDay[]> {
-  const stay = days.flatMap((d) => d.slots).find((s) => s.kind === "stay" && s.choice);
-  const choice = stay?.kind === "stay" ? stay.choice : undefined;
-  if (!choice || choice.url) return days;
-  const url = await pages.kakaoPageOf(choice);
-  if (!url) return days;
-  const linked = { ...choice, url };
+  const stays = new Map(
+    days.flatMap((d) => d.slots).flatMap((s) => (s.kind === "stay" && s.choice && !s.choice.url ? [[s.choice.id, s.choice] as const] : [])),
+  );
+  if (stays.size === 0) return days;
+  const found = await Promise.all([...stays.values()].map(async (p) => [p.id, await pages.kakaoPageOf(p)] as const));
+  const urls = new Map(found.flatMap(([id, url]) => (url ? [[id, url] as const] : [])));
   return days.map((day) => ({
     ...day,
-    slots: day.slots.map((slot) => (slot.kind === "stay" && slot.choice?.id === choice.id ? { ...slot, choice: linked } : slot)),
+    slots: day.slots.map((slot) => {
+      const url = slot.kind === "stay" && slot.choice ? urls.get(slot.choice.id) : undefined;
+      return slot.kind === "stay" && slot.choice && url ? { ...slot, choice: { ...slot.choice, url } } : slot;
+    }),
   }));
 }
 

@@ -202,30 +202,24 @@ const STAY_ALTERNATIVES = 2;
 /** rank 가 없는 숙소는 가운데로 본다 */
 const MIDDLE_RANK = 2;
 
-/** 숙소 칸 키 — 연휴 내내 한 곳에 묵으니 첫 밤 칸 하나로 고른다 */
-export function stayKeyOf(days: readonly TripDay[]): string | undefined {
-  const day = days.find((d) => d.slots.some((s) => s.kind === "stay"));
-  return day && slotKeyOf(day.date, "night");
-}
-
 /**
- * 숙소는 첫 밤 근처 한 곳으로 정해 매일 같은 곳에 묵는다 — 짐 싸서 옮기지 않는다.
+ * 처음엔 첫 밤 근처 한 곳을 골라 매일 같은 곳에 묵는다 — 짐 싸서 옮기지 않는다.
  * 첫 밤 장소에서 STAY_REACH_KM 안이면 종류(rank: 호텔·한옥 → 펜션 → 그 밖 → 모텔) 다음 거리 순, 하나도 없으면 가장 가까운 곳.
- * 사용자가 고른 숙소(picks 의 첫 밤 칸)는 그대로 둔다.
+ * 사용자가 고른 숙소(picks)는 그 밤에만 둔다 — 첫날 숙소를 바꿔도 다른 밤은 그대로다.
  */
 export function fillStays(days: readonly TripDay[], lodgings: readonly Place[], picks: Picks = new Map()): TripDay[] {
   const firstNight = days.flatMap((d) => d.slots).find((s): s is Stay => s.kind === "stay");
-  const key = stayKeyOf(days);
-  const pickedId = key ? picks.get(key) : undefined;
   const ordered = firstNight ? rankStays(lodgings, firstNight.near) : [...lodgings];
-  const picked = ordered.find((p) => p.id === pickedId);
-  const choice = picked ?? ordered[0];
-  const alternatives = ordered.filter((p) => p !== choice && p.title !== choice?.title).slice(0, STAY_ALTERNATIVES);
   return days.map((day) => ({
     ...day,
-    slots: day.slots.map((slot) =>
-      slot.kind === "stay" ? { ...slot, choice, picked: picked ? true : undefined, alternatives } : slot,
-    ),
+    slots: day.slots.map((slot) => {
+      if (slot.kind !== "stay") return slot;
+      const pickedId = picks.get(slotKeyOf(day.date, slot.time));
+      const picked = ordered.find((p) => p.id === pickedId);
+      const choice = picked ?? ordered[0];
+      const alternatives = ordered.filter((p) => p !== choice && p.title !== choice?.title).slice(0, STAY_ALTERNATIVES);
+      return { ...slot, choice, picked: picked ? true : undefined, alternatives };
+    }),
   }));
 }
 
