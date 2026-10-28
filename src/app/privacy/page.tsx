@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 /** 시행일 — 내용을 바꾸면 날짜도 바꾸고 「바뀐 내용」에 한 줄 남긴다 */
-const EFFECTIVE = "2026년 10월 27일";
+const EFFECTIVE = "2026년 10월 28일";
 /** 개인정보 문의 — 스토어 등록 정보의 연락처와 같게 */
 const CONTACT_EMAIL = "tkddlfdlfemd@gmail.com";
 
@@ -85,7 +85,7 @@ export default function PrivacyPage() {
                 head={["정보", "언제", "필수"]}
                 rows={[
                   ["카카오 회원 번호", "카카오 로그인", "필수"],
-                  ["카카오 닉네임", "카카오 로그인 때 동의한 경우", "선택"],
+                  ["카카오 닉네임", "카카오 로그인", "필수"],
                   ["저장한 일정, 찜한 일정", "직접 저장하거나 찜할 때", "기능을 쓸 때"],
                 ]}
               />
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
             <Section n={3}>
               <ul className="list-disc space-y-1 pl-5">
                 <li>카카오 회원 번호, 저장한 일정, 찜: 탈퇴할 때까지 보관하고, 탈퇴하면 그 즉시 지워요.</li>
-                <li>로그인 쿠키: 최대 30일. 로그아웃하면 바로 지워져요.</li>
+                <li>로그인 쿠키: 최대 7일. 로그아웃하면 바로 지워져요.</li>
                 <li>접속 기록: 호스팅 업체(Vercel)의 기본 보관 기간이 지나면 자동으로 지워져요.</li>
               </ul>
               <p>법령에 따로 보관해야 하는 정보는 받지 않아요.</p>
@@ -161,7 +161,7 @@ export default function PrivacyPage() {
               <Table
                 head={["쿠키", "용도", "기간"]}
                 rows={[
-                  ["ht_session", "로그인 상태 유지 (회원 번호, 닉네임)", "최대 30일"],
+                  ["ht_session", "로그인 상태 유지 (회원 번호, 닉네임)", "최대 7일"],
                   ["ht_oauth", "카카오 로그인 위조 방지", "10분"],
                 ]}
               />
@@ -208,7 +208,8 @@ export default function PrivacyPage() {
             <Section n={11}>
               <p>내용이 바뀌면 시행 7일 전에 이 페이지에 알려 드려요.</p>
               <ul className="list-disc pl-5 text-[15px] text-muted">
-                <li>{EFFECTIVE}: 처음 만듦</li>
+                <li>{EFFECTIVE}: 카카오 닉네임을 필수로 받고, 로그인 쿠키 기한을 30일에서 7일로 줄였어요.</li>
+                <li>2026년 10월 27일: 처음 만듦</li>
               </ul>
             </Section>
           </div>

@@ -11,13 +11,13 @@ export interface UserRepository {
   delete(id: string): Promise<void>;
 }
 
-/** 카카오가 알려 준 사람 — 닉네임은 선택 동의라 없을 수 있다 */
+/** 카카오가 알려 준 사람 — 닉네임은 필수 동의지만, 예전에 동의 없이 가입한 사람은 다시 동의하기 전까지 없을 수 있다 */
 export type KakaoProfile = {
   readonly kakaoId: number;
   readonly nickname?: string;
 };
 
-/** 포트 — 카카오 인가 코드로 회원 번호(와 동의했으면 닉네임)를 받는다. 실패하면 undefined */
+/** 포트 — 카카오 인가 코드로 회원 번호와 닉네임을 받는다. 실패하면 undefined */
 export interface KakaoAuth {
   profileFromCode(code: string, redirectUri: string): Promise<KakaoProfile | undefined>;
 }
