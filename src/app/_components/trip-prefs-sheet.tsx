@@ -126,7 +126,8 @@ export function TripPrefsSheet({
         ref={dialog}
         aria-labelledby="prefs-sheet-title"
         onClick={(e) => e.target === e.currentTarget && dialog.current?.close()}
-        className="fixed inset-x-0 bottom-0 top-auto m-0 max-h-[90dvh] w-full max-w-none overflow-hidden rounded-t-3xl border-[3px] border-b-0 border-ink bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-h-[85dvh] sm:max-w-xl sm:rounded-3xl sm:border-b-[3px]"
+        // overflow-clip — 시트 자체는 스크롤되지 않는다(hidden 은 초점이 갈 때 브라우저가 밀어 올릴 수 있다). 스크롤은 안쪽 본문만.
+        className="fixed inset-x-0 bottom-0 top-auto m-0 max-h-[90dvh] w-full max-w-none overflow-clip rounded-t-3xl border-[3px] border-b-0 border-ink bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-h-[85dvh] sm:max-w-xl sm:rounded-3xl sm:border-b-[3px]"
       >
         <form ref={form} onSubmit={submit} onChange={() => setCount(prefsEntries(read()).length)} className="flex max-h-[inherit] flex-col">
           <header className="shrink-0 px-5 pt-3">
@@ -161,7 +162,7 @@ export function TripPrefsSheet({
               {PACES.map((o) => (
                 <label
                   key={o.value}
-                  className="flex cursor-pointer flex-col items-center gap-0.5 rounded-2xl border-[2.5px] border-ink bg-surface px-2 py-3 text-center transition-transform hover:-translate-y-0.5 has-[:checked]:-rotate-1 has-[:checked]:bg-mint has-[:checked]:shadow-pop-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2"
+                  className="relative flex cursor-pointer flex-col items-center gap-0.5 rounded-2xl border-[2.5px] border-ink bg-surface px-2 py-3 text-center transition-transform hover:-translate-y-0.5 has-[:checked]:-rotate-1 has-[:checked]:bg-mint has-[:checked]:shadow-pop-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2"
                 >
                   <input type="radio" name="pace" value={o.value} defaultChecked={(prefs.pace ?? "normal") === o.value} className="sr-only" />
                   <span aria-hidden className="text-[28px] leading-none">
@@ -297,7 +298,10 @@ function Group({
 
 const CHECKED_TONE = { yellow: "has-[:checked]:bg-yellow", coral: "has-[:checked]:bg-coral", peach: "has-[:checked]:bg-peach" } as const;
 
-/** 고르는 칩 — 라디오·체크박스를 칩 모양으로. 고르면 색이 차고 살짝 기운다(자바스크립트 없이 :checked 로) */
+/**
+ * 고르는 칩 — 라디오·체크박스를 칩 모양으로. 고르면 색이 차고 살짝 기운다(자바스크립트 없이 :checked 로).
+ * label 을 relative 로 둔다 — 숨긴 입력(sr-only, absolute)이 시트 기준으로 놓이면 누를 때 초점이 가며 시트가 통째로 밀려 올라간다.
+ */
 function Chip({
   type,
   name,
@@ -317,7 +321,7 @@ function Chip({
 }) {
   return (
     <label
-      className={`inline-flex h-11 shrink-0 cursor-pointer select-none items-center gap-1.5 whitespace-nowrap rounded-full border-[2.5px] border-ink bg-surface px-4 font-display text-[16px] transition-transform hover:-translate-y-0.5 has-[:checked]:-rotate-1 has-[:checked]:shadow-pop-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:border-ink/25 has-[:disabled]:text-ink/35 has-[:disabled]:hover:translate-y-0 ${CHECKED_TONE[tone]}`}
+      className={`relative inline-flex h-11 shrink-0 cursor-pointer select-none items-center gap-1.5 whitespace-nowrap rounded-full border-[2.5px] border-ink bg-surface px-4 font-display text-[16px] transition-transform hover:-translate-y-0.5 has-[:checked]:-rotate-1 has-[:checked]:shadow-pop-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:border-ink/25 has-[:disabled]:text-ink/35 has-[:disabled]:hover:translate-y-0 ${CHECKED_TONE[tone]}`}
     >
       <input type={type} name={name} value={value} defaultChecked={defaultChecked} disabled={disabled} className="sr-only" />
       {children}
