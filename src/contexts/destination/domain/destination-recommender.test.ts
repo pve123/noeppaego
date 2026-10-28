@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Coordinate, SEOUL } from "@/shared/kernel/coordinate";
-import { recommendDestinations, reachKm } from "./destination-recommender";
+import { recommendDestinations, reachKm, reachPreferenceOf } from "./destination-recommender";
 import { Festival } from "./festival";
 import { TravelWindow } from "@/shared/kernel/travel-window";
 
@@ -108,5 +108,30 @@ describe("recommendDestinations", () => {
   it("최대 limit 곳까지만", () => {
     const many = Array.from({ length: 8 }, (_, i) => festival(`지역${i}`, PAJU, "2026-12-25", "2026-12-25"));
     expect(recommendDestinations(many, threeDays, SEOUL, 5)).toHaveLength(5);
+  });
+});
+
+describe("얼마나 멀리 — 사용자가 고른 거리", () => {
+  it("가까운 곳만은 80km, 멀어도 괜찮으면 한 단계 넓힌다", () => {
+    expect([2, 3, 5].map((d) => reachKm(d, "near"))).toEqual([80, 80, 80]);
+    expect([2, 3, 5].map((d) => reachKm(d, "far"))).toEqual([400, Infinity, Infinity]);
+    expect([2, 3, 5].map((d) => reachKm(d))).toEqual([150, 400, Infinity]);
+  });
+
+  it("사흘 연휴에 가까운 곳만 고르면 강릉(약 165km)은 빠지고 파주만", () => {
+    const threeDays = TravelWindow.of("2026-12-25", "2026-12-27");
+    const list = [festival("강릉", GANGNEUNG, "2026-12-25", "2026-12-25"), festival("파주", PAJU, "2026-12-25", "2026-12-25")];
+    expect(recommendDestinations(list, threeDays, SEOUL, 5, "near").map((d) => d.region.code)).toEqual(["파주"]);
+  });
+
+  it("멀어도 괜찮아도 제주는 나흘 이상일 때만", () => {
+    const jeju = [festival("50-110", JEJU, "2026-12-01", "2027-01-31")];
+    expect(recommendDestinations(jeju, TravelWindow.of("2026-12-25", "2026-12-27"), SEOUL, 5, "far")).toEqual([]);
+  });
+
+  it("모르는 값은 기본(auto)", () => {
+    expect(reachPreferenceOf("far")).toBe("far");
+    expect(reachPreferenceOf("아무거나")).toBe("auto");
+    expect(reachPreferenceOf(undefined)).toBe("auto");
   });
 });

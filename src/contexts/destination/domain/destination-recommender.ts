@@ -16,11 +16,23 @@ export type Destination = {
  * 연휴 길이로 갈 수 있는 거리(직선, km) — 이틀이면 가까운 곳, 사흘이면 육지 어디든, 나흘 이상이면 제주까지.
  * 서울에서 강릉 약 165km · 부산 약 325km · 제주 약 450km.
  */
-export function reachKm(days: number): number {
-  if (days <= 2) return 150;
-  if (days === 3) return 400;
-  return Number.POSITIVE_INFINITY;
+export function reachKm(days: number, preference: ReachPreference = "auto"): number {
+  const auto = days <= 2 ? 150 : days === 3 ? 400 : Number.POSITIVE_INFINITY;
+  if (preference === "near") return Math.min(auto, NEAR_KM);
+  if (preference === "far") return days <= 2 ? 400 : Number.POSITIVE_INFINITY;
+  return auto;
 }
+
+/**
+ * 얼마나 멀리 갈지 — 기본(auto)은 연휴 길이로 정하고, 사용자가 좁히거나(near) 넓힐(far) 수 있다.
+ * 아이와 함께라 가까운 곳만, 기차로 멀리 가려 짧은 연휴에도 멀리 — 같은 연휴라도 사람마다 다르다.
+ */
+export type ReachPreference = "near" | "auto" | "far";
+export const REACH_PREFERENCES: readonly ReachPreference[] = ["near", "auto", "far"];
+/** 「가까운 곳만」 — 차로 대략 한 시간 남짓 */
+export const NEAR_KM = 80;
+export const reachPreferenceOf = (value: unknown): ReachPreference =>
+  REACH_PREFERENCES.includes(value as ReachPreference) ? (value as ReachPreference) : "auto";
 
 /**
  * 제주는 비행기·배를 예약해야 해서 직선 거리와 상관없이 나흘 이상일 때만 — 광주에서 약 180km라 사흘 거리(400km)에 들어와 버린다.
@@ -43,10 +55,11 @@ export function recommendDestinations(
   window: TravelWindow,
   origin: Coordinate,
   limit = 5,
+  preference: ReachPreference = "auto",
 ): Destination[] {
   const overlapping = festivals.filter((f) => window.overlapDays(f.start, f.end) > 0);
   const byRegion = Map.groupBy(overlapping, (f) => f.region.code);
-  const reach = reachKm(window.days);
+  const reach = reachKm(window.days, preference);
 
   return [...byRegion.values()]
     .map((group) => {

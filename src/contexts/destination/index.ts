@@ -11,3 +11,4 @@ const repository = new TourFestivalRepository();
 export const findDestinations = (query: FindDestinations) => handle(query, repository);
 
 export type { DestinationView, DestinationsView, FestivalView, LatLng } from "./application/find-destinations";
+export { reachPreferenceOf, type ReachPreference } from "./domain/destination-recommender";
