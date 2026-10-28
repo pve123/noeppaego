@@ -1,5 +1,5 @@
 /**
- * 분류 → 장소 성격(PlaceTag). 취향(관심사·동행·음식)과 맞춰 볼 때 쓴다(server-only 가 아니라 테스트할 수 있다).
+ * 분류 → 장소 성격(PlaceTag). 취향(관심사·동행·못 먹는 음식)과 맞춰 볼 때 쓴다(server-only 가 아니라 테스트할 수 있다).
  * 관광공사 신분류(lclsSystm3) 앞자리와 카카오 분류(「음식점 > 한식 > 육류,고기」)·상호에서 어림한다.
  */
 import type { PlaceTag } from "../domain/place";
@@ -34,15 +34,6 @@ export function sightTagsOf(code: string | undefined): PlaceTag[] {
   return [...(SIGHT_BY_CLASS[c.slice(0, 4)] ?? SIGHT_BY_GROUP[c.slice(0, 2)] ?? [])];
 }
 
-/** 카카오 음식점 분류 2단계 → 음식 종류 */
-const CUISINE_BY_CATEGORY: Record<string, PlaceTag> = {
-  한식: "korean",
-  중식: "chinese",
-  일식: "japanese",
-  양식: "western",
-  분식: "snack",
-};
-
 /** 고기 — 분류나 상호에 이 말이 있으면 */
 const MEAT_WORDS = ["육류", "고기", "갈비", "삼겹", "곱창", "막창", "족발", "보쌈", "치킨", "닭갈비", "불고기", "한우", "돼지", "소고기", "양꼬치", "스테이크", "돈까스", "돈가스", "순대"];
 /** 해산물·회 — 「회관」 같은 상호에 걸리지 않게 「회」 한 글자는 분류 낱말이 딱 「회」일 때만 */
@@ -50,13 +41,11 @@ const SEAFOOD_WORDS = ["해물", "생선", "횟집", "물회", "초밥", "스시
 /** 매운 음식 — 이름으로 알 수 있는 것만 */
 const SPICY_WORDS = ["마라", "짬뽕", "떡볶이", "닭발", "낙지", "주꾸미", "쭈꾸미", "매운", "불닭", "아구찜", "아귀찜", "해물찜", "닭볶음탕", "김치찜"];
 
-/** 카카오 식당 분류·상호 → 음식 종류 + 고기·해산물·매운 음식 */
+/** 카카오 식당 분류·상호 → 고기·해산물·매운 음식 */
 export function foodTagsOf(categoryName: string, placeName: string): PlaceTag[] {
   const parts = categoryName.split(">").map((p) => p.trim());
   const text = `${categoryName} ${placeName}`;
   const tags = new Set<PlaceTag>();
-  const cuisine = CUISINE_BY_CATEGORY[parts[1] ?? ""];
-  if (cuisine) tags.add(cuisine);
   if (MEAT_WORDS.some((w) => text.includes(w))) tags.add("meat");
   if (parts.includes("회") || SEAFOOD_WORDS.some((w) => text.includes(w))) tags.add("seafood");
   if (SPICY_WORDS.some((w) => text.includes(w))) tags.add("spicy");

@@ -17,19 +17,19 @@ describe("sightTagsOf", () => {
 });
 
 describe("foodTagsOf", () => {
-  it("카카오 분류 2단계로 음식 종류", () => {
-    expect(foodTagsOf("음식점 > 중식 > 중국요리", "홍콩반점")).toEqual(["chinese"]);
-    expect(foodTagsOf("음식점 > 한식 > 육류,고기 > 갈비", "원조갈비")).toEqual(["korean", "meat"]);
+  it("고기는 분류나 상호로", () => {
+    expect(foodTagsOf("음식점 > 중식 > 중국요리", "홍콩반점")).toEqual([]);
+    expect(foodTagsOf("음식점 > 한식 > 육류,고기 > 갈비", "원조갈비")).toEqual(["meat"]);
   });
 
   it("해산물은 분류 낱말 「회」나 상호로 — 「회관」은 해산물이 아니다", () => {
-    expect(foodTagsOf("음식점 > 일식 > 회", "바다")).toEqual(["japanese", "seafood"]);
+    expect(foodTagsOf("음식점 > 일식 > 회", "바다")).toEqual(["seafood"]);
     expect(foodTagsOf("음식점 > 한식", "대구횟집")).toContain("seafood");
-    expect(foodTagsOf("음식점 > 한식 > 한정식", "남도회관")).toEqual(["korean"]);
+    expect(foodTagsOf("음식점 > 한식 > 한정식", "남도회관")).toEqual([]);
   });
 
   it("매운 음식은 상호·분류로 알 수 있는 것만", () => {
-    expect(foodTagsOf("음식점 > 중식 > 중국요리", "라라마라탕")).toEqual(["chinese", "spicy"]);
-    expect(foodTagsOf("음식점 > 분식 > 떡볶이", "신전떡볶이")).toEqual(["snack", "spicy"]);
+    expect(foodTagsOf("음식점 > 중식 > 중국요리", "라라마라탕")).toEqual(["spicy"]);
+    expect(foodTagsOf("음식점 > 분식 > 떡볶이", "신전떡볶이")).toEqual(["spicy"]);
   });
 });

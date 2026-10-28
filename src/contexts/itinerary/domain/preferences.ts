@@ -8,25 +8,20 @@ export type Pace = "relaxed" | "normal" | "packed";
 export type Interest = "nature" | "history" | "activity" | "shopping";
 /** 못 먹는 음식 */
 export type FoodAvoid = "seafood" | "meat" | "spicy";
-/** 숙소 종류 */
-export type StayType = "hotel" | "hanok" | "pension" | "budget";
-/** 그날 먹고 싶은 음식 */
-export type Cuisine = "korean" | "chinese" | "japanese" | "western" | "snack" | "meat";
 /** 그날 디저트(카페) — 없음 또는 언제 들를지 */
 export type DessertTime = "none" | "beforeLunch" | "afterLunch" | "beforeDinner" | "afterDinner";
 
-export type DayPrefs = { readonly cuisine?: Cuisine; readonly dessert?: DessertTime };
+/** 그날 취향 — 못 먹는 음식(그날 점심·저녁에서 뺀다)과 디저트 */
+export type DayPrefs = { readonly avoid?: readonly FoodAvoid[]; readonly dessert?: DessertTime };
 
 /**
  * 여행 취향 — 고른 것만 반영한다. 아무것도 안 골랐으면 예전과 같은 일정이 나온다.
- * 숙소는 매일 같은 곳에 묵어서 여행 전체로, 음식과 디저트는 날마다 받는다.
+ * 누구와·속도·좋아하는 것은 여행 전체로, 못 먹는 음식과 디저트는 날마다 받는다.
  */
 export type TripPrefs = {
   readonly companion?: Companion;
   readonly pace?: Pace;
   readonly interests?: readonly Interest[];
-  readonly avoid?: readonly FoodAvoid[];
-  readonly stay?: StayType;
   /** 날짜(YYYY-MM-DD) → 그날 취향 */
   readonly days?: Readonly<Record<string, DayPrefs>>;
 };
@@ -37,9 +32,7 @@ export const hasPrefs = (prefs: TripPrefs): boolean =>
     prefs.companion ||
       (prefs.pace && prefs.pace !== "normal") ||
       prefs.interests?.length ||
-      prefs.avoid?.length ||
-      prefs.stay ||
-      Object.values(prefs.days ?? {}).some((d) => d.cuisine || (d.dessert && d.dessert !== "afterLunch")),
+      Object.values(prefs.days ?? {}).some((d) => d.avoid?.length || (d.dessert && d.dessert !== "afterLunch")),
   );
 
 // ── 볼거리 ─────────────────────────────────────────────
@@ -97,43 +90,23 @@ export const allowedSights = (places: readonly Place[], prefs: TripPrefs): Place
 // ── 식사 ───────────────────────────────────────────────
 
 const AVOID_TAG: Record<FoodAvoid, PlaceTag> = { seafood: "seafood", meat: "meat", spicy: "spicy" };
-const CUISINE_TAG: Record<Cuisine, PlaceTag> = {
-  korean: "korean",
-  chinese: "chinese",
-  japanese: "japanese",
-  western: "western",
-  snack: "snack",
-  meat: "meat",
-};
 
 /**
- * 식사·카페 칸 후보를 취향에 맞춘다.
- * 못 먹는 음식은 꼭 뺀다(다 빠지면 그 칸은 빈다). 그날 먹고 싶은 음식은 있으면 그것만, 없으면 다른 식당으로.
+ * 식사 칸 후보에서 그날 못 먹는 음식을 꼭 뺀다(다 빠지면 그 칸은 빈다). 카페 칸은 그대로.
  */
 export function fittingMeals(places: readonly Place[], time: "lunch" | "cafe" | "dinner", prefs: TripPrefs, date: string): Place[] {
-  const avoid = (prefs.avoid ?? []).map((a) => AVOID_TAG[a]);
-  const edible = places.filter((p) => !has(p, avoid));
-  const cuisine = time === "cafe" ? undefined : prefs.days?.[date]?.cuisine;
-  if (!cuisine) return edible;
-  const wanted = edible.filter((p) => has(p, [CUISINE_TAG[cuisine]]));
-  return wanted.length > 0 ? wanted : edible;
+  if (time === "cafe") return [...places];
+  const avoid = (prefs.days?.[date]?.avoid ?? []).map((a) => AVOID_TAG[a]);
+  return places.filter((p) => !has(p, avoid));
 }
 
 // ── 숙소 ───────────────────────────────────────────────
 
 /**
- * 숙소 후보를 취향 순으로 — 고른 종류를 앞으로. 종류를 안 골랐어도 아이·부모님과 가면 실속형(모텔 등)은 뒤로.
- * ordered 는 이미 기본 순서(종류·거리)로 정렬돼 있다.
+ * 아이·부모님과 가면 실속형(모텔 등) 숙소는 뒤로 미룬다. ordered 는 이미 기본 순서(종류·거리)로 정렬돼 있다.
  */
 export function preferredStays(ordered: readonly Place[], prefs: TripPrefs): Place[] {
-  const wanted: PlaceTag | undefined = prefs.stay;
-  if (wanted) {
-    const match = ordered.filter((p) => has(p, [wanted]));
-    return [...match, ...ordered.filter((p) => !match.includes(p))];
-  }
-  if (prefs.companion === "kids" || prefs.companion === "parents") {
-    const budget = ordered.filter((p) => has(p, ["budget"]));
-    return [...ordered.filter((p) => !budget.includes(p)), ...budget];
-  }
-  return [...ordered];
+  if (prefs.companion !== "kids" && prefs.companion !== "parents") return [...ordered];
+  const budget = ordered.filter((p) => has(p, ["budget"]));
+  return [...ordered.filter((p) => !budget.includes(p)), ...budget];
 }

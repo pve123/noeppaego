@@ -3,7 +3,7 @@ import { lodgingTypeOf } from "./lodging-types";
 
 describe("lodgingTypeOf", () => {
   it("호텔·한옥이 먼저, 펜션, 모르는 숙소, 모텔 순", () => {
-    expect(lodgingTypeOf("AC010100")).toEqual({ rank: 0, label: "호텔", tag: "hotel" });
+    expect(lodgingTypeOf("AC010100")).toEqual({ rank: 0, label: "호텔" });
     expect(lodgingTypeOf("AC030200").label).toBe("한옥");
     expect(lodgingTypeOf("AC030100").rank).toBe(1);
     expect(lodgingTypeOf("AC030400")).toEqual({ rank: 2, label: "숙소" });

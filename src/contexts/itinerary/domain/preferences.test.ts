@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { Place, PlaceTag } from "./place";
 import { allowedSights, fittingMeals, fittingSights, hasPrefs, preferredStays } from "./preferences";
-import { draftTrip, fillStays, layoutOf, TripDay } from "./trip-planner";
+import { draftTrip, fillMeals, fillStays, layoutOf, mealsOf, TripDay } from "./trip-planner";
 
 const at = (x: number) => new Coordinate(37.7, 126.7 + x * 0.01);
 const place = (id: string, x: number, tags: PlaceTag[] = [], extra: Partial<Place> = {}): Place => ({
@@ -107,49 +107,56 @@ describe("draftTrip — 취향", () => {
   });
 });
 
-describe("fittingMeals", () => {
+describe("fittingMeals — 그날 못 먹는 음식", () => {
   const date = "2026-12-25";
-  const soup = place("국밥", 0, ["korean", "meat"], { kind: "restaurant" });
-  const sushi = place("초밥", 0, ["japanese", "seafood"], { kind: "restaurant" });
-  const mara = place("마라탕", 0, ["chinese", "spicy"], { kind: "restaurant" });
+  const soup = place("국밥", 0, ["meat"], { kind: "restaurant" });
+  const sushi = place("초밥", 0, ["seafood"], { kind: "restaurant" });
+  const mara = place("마라탕", 0, ["spicy"], { kind: "restaurant" });
+  const noodle = place("칼국수", 0, [], { kind: "restaurant" });
 
-  it("못 먹는 음식은 꼭 뺀다 — 다 빠지면 빈 목록", () => {
-    expect(ids(fittingMeals([soup, sushi, mara], "lunch", { avoid: ["seafood", "spicy"] }, date))).toEqual(["국밥"]);
-    expect(ids(fittingMeals([sushi], "lunch", { avoid: ["seafood"] }, date))).toEqual([]);
+  it("그날 고른 것만 꼭 뺀다 — 다 빠지면 빈 목록", () => {
+    const prefs = { days: { [date]: { avoid: ["seafood", "spicy"] as const } } };
+    expect(ids(fittingMeals([soup, sushi, mara, noodle], "lunch", prefs, date))).toEqual(["국밥", "칼국수"]);
+    expect(ids(fittingMeals([sushi], "dinner", { days: { [date]: { avoid: ["seafood"] } } }, date))).toEqual([]);
   });
 
-  it("그날 먹고 싶은 음식이 있으면 그것만, 없으면 다른 식당으로", () => {
-    const prefs = { days: { [date]: { cuisine: "chinese" as const } } };
-    expect(ids(fittingMeals([soup, sushi, mara], "dinner", prefs, date))).toEqual(["마라탕"]);
-    expect(ids(fittingMeals([soup, sushi], "dinner", prefs, date))).toEqual(["국밥", "초밥"]);
+  it("다른 날 고른 것은 이날에 적용하지 않는다", () => {
+    const prefs = { days: { "2026-12-26": { avoid: ["meat"] as const } } };
+    expect(ids(fittingMeals([soup, noodle], "lunch", prefs, date))).toEqual(["국밥", "칼국수"]);
   });
 
-  it("카페 칸에는 음식 종류를 적용하지 않는다", () => {
+  it("카페 칸은 그대로", () => {
     const cafe = place("디저트", 0, [], { kind: "cafe" });
-    expect(ids(fittingMeals([cafe], "cafe", { days: { [date]: { cuisine: "chinese" } } }, date))).toEqual(["디저트"]);
+    expect(ids(fittingMeals([cafe], "cafe", { days: { [date]: { avoid: ["meat"] } } }, date))).toEqual(["디저트"]);
   });
 });
 
-describe("숙소 취향", () => {
-  const hotel = place("호텔", 1, ["hotel"], { kind: "lodging", rank: 0 });
-  const hanok = place("한옥", 5, ["hanok"], { kind: "lodging", rank: 0 });
+describe("숙소 — 아이·부모님과 가면 실속형은 뒤로", () => {
+  const hotel = place("호텔", 1, [], { kind: "lodging", rank: 0 });
   const motel = place("모텔", 0.1, ["budget"], { kind: "lodging", rank: 3 });
 
-  it("고른 종류를 앞으로", () => {
-    expect(ids(preferredStays([hotel, motel, hanok], { stay: "hanok" }))).toEqual(["한옥", "호텔", "모텔"]);
-  });
-
-  it("아이·부모님과 가면 실속형은 뒤로", () => {
+  it("동행에 따라", () => {
     expect(ids(preferredStays([motel, hotel], { companion: "kids" }))).toEqual(["호텔", "모텔"]);
-    expect(ids(preferredStays([motel, hotel], {}))).toEqual(["모텔", "호텔"]);
+    expect(ids(preferredStays([motel, hotel], { companion: "parents" }))).toEqual(["호텔", "모텔"]);
+    expect(ids(preferredStays([motel, hotel], { companion: "friends" }))).toEqual(["모텔", "호텔"]);
   });
 
-  it("fillStays 가 취향을 따른다", () => {
-    const days = draftTrip(["2026-12-25", "2026-12-26"], [place("A", 0), place("B", 1)], []);
-    const stay = fillStays(days, [hotel, hanok], new Map(), { stay: "hanok" })
+  it("fillStays 가 따른다", () => {
+    const days = draftTrip(["2026-12-25", "2026-12-26"], [place("A", 0), place("B", 0.1)], []);
+    const stay = fillStays(days, [motel, hotel], new Map(), { companion: "kids" })
       .flatMap((d) => d.slots)
       .find((s) => s.kind === "stay");
-    expect(stay?.kind === "stay" && stay.choice?.id).toBe("한옥");
+    expect(stay?.kind === "stay" && stay.choice?.id).toBe("호텔");
+  });
+});
+
+describe("fillMeals — 관광지와 겹치기", () => {
+  it("관광지로 넣은 곳(같은 이름)은 카페·식사로 다시 고르지 않는다", () => {
+    const days = draftTrip(["2026-12-25"], [place("정원", 0), place("B", 10)], []);
+    const sameGarden = place("kakao:정원", 0.1, [], { kind: "cafe", title: "정원" });
+    const [, cafe] = mealsOf(fillMeals(days, [[], [sameGarden, place("카페", 0.3, [], { kind: "cafe" })], []]));
+    expect(cafe.choice?.id).toBe("카페");
+    expect(cafe.alternatives).toEqual([]);
   });
 });
 
@@ -159,5 +166,6 @@ describe("hasPrefs", () => {
     expect(hasPrefs({ pace: "normal", days: { "2026-12-25": { dessert: "afterLunch" } } })).toBe(false);
     expect(hasPrefs({ pace: "relaxed" })).toBe(true);
     expect(hasPrefs({ days: { "2026-12-25": { dessert: "none" } } })).toBe(true);
+    expect(hasPrefs({ days: { "2026-12-25": { avoid: ["meat"] } } })).toBe(true);
   });
 });
