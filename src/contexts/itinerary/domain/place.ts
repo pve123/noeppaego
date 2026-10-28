@@ -37,6 +37,11 @@ export interface RestaurantFinder {
   near(at: Coordinate, limit: number): Promise<Place[]>;
 }
 
+/** 포트 — 장소의 카카오맵 페이지(별점·리뷰를 보는 곳). 같은 곳을 못 찾으면 undefined */
+export interface PlacePages {
+  kakaoPageOf(place: Place): Promise<string | undefined>;
+}
+
 /** 포트 — 자동차 이동 시간(분). 모르면 undefined */
 export interface DriveTimes {
   minutes(from: Coordinate, to: Coordinate): Promise<number | undefined>;
