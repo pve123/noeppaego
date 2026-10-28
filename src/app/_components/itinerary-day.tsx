@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
 import type { DayView, PlaceView, SlotView, WeatherView } from "@/contexts/itinerary";
 import type { MapPin } from "./kakao-map";
+import { ClampText } from "./clamp-text";
 import { AddressBar } from "./place-address";
 import { ZoomableImage } from "./zoomable-image";
 
@@ -133,7 +134,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
                   <WordWrap text={periodOf(place)!} />
                 </p>
               )}
-              {place?.intro && <p className="mt-1.5 line-clamp-2 text-[14px] leading-relaxed text-ink/80">{place.intro}</p>}
+              {place?.intro && <ClampText text={place.intro} className="mt-1.5 text-[14px] leading-relaxed text-ink/80" />}
               {(slot.picked || slot.forRain) && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {slot.picked && <p className="rounded-full bg-yellow px-2.5 py-0.5 text-xs font-bold">직접 고른 곳</p>}
@@ -170,9 +171,10 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
             )}
           </div>
           {slot.alternatives.length > 0 && (
-            <ul className="no-scrollbar flex gap-1.5 overflow-x-auto px-3 sm:flex-wrap sm:overflow-visible sm:px-0">
+            // 휴대폰: 옆으로 민다 — 오른쪽 끝을 흐리게 해 「더 있어요」를 보여 주고, 끝까지 밀면 마지막 칩이 흐림 밖으로 나오게 여백을 둔다
+            <ul className="no-scrollbar flex snap-x gap-1.5 overflow-x-auto scroll-px-3 px-3 pr-10 [mask-image:linear-gradient(to_right,#000_calc(100%-36px),transparent)] sm:flex-wrap sm:overflow-visible sm:px-0 sm:[mask-image:none]">
               {slot.alternatives.map((p) => (
-                <li key={p.id} className="shrink-0">
+                <li key={p.id} className="shrink-0 snap-start">
                   <Link
                     href={hrefFor(slot.key, p.id)}
                     scroll={false}
