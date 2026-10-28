@@ -1,7 +1,7 @@
 import { durationLabel, estimateDriveMinutes } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dateLabel, TravelWindow } from "@/shared/kernel/travel-window";
-import { DriveTimes, Place, PlaceCatalog, RestaurantFinder } from "../domain/place";
+import { DriveTimes, Place, PlaceCatalog, PlacePages, RestaurantFinder } from "../domain/place";
 import {
   draftTrip,
   fillMeals,
@@ -109,6 +109,7 @@ export async function planItinerary(
   restaurants: RestaurantFinder,
   driveTimes: DriveTimes,
   outlook: WeatherOutlook,
+  pages: PlacePages,
 ): Promise<ItineraryView | undefined> {
   const window = TravelWindow.of(query.start, query.end);
   const dates = window.dates(MAX_TRIP_DAYS);
@@ -133,7 +134,7 @@ export async function planItinerary(
   );
 
   const candidates = await Promise.all(mealsOf(draft).map((m) => restaurants.near(m.near, MEAL_CANDIDATES)));
-  const days = fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks);
+  const days = await withStayPage(fillStays(fillMeals(draft, candidates, MEAL_ALTERNATIVES, picks), lodgings, picks), pages);
   const stayKey = stayKeyOf(days);
   const travel = await travelLabels(days.map((d) => d.slots.map(placeOf)), driveTimes);
 
@@ -229,6 +230,23 @@ async function travelLabels(
       );
     }),
   );
+}
+
+/**
+ * 고른 숙소에 카카오맵 페이지를 붙인다 — 관광공사 숙소엔 별점·리뷰가 없어 식당처럼 「별점과 리뷰」로 보낸다.
+ * 연휴 내내 한 숙소라 한 번만 찾는다. 못 찾으면 버튼 없이 둔다.
+ */
+async function withStayPage(days: TripDay[], pages: PlacePages): Promise<TripDay[]> {
+  const stay = days.flatMap((d) => d.slots).find((s) => s.kind === "stay" && s.choice);
+  const choice = stay?.kind === "stay" ? stay.choice : undefined;
+  if (!choice || choice.url) return days;
+  const url = await pages.kakaoPageOf(choice);
+  if (!url) return days;
+  const linked = { ...choice, url };
+  return days.map((day) => ({
+    ...day,
+    slots: day.slots.map((slot) => (slot.kind === "stay" && slot.choice?.id === choice.id ? { ...slot, choice: linked } : slot)),
+  }));
 }
 
 function placeView(place: Place): PlaceView {
