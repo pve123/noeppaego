@@ -183,3 +183,8 @@ html {
 .install-bob {
   animation: loading-pin 0.7s ease-in-out 0.5s 2;
 }
+
+/* 시트(모달 dialog)가 열려 있으면 뒤 화면이 스크롤되지 않게 */
+html:has(dialog[open]:modal) {
+  overflow: hidden;
+}

@@ -47,6 +47,20 @@ export interface PlacePages {
   kakaoPageOf(place: Place): Promise<string | undefined>;
 }
 
+/** 근처 주차장 — 요금·빈자리는 모른다 */
+export type ParkingLot = {
+  readonly name: string;
+  readonly address: string;
+  readonly location: Coordinate;
+  /** 기준 장소에서 직선 거리(m) */
+  readonly distanceM: number;
+};
+
+/** 포트 — 좌표 근처 주차장, 가까운 순. 못 찾거나 실패하면 빈 배열 */
+export interface ParkingFinder {
+  near(at: Coordinate): Promise<ParkingLot[]>;
+}
+
 /** 포트 — 자동차 이동 시간(분). 모르면 undefined */
 export interface DriveTimes {
   minutes(from: Coordinate, to: Coordinate): Promise<number | undefined>;

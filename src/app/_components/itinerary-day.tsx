@@ -153,7 +153,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
         </div>
       </div>
 
-      {place?.address && <AddressBar address={place.address} />}
+      {place?.address && <AddressBar address={place.address} place={place} />}
 
       {hrefFor && (slot.alternatives.length > 0 || slot.picked) && (
         <div className="flex flex-col gap-2 border-t-2 border-dashed border-ink/25 bg-cream py-2.5 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-1.5 sm:px-4">

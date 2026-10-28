@@ -4,7 +4,9 @@
  */
 import "server-only";
 import { KakaoDriveTimes } from "@/shared/kakao/kakao-mobility";
+import { Coordinate } from "@/shared/kernel/coordinate";
 import { describeItinerary as describe } from "./application/describe-itinerary";
+import { findParking as findLots } from "./application/find-parking";
 import { planItinerary as handle, type ItineraryView, type PlanItinerary } from "./application/plan-itinerary";
 import { randomId } from "@/shared/db/random-id";
 import {
@@ -20,6 +22,7 @@ import { OpenAiTripWriter } from "./infrastructure/openai-trip-writer";
 import { DrizzleSavedItineraryRepository } from "./infrastructure/drizzle-saved-itinerary-repository";
 import { KmaWeatherOutlook } from "./infrastructure/kma-weather-outlook";
 import { PreviewWeatherOutlook, weatherPreviewOf } from "./infrastructure/preview-weather-outlook";
+import { KakaoParkingFinder } from "./infrastructure/kakao-parking-finder";
 import { KakaoPlacePages } from "./infrastructure/kakao-place-pages";
 import { TourPlaceIntros } from "./infrastructure/tour-place-intros";
 import { KakaoRestaurantFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
@@ -43,6 +46,10 @@ const outlook = preview ? new PreviewWeatherOutlook(preview) : new KmaWeatherOut
 export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, driveTimes, outlook, pages, intros);
 /** 하루마다 AI 소개 글 — 못 쓰면 undefined */
 export const describeItinerary = (plan: ItineraryView) => describe(plan, writer);
+
+const parking = new KakaoParkingFinder();
+/** 장소 근처 주차장 — 일정 카드의 「주차」를 눌렀을 때만 부른다 */
+export const findParking = (at: { lat: number; lng: number }) => findLots(new Coordinate(at.lat, at.lng), parking);
 
 const saved = new DrizzleSavedItineraryRepository();
 
@@ -73,4 +80,5 @@ export const toggleFavorite = (command: { userId: string; itineraryId: string; f
 export const forgetItinerariesOf = (userId: string) => forget(userId, saved);
 
 export type { DayView, ItineraryView, PlaceView, SlotView, WeatherView } from "./application/plan-itinerary";
+export type { ParkingView } from "./application/find-parking";
 export type { FavoriteView, SavedItineraryView } from "./application/saved-itineraries";
