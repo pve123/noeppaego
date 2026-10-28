@@ -6,7 +6,8 @@ import "server-only";
 import { KakaoDriveTimes } from "@/shared/kakao/kakao-mobility";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { describeItinerary as describe } from "./application/describe-itinerary";
-import { findParking as findLots } from "./application/find-parking";
+import { findFacilityParking as findFacility, findParking as findLots } from "./application/find-parking";
+import type { PlaceKind } from "./domain/place";
 import { planItinerary as handle, type ItineraryView, type PlanItinerary } from "./application/plan-itinerary";
 import { randomId } from "@/shared/db/random-id";
 import {
@@ -23,6 +24,7 @@ import { DrizzleSavedItineraryRepository } from "./infrastructure/drizzle-saved-
 import { KmaWeatherOutlook } from "./infrastructure/kma-weather-outlook";
 import { PreviewWeatherOutlook, weatherPreviewOf } from "./infrastructure/preview-weather-outlook";
 import { KakaoParkingFinder } from "./infrastructure/kakao-parking-finder";
+import { TourFacilityParking } from "./infrastructure/tour-facility-parking";
 import { KakaoPlacePages } from "./infrastructure/kakao-place-pages";
 import { TourPlaceIntros } from "./infrastructure/tour-place-intros";
 import { KakaoRestaurantFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
@@ -50,6 +52,9 @@ export const describeItinerary = (plan: ItineraryView) => describe(plan, writer)
 const parking = new KakaoParkingFinder();
 /** 장소 근처 주차장 — 일정 카드의 「주차」를 눌렀을 때만 부른다 */
 export const findParking = (at: { lat: number; lng: number }) => findLots(new Coordinate(at.lat, at.lng), parking);
+const facilityParking = new TourFacilityParking();
+/** 장소 자체 주차 안내(관광공사) — 「주차」 시트를 열 때만 부른다 */
+export const findFacilityParking = (placeId: string, kind: PlaceKind) => findFacility(placeId, kind, facilityParking);
 
 const saved = new DrizzleSavedItineraryRepository();
 
@@ -80,5 +85,5 @@ export const toggleFavorite = (command: { userId: string; itineraryId: string; f
 export const forgetItinerariesOf = (userId: string) => forget(userId, saved);
 
 export type { DayView, ItineraryView, PlaceView, SlotView, WeatherView } from "./application/plan-itinerary";
-export type { ParkingView } from "./application/find-parking";
+export type { FacilityParkingView, ParkingView } from "./application/find-parking";
 export type { FavoriteView, SavedItineraryView } from "./application/saved-itineraries";

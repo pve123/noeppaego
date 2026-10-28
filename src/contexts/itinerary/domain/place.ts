@@ -56,6 +56,14 @@ export type ParkingLot = {
   readonly distanceM: number;
 };
 
+/** 시설 자체 주차 안내 — 「가능(소형 150대)」처럼 기관이 적은 글 그대로 */
+export type FacilityParking = { readonly text: string; readonly fee?: string };
+
+/** 포트 — 장소(id·종류)의 시설 주차 안내. 안내가 없거나 모르는 장소면 undefined */
+export interface FacilityParkingSource {
+  parkingOf(placeId: string, kind: PlaceKind): Promise<FacilityParking | undefined>;
+}
+
 /** 포트 — 좌표 근처 주차장, 가까운 순. 못 찾거나 실패하면 빈 배열 */
 export interface ParkingFinder {
   near(at: Coordinate): Promise<ParkingLot[]>;

@@ -119,6 +119,25 @@ export async function fetchOverview(contentId: string): Promise<PublicDataResult
   return { ok: true, value: result.value[0]?.overview ?? "" };
 }
 
+/** 소개 정보(detailIntro2) 중 주차 칸 — 타입마다 이름이 다르다. 값에 `<br>` 같은 태그가 섞여 온다 */
+type IntroParking = { parking?: string; parkingculture?: string; parkingfee?: string; parkinglodging?: string };
+
+/** 시설 주차 안내 — 관광지·문화시설·숙소만 칸이 있다. 거의 안 바뀌어 며칠 캐시한다. 없으면 빈 값 */
+export async function fetchIntroParking(
+  contentId: string,
+  contentTypeId: ContentTypeId,
+): Promise<PublicDataResult<{ parking: string; fee: string }>> {
+  "use cache";
+  const result = await requestItems<IntroParking>("tour:intro", `${BASE}/detailIntro2`, { ...COMMON, contentId, contentTypeId });
+  if (!result.ok) {
+    cacheLife("seconds");
+    return result;
+  }
+  cacheLife("days");
+  const item = result.value[0] ?? {};
+  return { ok: true, value: { parking: item.parking ?? item.parkingculture ?? item.parkinglodging ?? "", fee: item.parkingfee ?? "" } };
+}
+
 // ── 항목 해석 ─────────────────────────────────────────
 
 /** 세종은 시·군·구가 없어 시·도 코드 하나로 온다 */
