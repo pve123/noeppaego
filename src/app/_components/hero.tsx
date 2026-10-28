@@ -1,3 +1,6 @@
+/** 하는 일 세 가지 — 연휴 찾기(연차 최소) · 갈 곳 추천 · 하루 일정 */
+const STEPS = ["연차 적게 쓰는 연휴", "갈 만한 곳", "하루 일정까지"];
+
 export function Hero() {
   return (
     <section id="top" className="mx-auto flex max-w-6xl items-center gap-10 px-4 pb-14 pt-8 sm:px-6 sm:pt-12">
@@ -10,7 +13,17 @@ export function Hero() {
           <br />
           <span className="rounded-2xl bg-yellow px-2.5">가장 길게</span> 쉴까?
         </h1>
-        <p className="max-w-[460px] text-lg leading-[1.8]">공휴일과 주말을 이어서 연차는 적게 쓰고 오래 쉬는 날을 찾아 드려요.</p>
+        {/* 긴 설명 문장 대신 하는 일을 순서대로 — 「연차 계산」 다음에 갈 곳과 일정까지 해 준다는 걸 한눈에 */}
+        <ol aria-label="이렇게 도와드려요" className="flex flex-wrap gap-2">
+          {STEPS.map((step, i) => (
+            <li key={step} className="flex items-center gap-1.5 rounded-full border-2 border-ink bg-surface py-1 pl-1 pr-3 text-[15px] font-bold">
+              <span aria-hidden className="flex size-6 items-center justify-center rounded-full bg-ink font-display text-[13px] text-cream">
+                {i + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
         <a
           href="#next"
           className="inline-flex h-14 items-center self-start rounded-[18px] border-[3px] border-ink bg-coral px-7 font-display text-xl shadow-pop-sm transition-transform hover:-translate-y-0.5"

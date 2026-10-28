@@ -7,7 +7,8 @@ export function PageBand({ eyebrow, title, sub, children }: { eyebrow?: string; 
       <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 sm:px-6 sm:py-10">
         {eyebrow && <p className="font-display text-[17px] text-yellow">{eyebrow}</p>}
         <h1 className="font-display text-[clamp(30px,4.5vw,48px)] leading-tight text-balance">{title}</h1>
-        {sub && <p className="text-[16px] text-soft-ink text-balance">{sub}</p>}
+        {/* div — 부제 안에 줄(p)을 여러 개 넣는 곳이 있다(p 안에 p 는 HTML 오류) */}
+        {sub && <div className="text-[16px] text-soft-ink text-balance">{sub}</div>}
         {children}
       </div>
     </section>

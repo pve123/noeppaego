@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { BreakStatus, LongBreakView } from "@/contexts/calendar";
 import { DayStrip } from "./day-strip";
-import { leaveText, periodText } from "./leave-text";
+import { LeaveLine, PeriodLine } from "./leave-text";
 
 /**
  * 연휴 카드 — 카드 전체가 「갈 곳 보기」 링크다. 할 일은 하나만 둔다.
@@ -24,11 +24,8 @@ export function BreakCard({ item }: { item: LongBreakView }) {
 
         <div className="flex flex-1 flex-col gap-1.5 px-5 pb-5 pt-4">
           <p className="font-display text-[44px] leading-none">{base.length}일</p>
-          <p className="text-[15px] text-muted">
-            {periodText(base)}
-            <br />
-            {leaveText(base)}
-          </p>
+          <PeriodLine option={base} className="mt-1 text-[15px] text-ink" />
+          <LeaveLine option={base} className="text-[14px] text-muted" />
           <DayStrip days={base.days} size="sm" />
           {longest && (
             <p className="mt-2 text-[15px]">

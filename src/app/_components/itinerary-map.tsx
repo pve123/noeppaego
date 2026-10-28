@@ -117,25 +117,6 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
           })}
         </div>
       </div>
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <button
-          type="button"
-          aria-pressed={showParking}
-          onClick={toggleParking}
-          className={`inline-flex h-10 items-center gap-1.5 rounded-full border-[2.5px] border-ink px-4 text-[15px] font-bold transition-colors ${
-            showParking ? "bg-[#1d5fd6] text-white" : "bg-surface hover:bg-cream"
-          }`}
-        >
-          <ParkingMark className={`size-5 text-[12px] ${showParking ? "ring-2 ring-white" : ""}`} />
-          주차장 보기
-        </button>
-        <span aria-live="polite" className="text-sm text-muted">
-          {dayParking === "loading" && "근처 주차장을 찾는 중이에요"}
-          {dayParking === "failed" && "주차장을 불러오지 못했어요. 다시 켜 보세요."}
-          {Array.isArray(dayParking) && dayParking.length === 0 && "이날 장소 근처(500m)에 주차장이 없어요."}
-        </span>
-      </div>
-
       <div className="mt-4 grid gap-4 md:grid-cols-[1fr_340px]">
         {/* 선이 길처럼 보여 헷갈리지 않게 — 지도 아래 작은 글 대신 지도 위에 붙여 둔다 */}
         <div className="relative">
@@ -149,6 +130,25 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
               방문 순서예요. 실제 길과 달라요.
             </p>
           )}
+          {/* 주차장 보기 — 지도 앱의 레이어 버튼처럼 지도 오른쪽 아래에 띄운다. 상태 글은 버튼 위 말풍선으로 */}
+          <div className="absolute bottom-3 right-3 z-[5] flex flex-col items-end gap-1.5">
+            <span aria-live="polite" className="empty:hidden max-w-[220px] rounded-xl border-2 border-ink bg-surface/95 px-2.5 py-1 text-right text-[12px] font-bold">
+              {dayParking === "loading" && "주차장을 찾는 중이에요"}
+              {dayParking === "failed" && "불러오지 못했어요. 다시 켜 보세요."}
+              {Array.isArray(dayParking) && dayParking.length === 0 && "근처 500m에 주차장이 없어요"}
+            </span>
+            <button
+              type="button"
+              aria-pressed={showParking}
+              onClick={toggleParking}
+              className={`inline-flex h-11 items-center gap-1.5 rounded-full border-[2.5px] border-ink pl-2 pr-4 text-[15px] font-bold shadow-pop-sm transition-colors ${
+                showParking ? "bg-[#1d5fd6] text-white" : "bg-surface hover:bg-cream"
+              }`}
+            >
+              <ParkingMark className={`size-6 text-[13px] ${showParking ? "ring-2 ring-white" : ""}`} />
+              {showParking ? "주차장 끄기" : "주차장 보기"}
+            </button>
+          </div>
         </div>
         <ol aria-label={`${day.dayNumber}일차 장소`} className="space-y-2 self-start">
           {day.stops.map((s, i) => (

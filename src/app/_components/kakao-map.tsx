@@ -201,7 +201,6 @@ export function KakaoMap({
         </div>
         {legend.length > 0 && (
           <div className="self-start">
-            <p className="mb-2 text-sm text-muted">번호를 누르면 그 지역만 보여 드려요.</p>
             <ul aria-label="지도 번호" className="space-y-2">
               {legend.map((item) => {
                 const active = item.badge === focus;
@@ -210,6 +209,7 @@ export function KakaoMap({
                     <button
                       type="button"
                       aria-pressed={active}
+                      aria-label={`${item.text} 지도에서 보기`}
                       onClick={() => setFocus(active ? undefined : item.badge)}
                       className={`flex w-full items-start gap-3 rounded-2xl border-[2.5px] border-ink px-3 py-2.5 text-left transition-transform ${
                         active ? "-translate-y-0.5 bg-yellow shadow-pop-sm" : focus ? "bg-surface opacity-60 hover:opacity-100" : "bg-surface hover:-translate-y-0.5"
@@ -221,7 +221,20 @@ export function KakaoMap({
                       >
                         {item.badge}
                       </span>
-                      <span className="font-bold leading-snug [overflow-wrap:anywhere]">{item.text}</span>
+                      <span className="min-w-0 flex-1 font-bold leading-snug [overflow-wrap:anywhere]">{item.text}</span>
+                      {/* 안내 문장 대신 줄마다 「지도에서 보기」 표시 — 누를 수 있다는 걸 모양으로 알린다 */}
+                      <span
+                        aria-hidden
+                        className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-2 ${
+                          active ? "border-ink bg-ink text-cream" : "border-ink/20 text-ink/60"
+                        }`}
+                      >
+                        <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                          <circle cx="12" cy="12" r="6.5" />
+                          <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none" />
+                          <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" />
+                        </svg>
+                      </span>
                     </button>
                   </li>
                 );
