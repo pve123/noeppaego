@@ -7,7 +7,7 @@ import { findDestinations, reachPreferenceOf, type ReachPreference } from "@/con
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { DestinationCard } from "../../_components/destination-card";
 import { KakaoMap, type MapPin } from "../../_components/kakao-map";
-import { leaveText, periodText } from "../../_components/leave-text";
+import { LeaveLine, PeriodLine } from "../../_components/leave-text";
 import { OriginSelect } from "../../_components/origin-select";
 import { PageBand } from "../../_components/page-band";
 import { ReachChips, reachLabel, reachQuery, widerThan } from "../../_components/reach-chips";
@@ -65,9 +65,8 @@ async function BreakDetail({ params, searchParams }: PageProps<"/breaks/[start]"
         title="어디로 갈까요?"
         sub={
           <>
-            {periodText(base)}
-            <br />
-            {leaveText(base)}
+            <PeriodLine option={base} className="text-cream" />
+            <LeaveLine option={base} className="mt-2" />
           </>
         }
       />
@@ -100,15 +99,24 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
         <OriginSelect origins={view.origins} selected={view.originId} basePath={basePath} query={reachQuery(view.reach)} />
         <ReachChips basePath={basePath} originId={view.originId} selected={view.reach} />
       </div>
-      <p className="mt-5 text-[16px]">
-        {view.originName}에서 {view.reachKm ? `${view.reachKm}km 안에서 ` : ""}축제가 많은 곳부터 보여 드려요.
-      </p>
+      {/* 목록 머리 — 문장 대신 몇 곳인지와 어떤 조건으로 골랐는지를 칩으로 */}
+      {view.destinations.length > 0 && (
+        <div className="mt-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+          <h2 className="font-display text-[24px] leading-tight">추천 지역 {view.destinations.length}곳</h2>
+          <ul aria-label="고른 기준" className="flex flex-wrap gap-1.5 text-[13px] font-bold">
+            <li className="rounded-full bg-soft-ink px-2.5 py-1">
+              {view.originName}에서 {view.reachKm ? `${view.reachKm}km 안` : "거리 제한 없이"}
+            </li>
+            <li className="rounded-full bg-soft-ink px-2.5 py-1">축제 많은 순</li>
+          </ul>
+        </div>
+      )}
 
       {view.destinations.length === 0 ? (
         <EmptyDestinations basePath={basePath} originId={view.originId} reach={view.reach} reachKm={view.reachKm} />
       ) : (
         <>
-          <ol className="mt-6 grid gap-5 md:grid-cols-2">
+          <ol className="mt-4 grid gap-5 md:grid-cols-2">
             {view.destinations.map((d, i) => (
               <li key={d.code} className="min-w-0">
                 <DestinationCard destination={d} rank={i + 1} planHref={`/breaks/${start}/${d.code}`} />

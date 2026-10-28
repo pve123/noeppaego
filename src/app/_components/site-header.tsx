@@ -65,13 +65,19 @@ export function SiteFooter() {
   return (
     <footer className="mt-16 border-t-[3px] border-ink bg-mint">
       <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-between gap-8 px-4 py-12 sm:px-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-start gap-3">
           <Logo size={56} />
           <div>
             <p className="font-display text-[26px] leading-tight">
               <BrandName />
             </p>
-            <p className="text-[15px]">너 P야? 계획은 맡겨 주세요</p>
+            {/* 슬로건을 메신저 대화처럼 — 묻는 말풍선(흰색)과 J의 대답(노랑) */}
+            <div className="mt-2.5 flex flex-col items-start gap-1.5 font-display text-[16px]">
+              <p className="-rotate-2 rounded-2xl rounded-bl-sm border-2 border-ink bg-surface px-3 py-1">너 P야?</p>
+              <p className="ml-5 rotate-1 rounded-2xl rounded-br-sm border-2 border-ink bg-yellow px-3 py-1 shadow-pop-sm">
+                계획은 <span className="rounded-md bg-ink px-1 text-cream">J</span>가 다 짤게
+              </p>
+            </div>
           </div>
         </div>
         <div className="w-full sm:w-auto">

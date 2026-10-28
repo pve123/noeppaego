@@ -21,7 +21,10 @@ export type FindDestinations = {
 export type FestivalView = {
   id: string;
   title: string;
+  /** 「2026.01.01부터 12.31까지」 — 끝날이 같은 해면 연도를 뺀다 */
   dateLabel: string;
+  /** 연휴 내내 열린다 — 아무 날이나 가도 된다 */
+  wholeBreak: boolean;
   address: string;
   imageUrl?: string;
 };
@@ -78,7 +81,8 @@ export async function findDestinations(
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,
-        dateLabel: rangeText(dotDate(f.start), dotDate(f.end)),
+        dateLabel: rangeText(dotDate(f.start), f.start.slice(0, 4) === f.end.slice(0, 4) ? dotDate(f.end).slice(5) : dotDate(f.end)),
+        wholeBreak: window.overlapDays(f.start, f.end) === window.days,
         address: f.address,
         imageUrl: f.imageUrl,
       })),
