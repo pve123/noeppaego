@@ -15,7 +15,8 @@ export const reachQuery = (reach: ReachPreference) => (reach === "auto" ? "" : `
 export function ReachChips({ basePath, originId, selected }: { basePath: string; originId: string; selected: ReachPreference }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <span id="reach-label" className="font-bold">
+      {/* 출발지 줄과 컨트롤 시작점을 맞춘다(같은 라벨 폭) */}
+      <span id="reach-label" className="font-bold sm:w-40">
         얼마나 멀리 갈까요?
       </span>
       <nav aria-labelledby="reach-label" className="flex flex-wrap gap-2">

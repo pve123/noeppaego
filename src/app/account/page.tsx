@@ -22,7 +22,8 @@ export default function AccountPage() {
       <SiteNotice />
       <main>
         <PageBand title="내 계정" sub="로그인 정보와 저장한 일정을 관리해요." />
-        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+        {/* 왼쪽 끝은 제목 띠와 맞추고(6xl), 읽기 폭은 좁게(2xl) */}
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 [&>*]:max-w-2xl">
           <RevealSuspense fallback={<Shimmer className="h-96" />}>
             <Account />
           </RevealSuspense>
@@ -38,7 +39,7 @@ async function Account() {
   if (!user) {
     return (
       <div className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
-        <p className="font-display text-[22px]">로그인하면 계정을 관리할 수 있어요.</p>
+        <p className="font-display text-[22px] text-balance">로그인하면 계정을 관리할 수 있어요.</p>
         <p className="mt-2 text-muted">탈퇴하려는 경우에도 먼저 로그인해 주세요.</p>
         <div className="mt-5">
           <KakaoLoginButton next="/account" />

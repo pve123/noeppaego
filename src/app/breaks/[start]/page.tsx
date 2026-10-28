@@ -168,7 +168,7 @@ function EmptyDestinations({
   const wider = reachKm ? widerThan(reach) : undefined;
   return (
     <div className="mt-6 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
-      <p className="font-display text-[22px]">
+      <p className="font-display text-[22px] text-balance">
         {wider && reachKm ? `${reachKm}km 안에는 이 기간 축제가 없어요.` : "이 기간에 등록된 축제가 아직 없어요."}
       </p>
       <p className="mt-2 text-muted">{wider ? "범위를 넓히면 갈 곳이 나올 수 있어요." : "날짜가 가까워지면 다시 확인해 주세요."}</p>

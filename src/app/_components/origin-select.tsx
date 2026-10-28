@@ -44,7 +44,7 @@ export function OriginSelect({
       }}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span id={`${id}-label`} className="font-bold">
+        <span id={`${id}-label`} className="font-bold sm:w-40">
           어디서 출발하세요?
         </span>
         <button
