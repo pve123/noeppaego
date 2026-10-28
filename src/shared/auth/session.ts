@@ -3,12 +3,13 @@ import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
 
 /**
- * 로그인 세션 — 서명한 쿠키(httpOnly·Secure·SameSite=Lax) 하나. 안에는 사용자 id 와 (동의했으면) 닉네임만 둔다.
+ * 로그인 세션 — 서명한 쿠키(httpOnly·Secure·SameSite=Lax) 하나. 안에는 사용자 id 와 닉네임만 둔다.
  * 닉네임은 DB 에 저장하지 않는다 — 로그아웃하거나 만료되면 사라진다.
  * 서명 키는 AUTH_SECRET(32자 이상). 없으면 로그인을 막는다 — 약한 키로 돌지 않게.
  */
 const COOKIE = "ht_session";
-const MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
+/** 7일 — 오래 두면 예전 동의(닉네임 없음)로 만든 세션이 오래 남는다 */
+const MAX_AGE_SECONDS = 7 * 24 * 60 * 60;
 
 function key(): Uint8Array | undefined {
   const secret = process.env.AUTH_SECRET;
@@ -40,7 +41,8 @@ export async function currentUser(): Promise<{ id: string; nickname?: string } |
   const token = (await cookies()).get(COOKIE)?.value;
   if (!k || !token) return undefined;
   try {
-    const { payload } = await jwtVerify(token, k, { algorithms: ["HS256"] });
+    // 기한을 줄이기 전에 30일로 만든 세션도 발급(iat) 뒤 7일이 지나면 끝낸다
+    const { payload } = await jwtVerify(token, k, { algorithms: ["HS256"], maxTokenAge: MAX_AGE_SECONDS });
     if (!payload.sub) return undefined;
     return { id: payload.sub, nickname: typeof payload.nick === "string" ? payload.nick : undefined };
   } catch {

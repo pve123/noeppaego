@@ -5,7 +5,10 @@ const AUTHORIZE = "https://kauth.kakao.com/oauth/authorize";
 const TOKEN = "https://kauth.kakao.com/oauth/token";
 const ME = "https://kapi.kakao.com/v2/user/me";
 
-/** 카카오 로그인 화면 주소 — 동의 항목은 콘솔 설정(닉네임 선택 동의)을 따른다 */
+/**
+ * 카카오 로그인 화면 주소 — 동의 항목은 콘솔 설정(닉네임 필수 동의)을 따른다.
+ * 계정 고르기 화면을 띄운다(select_account) — 카카오톡에 로그인된 계정으로 말없이 들어가 「찜이 사라졌다」고 헷갈리지 않게.
+ */
 export function kakaoAuthorizeUrl(state: string, redirectUri: string): string | undefined {
   const clientId = process.env.KAKAO_REST_API_KEY;
   if (!clientId) return undefined;
@@ -14,6 +17,7 @@ export function kakaoAuthorizeUrl(state: string, redirectUri: string): string | 
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("state", state);
+  url.searchParams.set("prompt", "select_account");
   return url.toString();
 }
 

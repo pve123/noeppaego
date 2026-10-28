@@ -40,10 +40,7 @@ export function SaveCard({ loggedIn, target }: { loggedIn: boolean; target: Save
         {loggedIn ? (
           <SaveButton target={target} />
         ) : (
-          <>
-            <KakaoLoginButton next={`${target.here}#save`} />
-            <p className="mt-2 text-xs text-muted">회원 번호와 닉네임(선택)만 받아요</p>
-          </>
+          <KakaoLoginButton next={`${target.here}#save`} />
         )}
       </div>
     </section>
