@@ -20,11 +20,11 @@ const visitIds = (days: TripDay[]) =>
 const times = (day: TripDay) => day.slots.map((s) => s.time);
 
 describe("layoutOf", () => {
-  it("첫날은 점심부터, 마지막 날은 점심 먹고 귀가", () => {
-    expect(layoutOf(0, 3)).toEqual(["lunch", "afternoon", "dinner", "night"]);
-    expect(layoutOf(1, 3)).toEqual(["morning", "lunch", "afternoon", "dinner", "night"]);
-    expect(layoutOf(2, 3)).toEqual(["morning", "lunch", "home"]);
-    expect(layoutOf(0, 1)).toEqual(["morning", "lunch", "afternoon", "dinner", "home"]);
+  it("첫날은 점심부터, 마지막 날은 점심 먹고 귀가 — 매일 점심 뒤엔 카페", () => {
+    expect(layoutOf(0, 3)).toEqual(["lunch", "cafe", "afternoon", "dinner", "night"]);
+    expect(layoutOf(1, 3)).toEqual(["morning", "lunch", "cafe", "afternoon", "dinner", "night"]);
+    expect(layoutOf(2, 3)).toEqual(["morning", "lunch", "cafe", "home"]);
+    expect(layoutOf(0, 1)).toEqual(["morning", "lunch", "cafe", "afternoon", "dinner", "home"]);
   });
 });
 
@@ -78,7 +78,7 @@ describe("draftTrip", () => {
 
   it("마지막 날은 귀가로 끝나고 숙소가 없다", () => {
     const days = draftTrip(dates, [place("A", 0), place("B", 1), place("C", 2), place("D", 3)], []);
-    expect(times(days[2])).toEqual(["morning", "lunch", "home"]);
+    expect(times(days[2])).toEqual(["morning", "lunch", "cafe", "home"]);
     expect(times(days[0]).at(-1)).toBe("night");
   });
 });
@@ -88,11 +88,34 @@ describe("fillMeals", () => {
     const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
     const near = [place("국밥", 0.1, { kind: "restaurant" }), place("파스타", 0.5, { kind: "restaurant" })];
     const sameNameOtherBranch = place("국밥-2", 10.1, { kind: "restaurant", title: "국밥" });
-    const filled = fillMeals(days, [near, [sameNameOtherBranch, place("냉면", 10.3, { kind: "restaurant" })]]);
-    const [lunch, dinner] = mealsOf(filled);
+    const filled = fillMeals(days, [near, [], [sameNameOtherBranch, place("냉면", 10.3, { kind: "restaurant" })]]);
+    const [lunch, , dinner] = mealsOf(filled);
     expect(lunch.choice?.id).toBe("국밥");
     expect(lunch.alternatives.map((p) => p.id)).toEqual(["파스타"]);
     expect(dinner.choice?.id).toBe("냉면");
+  });
+});
+
+describe("카페 칸", () => {
+  it("점심과 같은 근처에서 찾고, 고르는 방식은 식사 칸과 같다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
+    const [lunch, cafe] = mealsOf(days);
+    expect(cafe.time).toBe("cafe");
+    expect(cafe.near).toEqual(lunch.near);
+
+    const cafes = [place("디저트", 0.2, { kind: "cafe" }), place("베이커리", 0.4, { kind: "cafe" })];
+    const [, filled] = mealsOf(fillMeals(days, [[place("국밥", 0.1, { kind: "restaurant" })], cafes, []], 2));
+    expect(filled.choice?.id).toBe("디저트");
+    expect(filled.alternatives.map((p) => p.id)).toEqual(["베이커리"]);
+  });
+
+  it("고른 카페는 그 칸에 고정한다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
+    const cafes = [place("디저트", 0.2, { kind: "cafe" }), place("베이커리", 0.4, { kind: "cafe" })];
+    const picks = new Map([[slotKeyOf("2026-12-25", "cafe"), "베이커리"]]);
+    const [, cafe] = mealsOf(fillMeals(days, [[], cafes, []], 2, picks));
+    expect(cafe.choice?.id).toBe("베이커리");
+    expect(cafe.picked).toBe(true);
   });
 });
 
@@ -160,7 +183,7 @@ describe("사용자가 고른 곳(picks)", () => {
   it("식사 칸 후보에는 다른 끼니가 이미 쓰는 식당을 넣지 않는다", () => {
     const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 0.2)], []);
     const shared = ["R1", "R2", "R3", "R4"].map((id, i) => place(id, 0.1 * (i + 1), { kind: "restaurant" }));
-    const [lunch, dinner] = mealsOf(fillMeals(days, [shared, shared], 3));
+    const [lunch, , dinner] = mealsOf(fillMeals(days, [shared, [], shared], 3));
     expect(lunch.choice?.id).toBe("R1");
     expect(dinner.choice?.id).toBe("R2");
     expect(lunch.alternatives.map((p) => p.id)).toEqual(["R3", "R4"]);
@@ -188,7 +211,7 @@ describe("사용자가 고른 곳(picks)", () => {
     const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 0.2)], []);
     const shared = [place("국밥", 0.1, { kind: "restaurant" }), place("파스타", 0.3, { kind: "restaurant" })];
     const picks = new Map([[slotKeyOf("2026-12-25", "dinner"), "국밥"]]);
-    const [lunch, dinner] = mealsOf(fillMeals(days, [shared, shared], 2, picks));
+    const [lunch, , dinner] = mealsOf(fillMeals(days, [shared, [], shared], 2, picks));
     expect(lunch.choice?.id).toBe("파스타");
     expect(dinner.choice?.id).toBe("국밥");
   });

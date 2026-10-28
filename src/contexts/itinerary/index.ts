@@ -27,7 +27,7 @@ import { KakaoParkingFinder } from "./infrastructure/kakao-parking-finder";
 import { TourFacilityParking } from "./infrastructure/tour-facility-parking";
 import { KakaoPlacePages } from "./infrastructure/kakao-place-pages";
 import { TourPlaceIntros } from "./infrastructure/tour-place-intros";
-import { KakaoRestaurantFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
+import { KakaoCafeFinder, KakaoRestaurantFinder, TourCafeFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
 import { TourPlaceCatalog } from "./infrastructure/tour-place-catalog";
 
 const catalog = new TourPlaceCatalog();
@@ -35,6 +35,8 @@ const catalog = new TourPlaceCatalog();
 const restaurants = process.env.KAKAO_REST_API_KEY
   ? new KakaoRestaurantFinder(new TourRestaurantFinder())
   : new TourRestaurantFinder();
+// 카페도 같다 — 관광공사엔 카페가 적어 카카오가 없으면 카페 칸이 자주 빈다.
+const cafes = process.env.KAKAO_REST_API_KEY ? new KakaoCafeFinder(new TourCafeFinder()) : new TourCafeFinder();
 
 const driveTimes = new KakaoDriveTimes();
 const pages = new KakaoPlacePages();
@@ -45,7 +47,7 @@ const writer = new OpenAiTripWriter();
 const preview = process.env.VERCEL ? undefined : weatherPreviewOf(process.env.WEATHER_PREVIEW);
 const outlook = preview ? new PreviewWeatherOutlook(preview) : new KmaWeatherOutlook();
 
-export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, driveTimes, outlook, pages, intros);
+export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, cafes, driveTimes, outlook, pages, intros);
 /** 하루마다 AI 소개 글 — 못 쓰면 undefined */
 export const describeItinerary = (plan: ItineraryView) => describe(plan, writer);
 

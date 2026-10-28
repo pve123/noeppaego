@@ -27,7 +27,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const REGION_CODE = /^\d+(-\d+)?$/;
 
 /** 바꾼 칸 `2026-12-25-lunch~kakao:123` — 칸 키와 장소 id */
-const PICK = /^(\d{4}-\d{2}-\d{2}-(?:morning|lunch|afternoon|dinner|night))~([\w:.-]{1,80})$/;
+const PICK = /^(\d{4}-\d{2}-\d{2}-(?:morning|lunch|cafe|afternoon|dinner|night))~([\w:.-]{1,80})$/;
 
 function parsePicks(raw: string | string[] | undefined): Record<string, string> {
   const picks: Record<string, string> = {};

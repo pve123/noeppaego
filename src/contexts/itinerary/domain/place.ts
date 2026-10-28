@@ -1,7 +1,7 @@
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { TravelWindow } from "@/shared/kernel/travel-window";
 
-export type PlaceKind = "sight" | "culture" | "festival" | "restaurant" | "lodging";
+export type PlaceKind = "sight" | "culture" | "festival" | "restaurant" | "cafe" | "lodging";
 
 /** 일정에 넣을 수 있는 장소 */
 export type Place = {
@@ -34,6 +34,11 @@ export interface PlaceCatalog {
 
 /** 포트 — 좌표 근처 식당, 가까운 순 */
 export interface RestaurantFinder {
+  near(at: Coordinate, limit: number): Promise<Place[]>;
+}
+
+/** 포트 — 좌표 근처 카페·디저트 가게 */
+export interface CafeFinder {
   near(at: Coordinate, limit: number): Promise<Place[]>;
 }
 
