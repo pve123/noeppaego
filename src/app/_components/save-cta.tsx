@@ -1,7 +1,8 @@
 import { saveItineraryAction } from "../actions";
 import { KakaoLoginButton } from "./kakao-login-button";
 
-type SaveTarget = { start: string; region: string; picks: Record<string, string>; here: string };
+/** prefs 는 일정 주소의 여행 취향 부분(`with=kids&pace=relaxed`) */
+type SaveTarget = { start: string; region: string; picks: Record<string, string>; prefs: string; here: string };
 
 const BENEFITS = ["저장한 일정은 언제든 다시 볼 수 있어요", "링크 하나로 함께 갈 사람에게 보내요", "마음에 드는 일정을 찜해 모아 둬요"];
 
@@ -66,6 +67,7 @@ function SaveButton({ target, full = false }: { target: SaveTarget; full?: boole
       <input type="hidden" name="start" value={target.start} />
       <input type="hidden" name="region" value={target.region} />
       <input type="hidden" name="picks" value={JSON.stringify(target.picks)} />
+      <input type="hidden" name="prefs" value={target.prefs} />
       <input type="hidden" name="back" value={target.here} />
       <button
         type="submit"

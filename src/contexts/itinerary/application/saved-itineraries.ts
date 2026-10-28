@@ -1,13 +1,15 @@
 import { rangeText } from "@/shared/kernel/korean";
 import { dotDate } from "@/shared/kernel/travel-window";
 import { assertSnapshotSize, SAVED_ID, SavedItineraryRepository } from "../domain/saved-itinerary";
+import type { TripPrefs } from "../domain/preferences";
 import { ItineraryView } from "./plan-itinerary";
 
-/** 저장하는 내용 — 일정 읽기 모델과 그때의 연휴 이름·AI 소개 */
+/** 저장하는 내용 — 일정 읽기 모델과 그때의 연휴 이름·AI 소개·여행 취향(다시 짤 때 이어 쓴다) */
 export type ItinerarySnapshot = {
   breakTitle: string;
   plan: ItineraryView;
   summaries?: string[];
+  prefs?: TripPrefs;
 };
 
 // ── Command ──────────────────────────────────────────

@@ -13,6 +13,7 @@ import { ShareButtons } from "../../_components/share-buttons";
 import { RevealSuspense } from "../../_components/reveal";
 import { BandSkeleton } from "../../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
+import { prefsEntries } from "../../_components/trip-prefs";
 
 /**
  * 카톡·메신저 미리보기 — 일정마다 「경기도 파주시 2박 3일 · 성탄절 연휴」로 보이게. 이미지는 옆의 opengraph-image.tsx.
@@ -67,11 +68,12 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
 
   const { plan } = view;
   const share = shareTextOf(view);
-  const replan = `/breaks/${view.breakStart}/${view.regionCode}${
-    Object.keys(view.picks).length > 0
-      ? `?${new URLSearchParams(Object.entries(view.picks).map(([k, v]) => ["pick", `${k}~${v}`]))}`
-      : ""
-  }`;
+  // 다시 짜기 — 저장할 때의 여행 취향과 바꾼 칸을 그대로 이어 간다
+  const replanQuery = new URLSearchParams([
+    ...prefsEntries(view.prefs ?? {}),
+    ...Object.entries(view.picks).map(([k, v]): [string, string] => ["pick", `${k}~${v}`]),
+  ]);
+  const replan = `/breaks/${view.breakStart}/${view.regionCode}${replanQuery.size > 0 ? `?${replanQuery}` : ""}`;
   const mapDays: MapDay[] = plan.days.map((day) => ({
     dayNumber: day.dayNumber,
     dateLabel: day.dateLabel,

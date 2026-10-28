@@ -1,11 +1,15 @@
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { Place } from "./place";
+import { allowedSights, DessertTime, fittingSights, Pace, preferredStays, TripPrefs } from "./preferences";
 
 /** 연휴가 길어도 한 지역 일정은 2박 3일까지 — 그 이상은 한 지역에 머물기엔 길다. */
 export const MAX_TRIP_DAYS = 3;
 
+/** 방문 칸 — 오전·오후, 「꽉 차게」면 저녁 뒤 밤 산책 */
+export type VisitTime = "morning" | "afternoon" | "evening";
+
 export type Visit = {
-  readonly time: "morning" | "afternoon";
+  readonly time: VisitTime;
   readonly kind: "visit";
   readonly place: Place;
   /** 비 소식이 있어 실내 장소로 골랐다 */
@@ -54,13 +58,35 @@ const VISIT_ALTERNATIVES = 3;
 
 /**
  * 하루의 칸 — 첫날은 오는 데 오전을 쓰고, 마지막 날은 점심 먹고 돌아간다.
- * 하루짜리는 오전부터 저녁까지 돌고 돌아간다. 매일 점심 뒤엔 카페에 들른다.
+ * 하루짜리는 오전부터 저녁까지 돌고 돌아간다.
+ * - 여유롭게: 오전이 있는 날은 오후 관광을 뺀다(첫날은 오후가 유일한 관광이라 둔다)
+ * - 꽉 차게: 저녁이 있는 날은 저녁 뒤 밤 산책을 더한다
+ * - 디저트(카페)는 기본 점심 뒤. 저녁이 없는 날(마지막 날)에 저녁 전·후를 골랐으면 점심 뒤로.
  */
-export function layoutOf(dayIndex: number, totalDays: number): SlotTime[] {
-  if (totalDays === 1) return ["morning", "lunch", "cafe", "afternoon", "dinner", "home"];
-  if (dayIndex === 0) return ["lunch", "cafe", "afternoon", "dinner", "night"];
-  if (dayIndex === totalDays - 1) return ["morning", "lunch", "cafe", "home"];
-  return ["morning", "lunch", "cafe", "afternoon", "dinner", "night"];
+export function layoutOf(dayIndex: number, totalDays: number, pace: Pace = "normal", dessert: DessertTime = "afterLunch"): SlotTime[] {
+  let times: SlotTime[];
+  if (totalDays === 1) times = ["morning", "lunch", "afternoon", "dinner", "home"];
+  else if (dayIndex === 0) times = ["lunch", "afternoon", "dinner", "night"];
+  else if (dayIndex === totalDays - 1) times = ["morning", "lunch", "home"];
+  else times = ["morning", "lunch", "afternoon", "dinner", "night"];
+
+  if (pace === "relaxed" && times.includes("morning")) times = times.filter((t) => t !== "afternoon");
+  if (pace === "packed" && times.includes("dinner")) times = insert(times, "evening", "after", "dinner");
+  return withCafe(times, dessert);
+}
+
+function withCafe(times: SlotTime[], dessert: DessertTime): SlotTime[] {
+  if (dessert === "none") return times;
+  const at = dessert === "beforeDinner" || dessert === "afterDinner" ? "dinner" : "lunch";
+  if (!times.includes(at)) return insert(times, "cafe", "after", "lunch");
+  return insert(times, "cafe", dessert.startsWith("before") ? "before" : "after", at);
+}
+
+function insert(times: SlotTime[], time: SlotTime, where: "before" | "after", anchor: SlotTime): SlotTime[] {
+  const i = times.indexOf(anchor);
+  if (i < 0) return times;
+  const at = where === "before" ? i : i + 1;
+  return [...times.slice(0, at), time, ...times.slice(at)];
 }
 
 /**
@@ -73,6 +99,7 @@ export function layoutOf(dayIndex: number, totalDays: number): SlotTime[] {
  * - 축제가 들어갈 칸을 사용자가 다른 곳으로 바꾸면 그 축제는 일정에서 뺀다.
  * - 사용자가 고른 곳(picks)이 있으면 그 칸은 그곳으로 고정하고, 다른 칸이 먼저 가져가지 않게 예약해 둔다.
  *   고른 곳이 목록에 없으면(데이터가 바뀜) 그 칸은 자동으로 고른다.
+ * - 여행 취향(prefs)이 있으면 관심사·동행에 맞는 곳에서 먼저 고른다(fittingSights). 비 소식이 취향보다 앞선다.
  *
  * 방문지가 하나도 없으면 빈 배열 — 일정을 짤 수 없는 지역이다.
  */
@@ -80,8 +107,9 @@ export function draftTrip(
   dates: readonly string[],
   sights: readonly Place[],
   festivals: readonly Place[],
-  wet: (date: string, time: "morning" | "afternoon") => boolean = () => false,
+  wet: (date: string, time: VisitTime) => boolean = () => false,
   picks: Picks = new Map(),
+  prefs: TripPrefs = {},
 ): TripDay[] {
   if (sights.length === 0 && festivals.length === 0) return [];
 
@@ -90,7 +118,7 @@ export function draftTrip(
   const used = new Set<string>();
   let previous: Coordinate | undefined;
 
-  const pick = (date: string, time: "morning" | "afternoon"): Visit | undefined => {
+  const pick = (date: string, time: VisitTime): Visit | undefined => {
     const pickedId = picks.get(slotKeyOf(date, time));
     const picked = everywhere.find((p) => p.id === pickedId && !used.has(p.id));
     const open = (p: Place) => !used.has(p.id) && !reserved.has(p.id);
@@ -99,8 +127,10 @@ export function draftTrip(
     if (picked && due && due.id !== picked.id) used.add(due.id);
     const festival = picked ? undefined : due;
     const free = sights.filter(open);
-    const indoor = !picked && wet(date, time) ? free.filter((s) => s.indoor) : [];
-    const place = picked ?? festival ?? nearest(indoor.length > 0 ? indoor : free, previous);
+    const fitting = fittingSights(free, prefs, time);
+    // 비 오면 취향에 맞는 실내, 없으면 아무 실내라도
+    const indoor = !picked && wet(date, time) ? firstFilled(fitting.filter((s) => s.indoor), free.filter((s) => s.indoor)) : [];
+    const place = picked ?? festival ?? nearest(indoor.length > 0 ? indoor : fitting, previous);
     if (!place) return undefined;
     used.add(place.id);
     previous = place.location;
@@ -115,10 +145,10 @@ export function draftTrip(
   };
 
   const days = dates.map((date, dayIndex) => {
-    const times = layoutOf(dayIndex, dates.length);
+    const times = layoutOf(dayIndex, dates.length, prefs.pace, prefs.days?.[date]?.dessert);
     const visits = new Map<SlotTime, Visit>();
     for (const time of times) {
-      if (time === "morning" || time === "afternoon") {
+      if (isVisitTime(time)) {
         const visit = pick(date, time);
         if (visit) visits.set(time, visit);
       }
@@ -128,7 +158,7 @@ export function draftTrip(
     const lastVisit = placesOf(times).at(-1)?.location ?? previous;
     const slots: Slot[] = [];
     times.forEach((time, i) => {
-      if (time === "morning" || time === "afternoon") {
+      if (isVisitTime(time)) {
         const visit = visits.get(time);
         if (visit) slots.push(visit);
       } else if (time === "lunch" || time === "cafe" || time === "dinner") {
@@ -145,7 +175,11 @@ export function draftTrip(
     return { date, slots };
   });
 
-  // 바꿀 후보 — 일정에 안 들어간 볼거리 중 그 칸 장소에서 가까운 곳
+  // 바꿀 후보 — 일정에 안 들어간 볼거리 중 그 칸 장소에서 가까운 곳(취향에서 빼고 싶은 곳은 빼고)
+  const leftover = allowedSights(
+    sights.filter((s) => !used.has(s.id)),
+    prefs,
+  );
   return days.map((day) => ({
     ...day,
     slots: day.slots.map((slot) =>
@@ -153,7 +187,7 @@ export function draftTrip(
         ? {
             ...slot,
             alternatives: sortByDistance(
-              sights.filter((s) => !used.has(s.id)),
+              leftover,
               slot.place.location,
             ).slice(0, VISIT_ALTERNATIVES),
           }
@@ -232,11 +266,17 @@ const MIDDLE_RANK = 2;
 /**
  * 처음엔 첫 밤 근처 한 곳을 골라 매일 같은 곳에 묵는다 — 짐 싸서 옮기지 않는다.
  * 첫 밤 장소에서 STAY_REACH_KM 안이면 종류(rank: 호텔·한옥 → 펜션 → 그 밖 → 모텔) 다음 거리 순, 하나도 없으면 가장 가까운 곳.
+ * 숙소 종류를 골랐으면 그 종류를 먼저(가까운 순), 아이·부모님과 가면 실속형은 뒤로(preferredStays).
  * 사용자가 고른 숙소(picks)는 그 밤에만 둔다 — 첫날 숙소를 바꿔도 다른 밤은 그대로다.
  */
-export function fillStays(days: readonly TripDay[], lodgings: readonly Place[], picks: Picks = new Map()): TripDay[] {
+export function fillStays(
+  days: readonly TripDay[],
+  lodgings: readonly Place[],
+  picks: Picks = new Map(),
+  prefs: TripPrefs = {},
+): TripDay[] {
   const firstNight = days.flatMap((d) => d.slots).find((s): s is Stay => s.kind === "stay");
-  const ordered = firstNight ? rankStays(lodgings, firstNight.near) : [...lodgings];
+  const ordered = preferredStays(firstNight ? rankStays(lodgings, firstNight.near) : [...lodgings], prefs);
   return days.map((day) => ({
     ...day,
     slots: day.slots.map((slot) => {
@@ -258,6 +298,10 @@ function rankStays(lodgings: readonly Place[], from: Coordinate): Place[] {
   const ranked = [...reachable].sort((a, b) => (a.rank ?? MIDDLE_RANK) - (b.rank ?? MIDDLE_RANK));
   return [...ranked, ...byDistance.filter((p) => !reachable.includes(p))];
 }
+
+const isVisitTime = (time: SlotTime): time is VisitTime => time === "morning" || time === "afternoon" || time === "evening";
+
+const firstFilled = <T>(...lists: T[][]): T[] => lists.find((l) => l.length > 0) ?? [];
 
 function nearest(places: readonly Place[], from: Coordinate | undefined): Place | undefined {
   if (!from) return places[0];

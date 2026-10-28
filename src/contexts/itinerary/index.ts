@@ -8,6 +8,7 @@ import { Coordinate } from "@/shared/kernel/coordinate";
 import { describeItinerary as describe } from "./application/describe-itinerary";
 import { findFacilityParking as findFacility, findParking as findLots } from "./application/find-parking";
 import type { PlaceKind } from "./domain/place";
+import type { TripPrefs } from "./domain/preferences";
 import { planItinerary as handle, type ItineraryView, type PlanItinerary } from "./application/plan-itinerary";
 import { randomId } from "@/shared/db/random-id";
 import {
@@ -65,7 +66,7 @@ const saved = new DrizzleSavedItineraryRepository();
  * 처음 일정이면 AI 소개도 같이 저장한다.
  */
 export async function saveItinerary(
-  command: Omit<SaveItinerary, "snapshot"> & { breakTitle: string; breakEnd: string; today: string },
+  command: Omit<SaveItinerary, "snapshot"> & { breakTitle: string; breakEnd: string; today: string; prefs: TripPrefs },
 ): Promise<string | undefined> {
   const plan = await planItinerary({
     start: command.breakStart,
@@ -73,10 +74,11 @@ export async function saveItinerary(
     regionCode: command.regionCode,
     today: command.today,
     picks: command.picks,
+    prefs: command.prefs,
   });
   if (!plan) return undefined;
-  const summaries = plan.customized ? undefined : await describeItinerary(plan);
-  const snapshot: ItinerarySnapshot = { breakTitle: command.breakTitle, plan, summaries };
+  const summaries = plan.customized || plan.tailored ? undefined : await describeItinerary(plan);
+  const snapshot: ItinerarySnapshot = { breakTitle: command.breakTitle, plan, summaries, prefs: plan.tailored ? command.prefs : undefined };
   return save({ ...command, snapshot }, saved, () => randomId(10));
 }
 
@@ -89,3 +91,14 @@ export const forgetItinerariesOf = (userId: string) => forget(userId, saved);
 export type { DayView, ItineraryView, PlaceView, SlotView, WeatherView } from "./application/plan-itinerary";
 export type { FacilityParkingView, ParkingView } from "./application/find-parking";
 export type { FavoriteView, SavedItineraryView } from "./application/saved-itineraries";
+export type {
+  Companion,
+  Cuisine,
+  DayPrefs,
+  DessertTime,
+  FoodAvoid,
+  Interest,
+  Pace,
+  StayType,
+  TripPrefs,
+} from "./domain/preferences";

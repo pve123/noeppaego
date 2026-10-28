@@ -15,6 +15,7 @@ export const ContentType = {
   culture: "14",
   festival: "15",
   lodging: "32",
+  shopping: "38",
   restaurant: "39",
 } as const;
 export type ContentTypeId = (typeof ContentType)[keyof typeof ContentType];

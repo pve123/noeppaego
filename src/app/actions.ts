@@ -6,10 +6,11 @@ import { CalendarDate, findLongBreak } from "@/contexts/calendar";
 import { forgetItinerariesOf, saveItinerary, toggleFavorite } from "@/contexts/itinerary";
 import { currentUserId, endSession, safeNext } from "@/shared/auth/session";
 import { PublicDataError } from "@/shared/public-data/public-data";
+import { parsePrefs } from "./_components/trip-prefs";
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const REGION_CODE = /^\d+(-\d+)?$/;
-const PICK_KEY = /^\d{4}-\d{2}-\d{2}-(?:morning|lunch|cafe|afternoon|dinner|night)$/;
+const PICK_KEY = /^\d{4}-\d{2}-\d{2}-(?:morning|lunch|cafe|afternoon|dinner|evening|night)$/;
 const PICK_ID = /^[\w:.-]{1,80}$/;
 
 const loginFirst = (back: string) => redirect(`/api/auth/kakao?next=${encodeURIComponent(back)}`);
@@ -45,6 +46,10 @@ export async function saveItineraryAction(form: FormData): Promise<void> {
     if (PICK_KEY.test(k) && typeof v === "string" && PICK_ID.test(v)) picks[k] = v;
   }
 
+  // 여행 취향 — 일정 화면 주소의 취향 부분(`with=kids&pace=relaxed`)을 그대로 받아 같은 규칙으로 읽는다
+  const prefsParams = new URLSearchParams(String(form.get("prefs") ?? ""));
+  const prefs = parsePrefs(Object.fromEntries([...new Set(prefsParams.keys())].map((k) => [k, prefsParams.getAll(k)])));
+
   const today = CalendarDate.todayIn("Asia/Seoul", new Date());
   let id: string | undefined;
   try {
@@ -57,6 +62,7 @@ export async function saveItineraryAction(form: FormData): Promise<void> {
       breakTitle: longBreak.title,
       regionCode: region,
       picks,
+      prefs,
       today: today.iso,
     });
   } catch (e) {

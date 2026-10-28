@@ -1,7 +1,40 @@
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { TravelWindow } from "@/shared/kernel/travel-window";
+import type { Cuisine } from "./preferences";
 
 export type PlaceKind = "sight" | "culture" | "festival" | "restaurant" | "cafe" | "lodging";
+
+/**
+ * 장소 성격 — 여행 취향과 맞춰 볼 때 쓴다(분류 코드에서 어림한다).
+ * 볼거리: 자연(산·바다·생태·공원) · 역사 · 전시 · 교육 · 체험 · 테마파크 · 레저 · 랜드마크 · 쇼핑
+ * 음식: 한식 · 중식 · 일식 · 양식 · 분식 · 고기 · 해산물 · 매운 음식 / 숙소: 호텔급 · 한옥 · 펜션 · 실속형
+ */
+export type PlaceTag =
+  | "nature"
+  | "mountain"
+  | "ocean"
+  | "ecology"
+  | "park"
+  | "history"
+  | "exhibit"
+  | "education"
+  | "activity"
+  | "themepark"
+  | "leisure"
+  | "landmark"
+  | "shopping"
+  | "korean"
+  | "chinese"
+  | "japanese"
+  | "western"
+  | "snack"
+  | "meat"
+  | "seafood"
+  | "spicy"
+  | "hotel"
+  | "hanok"
+  | "pension"
+  | "budget";
 
 /** 일정에 넣을 수 있는 장소 */
 export type Place = {
@@ -21,6 +54,8 @@ export type Place = {
   readonly rank?: number;
   /** 축제 기간(YYYY-MM-DD) */
   readonly period?: { readonly start: string; readonly end: string };
+  /** 장소 성격 — 없으면 취향과 상관없이 고른다 */
+  readonly tags?: readonly PlaceTag[];
 };
 
 /** 포트 — 지역(법정동 시·도-시·군·구 코드)의 장소 */
@@ -32,9 +67,9 @@ export interface PlaceCatalog {
   lodgingsIn(regionCode: string): Promise<Place[]>;
 }
 
-/** 포트 — 좌표 근처 식당, 가까운 순 */
+/** 포트 — 좌표 근처 식당. cuisine 을 주면 그 종류를 먼저 찾는다(못 찾으면 다른 식당도 섞인다) */
 export interface RestaurantFinder {
-  near(at: Coordinate, limit: number): Promise<Place[]>;
+  near(at: Coordinate, limit: number, cuisine?: Cuisine): Promise<Place[]>;
 }
 
 /** 포트 — 좌표 근처 카페·디저트 가게 */
