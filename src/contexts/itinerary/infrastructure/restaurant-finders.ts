@@ -96,7 +96,7 @@ export class KakaoRestaurantFinder implements RestaurantFinder {
   /**
    * 많이 찾는 집부터, 끼니가 아닌 곳(빵집·디저트·술집·카페)과 체인 지점은 빼고 넘긴다.
    * 그중 어디를 고를지는 도메인(fillMeals)이 식사 칸에서 가까운 순으로 정한다 — 「많이 찾는 집 중 가까운 곳」.
-   * 거르고 나서 하나도 없으면 거르기 전 목록을 쓴다(식사 칸을 비우지 않는다).
+   * 거르고 나서 하나도 없으면 거르기 전 목록을, 그것도 없으면 다른 방법(fallback)을 쓴다(식사 칸을 비우지 않는다).
    */
   async near(at: Coordinate, limit: number): Promise<Place[]> {
     const popular = await searchKakaoRestaurants(at.lat, at.lng, "popular");
@@ -111,6 +111,8 @@ export class KakaoRestaurantFinder implements RestaurantFinder {
       picks = [...picks, ...more];
     }
     if (picks.length === 0) picks = meals;
+    // 카카오에 근처 식당이 하나도 없으면 관광공사 음식점이라도 — 식사 칸을 비우지 않는다
+    if (picks.length === 0) return this.fallback.near(at, limit);
 
     return picks
       .slice(0, limit)

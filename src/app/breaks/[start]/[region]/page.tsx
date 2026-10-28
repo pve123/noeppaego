@@ -64,7 +64,9 @@ export default function ItineraryPage({ params, searchParams }: PageProps<"/brea
 
 async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[region]">) {
   const { start, region } = await params;
-  const picks = parsePicks((await searchParams).pick);
+  const query = await searchParams;
+  const picks = parsePicks(query.pick);
+  const saveFailed = query.save === "failed";
   const base = `/breaks/${start}/${region}`;
   if (!ISO_DATE.test(start) || !REGION_CODE.test(region)) notFound();
   await connection(); // 「오늘」은 요청 시각 기준
@@ -127,6 +129,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
           <SaveCard loggedIn={loggedIn} target={saveTarget} />
         </div>
         <div className="mb-8 space-y-3">
+          {saveFailed && <Notice tone="highlight">여행 정보를 잠깐 불러오지 못해 저장하지 못했어요. 잠시 뒤 다시 저장해 주세요.</Notice>}
           {plan.customized && (
             <Notice
               tone="highlight"

@@ -13,6 +13,12 @@ export class DrizzleUserRepository implements UserRepository {
     return { id: row.id, kakaoId: row.kakaoId };
   }
 
+  /** 탈퇴했으면 false — 다른 기기의 세션 쿠키는 탈퇴 뒤에도 서명이 맞다 */
+  async exists(id: string): Promise<boolean> {
+    const [row] = await db().select({ id: users.id }).from(users).where(eq(users.id, id)).limit(1);
+    return Boolean(row);
+  }
+
   async delete(id: string): Promise<void> {
     await db().delete(users).where(eq(users.id, id));
   }

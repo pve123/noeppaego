@@ -79,3 +79,13 @@ describe("planLongBreaks", () => {
     expect(breaks.map((b) => b.base.start.iso)).toEqual(["2026-01-16", "2026-02-14"]);
   });
 });
+
+describe("LongBreak.extensions", () => {
+  it("수요일 공휴일의 앞·뒤 방법처럼 연차 수가 같은 방법은 늘리는 방법으로 치지 않는다", () => {
+    // 2026-01-14 는 수요일
+    const [b] = planLongBreaks(calendarOf(["2026-01-14", "수요일 공휴일"]));
+    expect(b.options.length).toBeGreaterThan(1);
+    expect(b.extensions.every((o) => o.leaveCount > b.base.leaveCount)).toBe(true);
+    expect(b.options.filter((o) => o.leaveCount === b.base.leaveCount).length).toBeGreaterThan(1);
+  });
+});

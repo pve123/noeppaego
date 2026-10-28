@@ -69,6 +69,7 @@ export function layoutOf(dayIndex: number, totalDays: number): SlotTime[] {
  * - 나머지는 바로 앞 방문지에서 가장 가까운 곳(처음은 목록 맨 앞 — 볼거리 좋은 순)으로 이어 동선을 줄인다.
  * - 같은 곳은 두 번 넣지 않는다. 방문지가 모자라면 그 칸은 뺀다.
  * - 비 오는 반나절(wet)에는 실내 장소에서 고른다. 실내가 없으면 그냥 고른다. 축제는 바꾸지 않는다.
+ * - 축제가 들어갈 칸을 사용자가 다른 곳으로 바꾸면 그 축제는 일정에서 뺀다.
  * - 사용자가 고른 곳(picks)이 있으면 그 칸은 그곳으로 고정하고, 다른 칸이 먼저 가져가지 않게 예약해 둔다.
  *   고른 곳이 목록에 없으면(데이터가 바뀜) 그 칸은 자동으로 고른다.
  *
@@ -92,9 +93,10 @@ export function draftTrip(
     const pickedId = picks.get(slotKeyOf(date, time));
     const picked = everywhere.find((p) => p.id === pickedId && !used.has(p.id));
     const open = (p: Place) => !used.has(p.id) && !reserved.has(p.id);
-    const festival = picked
-      ? undefined
-      : festivals.find((f) => open(f) && f.period && f.period.start <= date && date <= f.period.end);
+    const due = festivals.find((f) => open(f) && f.period && f.period.start <= date && date <= f.period.end);
+    // 축제가 들어갈 칸을 사용자가 다른 곳으로 바꿨으면 그 축제는 뺀다 — 다음 칸으로 밀려 그 칸을 바꾸지 않게
+    if (picked && due && due.id !== picked.id) used.add(due.id);
+    const festival = picked ? undefined : due;
     const free = sights.filter(open);
     const indoor = !picked && wet(date, time) ? free.filter((s) => s.indoor) : [];
     const place = picked ?? festival ?? nearest(indoor.length > 0 ? indoor : free, previous);
@@ -175,23 +177,47 @@ export function fillMeals(
   alternatives = 2,
   picks: Picks = new Map(),
 ): TripDay[] {
-  const reserved = new Set(picks.values());
-  const chosen = new Set<string>();
+  // 고른 식당이 제 칸 후보에 아직 있을 때만 예약한다 — 근처가 바뀌어 빠졌으면 다른 끼니가 써도 된다
   let index = 0;
-  return days.map((day) => ({
+  const reserved = new Set<string>();
+  for (const day of days) {
+    for (const slot of day.slots) {
+      if (slot.kind !== "meal") continue;
+      const pickedId = picks.get(slotKeyOf(day.date, slot.time));
+      if (pickedId && (candidates[index] ?? []).some((p) => p.id === pickedId)) reserved.add(pickedId);
+      index++;
+    }
+  }
+
+  const chosen = new Set<string>();
+  index = 0;
+  const filled = days.map((day) => ({
     ...day,
     slots: day.slots.map((slot) => {
-      if (slot.kind !== "meal") return slot;
+      if (slot.kind !== "meal") return { slot };
       const pickedId = picks.get(slotKeyOf(day.date, slot.time));
       const fresh = sortByDistance(candidates[index++] ?? [], slot.near).filter(
         (p) => !chosen.has(p.id) && !chosen.has(p.title),
       );
       const picked = fresh.find((p) => p.id === pickedId);
       const choice = picked ?? fresh.find((p) => !reserved.has(p.id));
-      const rest = fresh.filter((p) => p !== choice && p.title !== choice?.title && !reserved.has(p.id));
       if (choice) chosen.add(choice.id).add(choice.title);
-      return { ...slot, choice, picked: picked ? true : undefined, alternatives: rest.slice(0, alternatives) };
+      return { slot: { ...slot, choice, picked: picked ? true : undefined }, fresh };
     }),
+  }));
+  // 바꿀 후보는 다른 끼니가 이미 쓰는 식당을 뺀다 — 고르면 그 끼니가 저절로 바뀌니까
+  return filled.map((day) => ({
+    ...day,
+    slots: day.slots.map(({ slot, fresh }) =>
+      slot.kind === "meal" && fresh
+        ? {
+            ...slot,
+            alternatives: fresh
+              .filter((p) => !chosen.has(p.id) && !chosen.has(p.title) && !reserved.has(p.id))
+              .slice(0, alternatives),
+          }
+        : slot,
+    ),
   }));
 }
 

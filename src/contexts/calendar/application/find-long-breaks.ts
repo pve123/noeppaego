@@ -93,14 +93,14 @@ export type FindLongBreak = {
 
 /**
  * 연휴 하나. 1월 연휴는 전년 12월 말에 시작할 수 있어 시작일의 해와 다음 해를 같이 본다.
- * 올해·내년 밖이면 찾지 않는다.
+ * 작년·올해·내년 밖이면 찾지 않는다 — 작년 연휴도 넣어 해가 바뀌어도 저장·공유한 일정의 링크가 열리게.
  */
 export async function findLongBreak(
   query: FindLongBreak,
   repository: HolidayCalendarRepository,
 ): Promise<LongBreakView | undefined> {
   const years = [query.start.year, query.start.year + 1].filter(
-    (y) => y >= query.today.year && y <= query.today.year + 1,
+    (y) => y >= query.today.year - 1 && y <= query.today.year + 1,
   );
   for (const year of years) {
     const calendar = await repository.findByYear(year);

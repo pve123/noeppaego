@@ -32,7 +32,7 @@ export function BreakCard({ item }: { item: LongBreakView }) {
           <DayStrip days={base.days} size="sm" />
           {longest && (
             <p className="mt-2 text-[15px]">
-              연차 {longest.leaveCount}일을 더 쓰면 <strong className="font-display text-lg">{longest.length}일</strong> 쉬어요
+              연차 {longest.leaveCount - base.leaveCount}일을 더 쓰면 <strong className="font-display text-lg">{longest.length}일</strong> 쉬어요
             </p>
           )}
           <p className="mt-auto pt-3 text-right font-display text-lg">

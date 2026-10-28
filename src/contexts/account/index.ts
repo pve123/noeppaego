@@ -12,4 +12,6 @@ const users = new DrizzleUserRepository();
 
 export const signInWithKakao = (command: SignInWithKakao) => handle(command, kakao, users);
 export const deleteAccount = (command: DeleteAccount) => remove(command, users);
+/** 이 id 의 계정이 아직 있는가 — 저장·찜처럼 사용자 행을 가리키는 쓰기 앞에서 확인한다 */
+export const accountExists = (userId: string) => users.exists(userId);
 export { kakaoAuthorizeUrl } from "./infrastructure/kakao-oauth";
