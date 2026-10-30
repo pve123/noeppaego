@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { KakaoLoginButton } from "./kakao-login-button";
+import { NAV_ITEM } from "./nav-item";
 import { usePathname, useSearchParams } from "next/navigation";
 
 /** 헤더 오른쪽 — 로그인했으면 찜한 일정·내 계정(로그아웃·탈퇴는 그 안에), 아니면 카카오 로그인. 로그인 뒤에는 보던 화면으로 돌아온다 */
@@ -13,11 +14,16 @@ export function AccountMenu({ loggedIn, nickname }: { loggedIn: boolean; nicknam
   if (!loggedIn) return <KakaoLoginButton next={here} label="카카오 로그인" size="sm" />;
   return (
     <div className="flex items-center gap-1">
-      {nickname && <span className="mr-1 hidden max-w-[10em] truncate font-bold sm:inline">{nickname}님</span>}
-      <Link href="/saved" className="whitespace-nowrap rounded-full px-2.5 py-2 font-display text-[17px] hover:bg-yellow sm:px-3">
+      {/* 닉네임은 누르는 메뉴가 아니라 작은 이름표 — 메뉴와 같은 높이로 세우고 모양으로 구분한다 */}
+      {nickname && (
+        <span className="mr-1 hidden h-8 max-w-[10em] items-center truncate rounded-full bg-soft-ink px-3 text-[14px] font-bold leading-none sm:inline-flex">
+          {nickname}님
+        </span>
+      )}
+      <Link href="/saved" className={NAV_ITEM}>
         찜한 일정
       </Link>
-      <Link href="/account" className="whitespace-nowrap rounded-full px-2.5 py-2 font-display text-[17px] hover:bg-yellow sm:px-3">
+      <Link href="/account" className={NAV_ITEM}>
         내 계정
       </Link>
     </div>

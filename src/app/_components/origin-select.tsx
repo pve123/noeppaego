@@ -126,16 +126,21 @@ export function OriginSelect({
         className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}
       >
         <div className="overflow-hidden">
-          <ul aria-label="출발지" className="flex flex-wrap gap-2 pt-3">
+          {/* 휴대폰: 한 줄로 밀어 보고 오른쪽 끝을 흐려 「더 있어요」를 보인다(일정 카드 바꾸기 칩과 같은 모양).
+              넓은 화면: 9칸 격자로 두 줄을 고르게 — 마지막 줄에 한두 개만 남지 않게 */}
+          <ul
+            aria-label="출발지"
+            className="no-scrollbar flex snap-x gap-2 overflow-x-auto pb-1 pr-12 pt-3 [mask-image:linear-gradient(to_right,#000_calc(100%-40px),transparent)] sm:grid sm:grid-cols-[repeat(9,minmax(0,1fr))] sm:overflow-visible sm:pr-0 sm:[mask-image:none]"
+          >
             {origins.map((o) => {
               const isSelected = o.id === selected;
               return (
-                <li key={o.id}>
+                <li key={o.id} className="shrink-0 snap-start">
                   <button
                     type="button"
                     aria-current={isSelected ? "true" : undefined}
                     onClick={() => pick(o.id)}
-                    className={`inline-flex h-10 items-center gap-1 rounded-full border-2 px-4 font-display text-[16px] transition-colors ${
+                    className={`inline-flex h-10 w-full items-center justify-center gap-1 rounded-full border-2 px-4 font-display text-[16px] transition-colors ${
                       isSelected ? "border-ink bg-mint" : "border-ink/20 bg-surface hover:border-ink hover:bg-yellow"
                     }`}
                   >
