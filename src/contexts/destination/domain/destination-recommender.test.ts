@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Coordinate, SEOUL } from "@/shared/kernel/coordinate";
-import { recommendDestinations, reachMinutes, reachPreferenceOf } from "./destination-recommender";
+import { recommendDestinations, recommendedReach, reachMinutes, reachPreferenceOf } from "./destination-recommender";
 import { Festival } from "./festival";
 import { TravelWindow } from "@/shared/kernel/travel-window";
 
@@ -49,12 +49,18 @@ describe("recommendDestinations", () => {
   });
 
   it("축제가 많은 지역이 먼저, 같으면 가까운 곳이 먼저", () => {
-    const result = codes(threeDays, [
+    const result = recommendDestinations(
+      [
       festival("부산", BUSAN, "2026-12-01", "2026-12-31"),
       festival("부산", BUSAN, "2026-12-20", "2026-12-25"),
       festival("강릉", GANGNEUNG, "2026-12-24", "2026-12-26"),
       festival("파주", PAJU, "2026-12-24", "2026-12-26"),
-    ]);
+      ],
+      threeDays,
+      SEOUL,
+      undefined,
+      "any",
+    ).map((d) => d.region.code);
     expect(result).toEqual(["부산", "파주", "강릉"]);
   });
 
@@ -64,15 +70,15 @@ describe("recommendDestinations", () => {
     expect(codes(TravelWindow.of("2026-12-24", "2026-12-27"), jeju)).toEqual(["50-110"]);
   });
 
-  it("남쪽 출발지에서 차로 6시간 30분 안이어도 사흘 연휴엔 제주를 뺀다", () => {
+  it("광주에서 제주는 차로 4시간 거리로 어림되지만 「차로 4시간」에는 넣지 않는다", () => {
     const GWANGJU = new Coordinate(35.1595, 126.8526); // 제주까지 약 180km
     const jeju = [festival("50-110", JEJU, "2026-12-01", "2027-01-31")];
     expect(recommendDestinations(jeju, threeDays, GWANGJU)).toEqual([]);
     expect(recommendDestinations(jeju, TravelWindow.of("2026-12-24", "2026-12-27"), GWANGJU)).toHaveLength(1);
   });
 
-  it("이틀 연휴는 차로 2시간 30분 안만 — 강릉은 빠진다", () => {
-    expect(reachMinutes(2)).toBe(150);
+  it("이틀 연휴는 차로 2시간 안만 — 강릉은 빠진다", () => {
+    expect(reachMinutes(recommendedReach(2))).toBe(120);
     const twoDays = TravelWindow.of("2026-12-26", "2026-12-27");
     expect(
       codes(twoDays, [
@@ -112,26 +118,33 @@ describe("recommendDestinations", () => {
 });
 
 describe("얼마나 멀리 — 사용자가 고른 거리", () => {
-  it("가까운 곳만은 차로 1시간 30분, 멀어도 괜찮으면 한 단계 넓힌다", () => {
-    expect([2, 3, 5].map((d) => reachMinutes(d, "near"))).toEqual([90, 90, 90]);
-    expect([2, 3, 5].map((d) => reachMinutes(d, "far"))).toEqual([390, Infinity, Infinity]);
-    expect([2, 3, 5].map((d) => reachMinutes(d))).toEqual([150, 390, Infinity]);
+  it("칩은 차로 2시간·4시간·어디든으로 고정, 고르지 않으면 연휴 길이에 맞춘다", () => {
+    expect((["2h", "4h", "any"] as const).map(reachMinutes)).toEqual([120, 240, Infinity]);
+    expect([1, 2, 3, 4, 9].map(recommendedReach)).toEqual(["2h", "2h", "4h", "any", "any"]);
   });
 
-  it("사흘 연휴에 가까운 곳만 고르면 강릉(차로 약 2시간 50분)은 빠지고 파주만", () => {
+  it("사흘 연휴에 차로 2시간을 고르면 강릉(차로 약 2시간 50분)은 빠지고 파주만", () => {
     const threeDays = TravelWindow.of("2026-12-25", "2026-12-27");
     const list = [festival("강릉", GANGNEUNG, "2026-12-25", "2026-12-25"), festival("파주", PAJU, "2026-12-25", "2026-12-25")];
-    expect(recommendDestinations(list, threeDays, SEOUL, 5, "near").map((d) => d.region.code)).toEqual(["파주"]);
+    expect(recommendDestinations(list, threeDays, SEOUL, undefined, "2h").map((d) => d.region.code)).toEqual(["파주"]);
   });
 
-  it("멀어도 괜찮아도 제주는 나흘 이상일 때만", () => {
+  it("제주는 「어디든」을 고르고 사흘 이상일 때만", () => {
     const jeju = [festival("50-110", JEJU, "2026-12-01", "2027-01-31")];
-    expect(recommendDestinations(jeju, TravelWindow.of("2026-12-25", "2026-12-27"), SEOUL, 5, "far")).toEqual([]);
+    const twoDays = TravelWindow.of("2026-12-26", "2026-12-27");
+    const threeDays = TravelWindow.of("2026-12-25", "2026-12-27");
+    const fiveDays = TravelWindow.of("2026-12-24", "2026-12-28");
+    expect(recommendDestinations(jeju, twoDays, SEOUL, undefined, "any")).toEqual([]);
+    expect(recommendDestinations(jeju, threeDays, SEOUL, undefined, "any")).toHaveLength(1);
+    expect(recommendDestinations(jeju, fiveDays, SEOUL, undefined, "4h")).toEqual([]);
   });
 
-  it("모르는 값은 기본(auto)", () => {
-    expect(reachPreferenceOf("far")).toBe("far");
-    expect(reachPreferenceOf("아무거나")).toBe("auto");
-    expect(reachPreferenceOf(undefined)).toBe("auto");
+  it("주소 값 — 모르면 undefined(연휴 길이에 맞게), 예전 near·far 는 비슷한 칩으로", () => {
+    expect(reachPreferenceOf("4h")).toBe("4h");
+    expect(reachPreferenceOf("near")).toBe("2h");
+    expect(reachPreferenceOf("far")).toBe("any");
+    expect(reachPreferenceOf("auto")).toBeUndefined();
+    expect(reachPreferenceOf("toString")).toBeUndefined();
+    expect(reachPreferenceOf(undefined)).toBeUndefined();
   });
 });

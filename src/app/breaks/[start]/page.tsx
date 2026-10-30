@@ -82,7 +82,7 @@ async function BreakDetail({ params, searchParams }: PageProps<"/breaks/[start]"
   );
 }
 
-async function Destinations({ start, end, originId, reach }: { start: string; end: string; originId?: string; reach: ReachPreference }) {
+async function Destinations({ start, end, originId, reach }: { start: string; end: string; originId?: string; reach?: ReachPreference }) {
   let view;
   try {
     view = await findDestinations({ start, end, originId, reach });
@@ -96,24 +96,21 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
     <section aria-label="추천 지역" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       {/* 출발지·거리를 한 상자에 — 출발지 목록은 그 자리에서 펼쳐져 아래 카드를 덮지 않는다 */}
       <div className="flex flex-col gap-4 rounded-3xl border-[2.5px] border-ink bg-surface p-4 sm:p-5">
-        <OriginSelect origins={view.origins} selected={view.originId} selectedName={view.originName} basePath={basePath} query={reachQuery(view.reach)} />
-        <ReachChips basePath={basePath} originId={view.originId} selected={view.reach} />
+        <OriginSelect origins={view.origins} selected={view.originId} selectedName={view.originName} basePath={basePath} query={reachQuery(view.reach, view.recommended)} />
+        <ReachChips basePath={basePath} originId={view.originId} selected={view.reach} recommended={view.recommended} />
       </div>
-      {/* 목록 머리 — 문장 대신 몇 곳인지와 어떤 조건으로 골랐는지를 칩으로 */}
+      {/* 목록 머리 — 몇 곳인지와 어떤 조건으로 골랐는지를 한 줄 글자로 */}
       {view.destinations.length > 0 && (
         <div className="mt-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
           <h2 className="font-display text-[24px] leading-tight">추천 지역 {view.destinations.length}곳</h2>
-          <ul aria-label="고른 기준" className="flex flex-wrap gap-1.5 text-[13px] font-bold">
-            <li className="rounded-full bg-soft-ink px-2.5 py-1">
-              {view.originName}에서 {view.reachText ?? "거리 제한 없이"}
-            </li>
-            <li className="rounded-full bg-soft-ink px-2.5 py-1">축제 많은 순</li>
-          </ul>
+          <p className="text-[15px] text-muted">
+            {view.originName}에서 {view.reachText ? `${view.reachText}에 있는` : "거리와 상관없이"} 곳을 축제가 많은 순서로 보여 드려요.
+          </p>
         </div>
       )}
 
       {view.destinations.length === 0 ? (
-        <EmptyDestinations basePath={basePath} originId={view.originId} reach={view.reach} reachText={view.reachText} />
+        <EmptyDestinations basePath={basePath} originId={view.originId} reach={view.reach} recommended={view.recommended} reachText={view.reachText} />
       ) : (
         <>
           <ol className="mt-4 grid gap-5 md:grid-cols-2">
@@ -165,11 +162,13 @@ function EmptyDestinations({
   basePath,
   originId,
   reach,
+  recommended,
   reachText,
 }: {
   basePath: string;
   originId: string;
   reach: ReachPreference;
+  recommended: ReachPreference;
   reachText?: string;
 }) {
   // 이미 거리 제한이 없으면(4일 이상 등) 넓혀도 같다 — 버튼을 주지 않는다
@@ -182,7 +181,7 @@ function EmptyDestinations({
       <p className="mt-2 text-muted">{wider ? "범위를 넓히면 갈 곳이 나올 수 있어요." : "날짜가 가까워지면 다시 확인해 주세요."}</p>
       {wider && (
         <Link
-          href={`${basePath}?from=${originId}${reachQuery(wider)}`}
+          href={`${basePath}?from=${originId}${reachQuery(wider, recommended)}`}
           scroll={false}
           className="mt-5 inline-flex h-12 items-center rounded-[16px] border-[3px] border-ink bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5"
         >

@@ -16,35 +16,29 @@ export type Destination = {
 };
 
 /**
- * 연휴 길이로 갈 수 있는 차 이동 시간(분) — 이틀이면 2시간 30분, 사흘이면 6시간 30분(육지 어디든), 나흘 이상이면 제한 없이(제주까지).
- * 서울에서 강릉 약 2시간 50분 · 부산 약 5시간 25분(estimateTripMinutes).
+ * 얼마나 멀리 갈지 — 차로 2시간·4시간·어디든. 칩마다 값이 고정이라 두 칩의 결과가 겹치지 않는다.
+ * 고르지 않으면 연휴 길이에 맞는 것(recommendedReach)을 쓴다. 서울에서 강릉 약 2시간 50분 · 부산 약 5시간 25분(estimateTripMinutes).
  */
-export function reachMinutes(days: number, preference: ReachPreference = "auto"): number {
-  const auto = days <= 2 ? 150 : days === 3 ? WHOLE_MAINLAND_MINUTES : Number.POSITIVE_INFINITY;
-  if (preference === "near") return Math.min(auto, NEAR_MINUTES);
-  if (preference === "far") return days <= 2 ? WHOLE_MAINLAND_MINUTES : Number.POSITIVE_INFINITY;
-  return auto;
-}
+export type ReachPreference = "2h" | "4h" | "any";
+const REACH_MINUTES: Record<ReachPreference, number> = { "2h": 120, "4h": 240, any: Number.POSITIVE_INFINITY };
+/** 이전 주소(`?reach=near|far`)도 비슷한 칩으로 받는다 */
+const LEGACY_REACH: Record<string, ReachPreference> = { near: "2h", far: "any" };
+
+export const reachMinutes = (preference: ReachPreference) => REACH_MINUTES[preference];
+
+/** 연휴 길이에 맞는 거리 — 이틀이면 2시간, 사흘이면 4시간, 나흘 이상이면 어디든 */
+export const recommendedReach = (days: number): ReachPreference => (days <= 2 ? "2h" : days === 3 ? "4h" : "any");
+
+/** 주소 값 → 고른 거리. 모르는 값이면 undefined(연휴 길이에 맞게) */
+export const reachPreferenceOf = (value: unknown): ReachPreference | undefined =>
+  typeof value !== "string" ? undefined : Object.hasOwn(REACH_MINUTES, value) ? (value as ReachPreference) : Object.hasOwn(LEGACY_REACH, value) ? LEGACY_REACH[value] : undefined;
 
 /**
- * 얼마나 멀리 갈지 — 기본(auto)은 연휴 길이로 정하고, 사용자가 좁히거나(near) 넓힐(far) 수 있다.
- * 아이와 함께라 가까운 곳만, 기차로 멀리 가려 짧은 연휴에도 멀리 — 같은 연휴라도 사람마다 다르다.
- */
-export type ReachPreference = "near" | "auto" | "far";
-const REACH_PREFERENCES: readonly ReachPreference[] = ["near", "auto", "far"];
-/** 「가까운 곳만」 — 차로 1시간 30분(직선 약 80km) */
-const NEAR_MINUTES = 90;
-/** 육지 끝에서 끝까지 — 차로 6시간 30분(직선 약 400km) */
-const WHOLE_MAINLAND_MINUTES = 390;
-export const reachPreferenceOf = (value: unknown): ReachPreference =>
-  REACH_PREFERENCES.includes(value as ReachPreference) ? (value as ReachPreference) : "auto";
-
-/**
- * 제주는 비행기·배를 예약해야 해서 거리와 상관없이 나흘 이상일 때만 — 광주에서 직선 약 180km라 사흘 거리(6시간 30분)에 들어와 버린다.
+ * 제주는 비행기·배라 차 시간으로 잴 수 없다 — 「어디든」을 고르고 사흘 이상일 때만 넣는다.
  * 코드는 법정동 시·도 코드(제주특별자치도 50).
  */
 const JEJU_SIDO = "50";
-const JEJU_MIN_DAYS = 4;
+const JEJU_MIN_DAYS = 3;
 export const isJeju = (code: string) => code.split("-")[0] === JEJU_SIDO;
 
 /** 출발지에서 이보다 가까운 곳은 여행지가 아니라 동네다 — 서울시청에서 서울 끝까지 약 15km. */
@@ -61,11 +55,12 @@ export function recommendDestinations(
   origin: Coordinate,
   /** 몇 곳까지 — 기본은 조건에 맞는 곳 모두 */
   limit = Number.POSITIVE_INFINITY,
-  preference: ReachPreference = "auto",
+  preference: ReachPreference = recommendedReach(window.days),
 ): Destination[] {
   const overlapping = festivals.filter((f) => window.overlapDays(f.start, f.end) > 0);
   const byRegion = Map.groupBy(overlapping, (f) => f.region.code);
-  const reach = reachMinutes(window.days, preference);
+  const reach = reachMinutes(preference);
+  const jeju = preference === "any" && window.days >= JEJU_MIN_DAYS;
 
   return [...byRegion.values()]
     .map((group) => {
@@ -83,7 +78,7 @@ export function recommendDestinations(
       ),
     }))
     .filter((d) => d.distanceKm >= MIN_DISTANCE_KM && d.driveMinutes <= reach)
-    .filter((d) => window.days >= JEJU_MIN_DAYS || !isJeju(d.region.code))
+    .filter((d) => jeju || !isJeju(d.region.code))
     .sort(
       (a, b) =>
         b.festivals.length - a.festivals.length ||
