@@ -39,7 +39,7 @@ function shareTextOf(view: SavedItineraryView): { title: string; description: st
   const { plan } = view;
   const places = plan.days.flatMap((d) => d.slots).filter((s) => s.place).length;
   return {
-    title: `${plan.regionName} ${plan.lengthLabel} · ${view.breakTitle} 연휴`,
+    title: `${view.breakTitle} 연휴 ${plan.regionName} ${plan.lengthLabel}`,
     description: `${rangeText(plan.startLabel, plan.endLabel)} 일정이에요. 갈 곳과 맛집 ${places}곳을 날마다 정리했어요.`,
   };
 }

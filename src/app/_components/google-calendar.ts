@@ -17,7 +17,7 @@ export function googleCalendarUrl(trip: CalendarTrip): string {
   const details = [
     ...trip.days.map((day) =>
       [
-        `${day.dayNumber}일차 · ${day.dateLabel}`,
+        `${day.dayNumber}일차 ${day.dateLabel}`,
         ...day.slots.flatMap((s) => (s.place ? [`${s.timeLabel} ${s.place.title}`] : [])),
       ].join("\n"),
     ),

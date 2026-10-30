@@ -66,7 +66,7 @@ export function TripPrefsSheet({
     <>
       <section
         aria-labelledby="prefs-title"
-        className="relative overflow-hidden rounded-3xl border-[3px] border-ink bg-lavender p-5 shadow-pop sm:p-6"
+        className="relative overflow-hidden rounded-3xl border-[3px] border-ink bg-surface p-5 shadow-pop sm:p-6"
       >
         <span aria-hidden className="pointer-events-none absolute -right-3 -top-4 rotate-12 select-none text-[64px] opacity-90 sm:text-[80px]">
           {chosen ? "🎒" : "✨"}
@@ -75,7 +75,7 @@ export function TripPrefsSheet({
           {chosen ? "취향에 맞춰 짠 일정이에요" : "어떤 여행이 좋아요?"}
         </h2>
         <p className="mt-1 pr-14 text-[15px] text-ink/80">
-          {chosen ? "바꾸고 싶으면 언제든 다시 골라요." : "누구와, 어떤 속도로, 뭘 먹고 싶은지 고르면 일정을 다시 짜 드려요."}
+          {chosen ? "바꾸고 싶으면 언제든 다시 골라요." : "누구와 어떤 속도로 다니며 뭘 먹고 싶은지 고르면 일정을 다시 짜 드려요."}
         </p>
 
         <ul aria-label={chosen ? "고른 취향" : "고를 수 있는 것 예시"} className="mt-4 flex flex-wrap gap-1.5">
@@ -158,7 +158,7 @@ export function TripPrefsSheet({
               {PACES.map((o) => (
                 <label
                   key={o.value}
-                  className="relative flex cursor-pointer flex-col items-center gap-0.5 rounded-2xl border-[2.5px] border-ink bg-surface px-2 py-3 text-center transition-transform hover:-translate-y-0.5 has-[:checked]:-rotate-1 has-[:checked]:bg-mint has-[:checked]:shadow-pop-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2"
+                  className="relative flex cursor-pointer flex-col items-center gap-0.5 rounded-2xl border-[2.5px] border-ink bg-surface px-2 py-3 text-center transition-transform hover:-translate-y-0.5 has-[:checked]:bg-yellow has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2"
                 >
                   <input type="radio" name="pace" value={o.value} defaultChecked={(prefs.pace ?? "normal") === o.value} className="sr-only" />
                   <span aria-hidden className="text-[28px] leading-none">
@@ -306,7 +306,7 @@ function Chip({
 }) {
   return (
     <label
-      className={`relative inline-flex h-11 shrink-0 cursor-pointer select-none items-center gap-1.5 whitespace-nowrap rounded-full border-[2.5px] border-ink bg-surface px-4 font-display text-[16px] transition-transform hover:-translate-y-0.5 has-[:checked]:-rotate-1 has-[:checked]:shadow-pop-sm has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:border-ink/25 has-[:disabled]:text-ink/35 has-[:disabled]:hover:translate-y-0 ${CHECKED_TONE[tone]}`}
+      className={`relative inline-flex h-11 shrink-0 cursor-pointer select-none items-center gap-1.5 whitespace-nowrap rounded-full border-[2.5px] border-ink bg-surface px-4 font-display text-[16px] transition-transform hover:-translate-y-0.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:border-ink/25 has-[:disabled]:text-ink/35 has-[:disabled]:hover:translate-y-0 ${CHECKED_TONE[tone]}`}
     >
       <input type={type} name={name} value={value} defaultChecked={defaultChecked} disabled={disabled} className="sr-only" />
       {children}

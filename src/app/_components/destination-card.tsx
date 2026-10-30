@@ -3,7 +3,8 @@ import Link from "next/link";
 import type { DestinationView, FestivalView } from "@/contexts/destination";
 import { CalendarIcon } from "./icons";
 
-const BANDS = ["bg-yellow", "bg-mint", "bg-coral", "bg-lavender"];
+/** 순위 동그라미 색 — 아래 지도의 같은 번호 핀과 같은 순서(PIN_TONES)라 카드와 핀이 짝지어진다 */
+const RANK_TONES = ["bg-yellow", "bg-mint", "bg-coral", "bg-lavender"];
 /** 카드에 보이는 축제 수 — 고르는 데는 두 개면 충분하다. 사진은 맨 위에 하나만 크게 */
 const VISIBLE = 2;
 
@@ -25,9 +26,11 @@ export function DestinationCard({
   return (
     <Link href={planHref} className="group block h-full rounded-3xl outline-offset-4">
       <article className="flex h-full flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
-        <div className={`flex flex-col items-start gap-2 border-b-[3px] sm:flex-row sm:items-center sm:justify-between sm:gap-3 border-ink px-5 py-3.5 ${BANDS[(rank - 1) % BANDS.length]}`}>
-          <h3 className="min-w-0 font-display text-[22px] leading-tight [overflow-wrap:anywhere]">
-            <span className="mr-2 text-ink/60">{rank}</span>
+        <div className="flex flex-col items-start gap-2 border-b-[3px] border-ink px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <h3 className="flex min-w-0 items-center gap-2.5 font-display text-[22px] leading-tight [overflow-wrap:anywhere]">
+            <span className={`flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink text-[17px] ${RANK_TONES[(rank - 1) % RANK_TONES.length]}`}>
+              {rank}
+            </span>
             {destination.name}
           </h3>
           <span className="shrink-0 rounded-full border-[2.5px] border-ink bg-surface px-3 py-0.5 font-display text-[15px] tabular-nums">

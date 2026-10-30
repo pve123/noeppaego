@@ -68,7 +68,7 @@ async function Favorites() {
       <ul className="grid gap-5 md:grid-cols-2">
         {favorites.map((f) => (
           <li key={f.id} className="flex flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop">
-            <Link href={`/t/${f.id}`} className="border-b-[3px] border-ink bg-mint px-5 py-3.5">
+            <Link href={`/t/${f.id}`} className="border-b-[3px] border-ink px-5 py-3.5">
               <p className="text-sm font-bold">{f.breakTitle} 연휴</p>
               <p className="font-display text-[22px] leading-tight">{f.title}</p>
             </Link>

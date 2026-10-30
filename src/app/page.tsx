@@ -8,7 +8,6 @@ import { RevealSuspense } from "./_components/reveal";
 import { NextBreak } from "./_components/next-break";
 import { SiteFooter, SiteHeader, SiteNotice } from "./_components/site-header";
 import { SourceError } from "./_components/source-error";
-import { Steps } from "./_components/steps";
 import { YearTabs } from "./_components/year-tabs";
 
 export default function Home({ searchParams }: PageProps<"/">) {
@@ -17,7 +16,6 @@ export default function Home({ searchParams }: PageProps<"/">) {
       <SiteHeader />
       <SiteNotice />
       <main>
-        <Steps current={1} />
         <Hero />
         <RevealSuspense fallback={<BreaksSkeleton />}>
           <Breaks searchParams={searchParams} />
@@ -59,9 +57,9 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
         </div>
         {!view.notPublished && (
           <ul className="mt-4 flex flex-wrap gap-2 text-[15px]">
-            {/* 아래 범례와 같은 색 — 공휴일은 코랄 */}
+            {/* 날짜 칸·연차 줄과 같은 색 — 공휴일은 코랄, 연차 없이는 민트 */}
             <li className="rounded-full bg-coral px-3 py-1 font-bold">공휴일 {view.holidayCount}일</li>
-            <li className="rounded-full bg-yellow px-3 py-1 font-bold">연차 없이 3일 이상 쉬는 연휴 {view.freeBreakCount}번</li>
+            <li className="rounded-full bg-mint px-3 py-1 font-bold">연차 없이 3일 이상 쉬는 연휴 {view.freeBreakCount}번</li>
           </ul>
         )}
 

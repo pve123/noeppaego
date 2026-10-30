@@ -30,7 +30,7 @@ export function DeleteAccountForm() {
           onChange={(e) => setAgreed(e.target.checked)}
           className="mt-0.5 size-5 shrink-0 accent-ink"
         />
-        <span className="text-[15px] font-bold leading-relaxed">위 내용을 확인했고, 지운 정보는 되돌릴 수 없다는 걸 이해했어요.</span>
+        <span className="text-[15px] font-bold leading-relaxed">위 내용을 확인했고 지운 정보는 되돌릴 수 없다는 걸 이해했어요.</span>
       </label>
       <SubmitButton disabled={!agreed} />
     </form>

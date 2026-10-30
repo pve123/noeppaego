@@ -9,7 +9,7 @@ import { Sheet } from "./sheet";
  * 출발지 고르기 — 버튼을 누르면 도시 칩이 그 자리에서 펼쳐진다(아래 카드를 덮지 않고 밀어낸다).
  * 고르면 접히고 바로 다시 찾는다(주소에 ?from= 으로 남아 공유된다). 접혀 있을 땐 inert 라 Tab·화면 낭독기에서 빠진다.
  * 옆의 「내 위치로」는 먼저 우리 안내 시트(왜 필요한지·1km·저장 안 함)를 보여 주고, 허용하면 휴대폰 위치를 약 1km 단위(소수 둘째 자리)로 줄여 `?from=here:위도,경도` 로 넘긴다 — 서버에 저장하지 않는다.
- * @param query 주소에 함께 남길 다른 값(예: `&reach=near`) — 출발지를 바꿔도 거리 선택을 지킨다
+ * @param query 주소에 함께 남길 다른 값(예: `&reach=2h`) — 출발지를 바꿔도 거리 선택을 지킨다
  */
 export function OriginSelect({
   origins,
@@ -99,7 +99,7 @@ export function OriginSelect({
       }}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span id={`${id}-label`} className="font-bold sm:w-40">
+        <span id={`${id}-label`} className="w-full font-bold sm:w-40">
           어디서 출발하세요?
         </span>
         <button
@@ -126,7 +126,7 @@ export function OriginSelect({
             type="button"
             onClick={askLocation}
             disabled={locating}
-            className={`inline-flex h-11 items-center gap-1.5 rounded-full border-[2.5px] border-dashed border-ink/40 bg-surface/60 px-3.5 font-display text-[16px] transition-all hover:-translate-y-0.5 hover:border-solid hover:border-ink hover:bg-mint ${
+            className={`inline-flex h-11 items-center gap-1.5 rounded-full border-[2.5px] border-dashed border-ink/40 bg-surface/60 px-3.5 font-display text-[16px] transition-all hover:-translate-y-0.5 hover:border-solid hover:border-ink hover:bg-surface ${
               locating ? "animate-pulse" : ""
             }`}
           >
@@ -163,7 +163,7 @@ export function OriginSelect({
                     aria-current={isSelected ? "true" : undefined}
                     onClick={() => pick(o.id)}
                     className={`inline-flex h-10 w-full items-center justify-center gap-1 rounded-full border-2 px-4 font-display text-[16px] transition-colors ${
-                      isSelected ? "border-ink bg-mint" : "border-ink/20 bg-surface hover:border-ink hover:bg-yellow"
+                      isSelected ? "border-ink bg-yellow" : "border-ink/20 bg-surface hover:border-ink"
                     }`}
                   >
                     {o.name}
