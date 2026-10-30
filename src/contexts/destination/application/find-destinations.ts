@@ -4,6 +4,7 @@ import { dotDate, TravelWindow } from "@/shared/kernel/travel-window";
 import { isJeju, recommendDestinations, recommendedReach, reachMinutes, type ReachPreference } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
 import { AreaNames, ORIGINS, originOf } from "../domain/origin";
+import type { RoadTables } from "../domain/roads";
 
 // ── 쿼리 ─────────────────────────────────────────────
 
@@ -36,8 +37,10 @@ export type DestinationView = {
   code: string;
   name: string;
   center: LatLng;
-  /** 「차로 약 2시간 50분」 — 직선 거리로 어림한 값이라 10분 단위. 제주는 「비행기나 배로」 */
+  /** 「차로 약 3시간」 — 막히지 않을 때 기준. 제주는 「비행기나 배로」 */
   travelLabel: string;
+  /** 출발지에서 center 까지 도로 모양. 모르면 undefined — 지도는 점선 직선으로 잇는다 */
+  route?: LatLng[];
   festivals: FestivalView[];
 };
 
@@ -62,16 +65,17 @@ export async function findDestinations(
   query: FindDestinations,
   repository: FestivalRepository,
   areas: AreaNames,
+  roadTables: RoadTables,
 ): Promise<DestinationsView> {
   const window = TravelWindow.of(query.start, query.end);
   const origin = originOf(query.originId);
   // 내 위치는 동네 이름을 붙여 어디서 재는지 보이게 — 못 찾으면 「내 위치」 그대로
   const area = origin.id.startsWith("here:") ? await areas.nameAt(origin.at) : undefined;
-  const festivals = await repository.findOverlapping(window);
+  const [festivals, roads] = await Promise.all([repository.findOverlapping(window), roadTables.forOrigin(origin.id)]);
   const recommended = recommendedReach(window.days);
   const preference = query.reach ?? recommended;
   const reach = reachMinutes(preference);
-  const destinations = recommendDestinations(festivals, window, origin.at, undefined, preference);
+  const destinations = recommendDestinations(festivals, window, origin.at, undefined, preference, roads);
 
   return {
     originId: origin.id,
@@ -85,7 +89,8 @@ export async function findDestinations(
       code: d.region.code,
       name: d.region.name,
       center: { lat: d.center.lat, lng: d.center.lng },
-      travelLabel: isJeju(d.region.code) ? "비행기나 배로" : `차로 ${durationLabel(Math.round(d.driveMinutes / 10) * 10)}`,
+      travelLabel: isJeju(d.region.code) ? "비행기나 배로" : `차로 ${durationLabel(d.driveMinutes)}`,
+      route: roads.pathTo(d.region.code)?.map((p) => ({ lat: p.lat, lng: p.lng })),
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,

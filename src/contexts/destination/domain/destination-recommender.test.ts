@@ -148,3 +148,27 @@ describe("얼마나 멀리 — 사용자가 고른 거리", () => {
     expect(reachPreferenceOf(undefined)).toBeUndefined();
   });
 });
+
+describe("도로 표 — 미리 계산한 차 경로", () => {
+  const threeDays = TravelWindow.of("2026-12-25", "2026-12-27");
+  const GANGNEUNG_HALL = new Coordinate(37.7521, 128.8759);
+  const roads = {
+    pointOf: (code: string) => (code === "강릉" ? GANGNEUNG_HALL : undefined),
+    minutesTo: (code: string) => (code === "강릉" ? 196 : undefined),
+    pathTo: () => undefined,
+  };
+
+  it("표에 있으면 실제 시간과 대표 좌표를 쓴다 — 3시간 16분이라 「차로 2시간」에서 빠지고 「차로 4시간」에 든다", () => {
+    const list = [festival("강릉", GANGNEUNG, "2026-12-25", "2026-12-25")];
+    const [d] = recommendDestinations(list, threeDays, SEOUL, undefined, "4h", roads);
+    expect(d.driveMinutes).toBe(196);
+    expect(d.center).toBe(GANGNEUNG_HALL);
+    expect(recommendDestinations(list, threeDays, SEOUL, undefined, "2h", roads)).toEqual([]);
+  });
+
+  it("표에 없으면 직선 거리로 어림하고 축제들의 가운데를 쓴다", () => {
+    const [d] = recommendDestinations([festival("파주", PAJU, "2026-12-25", "2026-12-25")], threeDays, SEOUL, undefined, "2h", roads);
+    expect(d.center.lat).toBeCloseTo(PAJU.lat);
+    expect(d.driveMinutes).toBeGreaterThan(30);
+  });
+});

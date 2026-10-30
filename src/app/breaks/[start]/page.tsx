@@ -24,6 +24,8 @@ export const metadata: Metadata = {
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** 카드 머리 띠 색과 같은 순서 */
 const PIN_TONES: MapPin["tone"][] = ["yellow", "mint", "coral", "lavender"];
+/** 처음 그리는 선 수 — 더 많으면 출발지에서 뒤엉켜 읽을 수 없다 */
+const ROUTES_SHOWN = 5;
 
 export default function BreakPage({ params, searchParams }: PageProps<"/breaks/[start]">) {
   return (
@@ -124,10 +126,11 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
           <div className="mt-14">
             <KakaoMap
               title="출발지에서 얼마나 먼지 보기"
+              caption="차로 걸리는 시간은 막히지 않을 때 기준이에요. 도로 정보 © OpenStreetMap 기여자"
               tall
               label={`${view.originName}에서 추천 지역 ${view.destinations.length}곳까지 보여 주는 지도`}
               pins={[
-                { id: "origin", ...view.origin, badge: "출발", label: view.originName, tone: "ink" },
+                { id: "origin", ...view.origin, badge: "출발", label: view.originName, tone: "ink", anchor: true },
                 ...view.destinations.map((d, i) => ({
                   id: d.code,
                   ...d.center,
@@ -136,10 +139,13 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
                   tone: PIN_TONES[i % PIN_TONES.length],
                 })),
               ]}
-              // 출발지에서 지역마다 선을 그어 「어디서 어디까지」가 보이게 한다
+              // 출발지에서 지역까지 실제 도로를 그린다. 도로 표에 없으면(내 위치, 섬) 점선 직선으로 「어디서 어디까지」만
               routes={view.destinations.map((d, i) => ({
                 tone: PIN_TONES[i % PIN_TONES.length],
-                points: [view.origin, d.center],
+                points: d.route ?? [view.origin, d.center],
+                dashed: !d.route,
+                // 선은 위에서 다섯 곳만 — 나머지는 핀이나 번호표를 누르면 그린다
+                onlyWhenFocused: i >= ROUTES_SHOWN,
               }))}
               legend={view.destinations.map((d, i) => ({
                 badge: String(i + 1),

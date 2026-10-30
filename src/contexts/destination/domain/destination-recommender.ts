@@ -1,15 +1,16 @@
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { estimateTripMinutes } from "@/shared/kernel/duration";
 import { Festival, Region } from "./festival";
+import { NO_ROADS, type Roads } from "./roads";
 import { TravelWindow } from "@/shared/kernel/travel-window";
 
 export type Destination = {
   readonly region: Region;
-  /** 지역 축제들의 가운데 */
+  /** 지역 대표 좌표(시청·군청). 모르면 지역 축제들의 가운데 */
   readonly center: Coordinate;
   /** 출발지에서 center 까지 직선 거리 */
   readonly distanceKm: number;
-  /** 출발지에서 center 까지 차로 걸리는 시간(분, 직선 거리로 어림) */
+  /** 출발지에서 center 까지 차로 걸리는 시간(분). 도로 표에 없으면 직선 거리로 어림 */
   readonly driveMinutes: number;
   /** 연휴와 오래 겹치는 순 */
   readonly festivals: readonly Festival[];
@@ -17,7 +18,7 @@ export type Destination = {
 
 /**
  * 얼마나 멀리 갈지 — 차로 2시간·4시간·어디든. 칩마다 값이 고정이라 두 칩의 결과가 겹치지 않는다.
- * 고르지 않으면 연휴 길이에 맞는 것(recommendedReach)을 쓴다. 서울에서 강릉 약 2시간 50분 · 부산 약 5시간 25분(estimateTripMinutes).
+ * 고르지 않으면 연휴 길이에 맞는 것(recommendedReach)을 쓴다. 막히지 않으면 서울에서 강릉 약 3시간.
  */
 export type ReachPreference = "2h" | "4h" | "any";
 const REACH_MINUTES: Record<ReachPreference, number> = { "2h": 120, "4h": 240, any: Number.POSITIVE_INFINITY };
@@ -56,6 +57,8 @@ export function recommendDestinations(
   /** 몇 곳까지 — 기본은 조건에 맞는 곳 모두 */
   limit = Number.POSITIVE_INFINITY,
   preference: ReachPreference = recommendedReach(window.days),
+  /** 미리 계산한 차 경로 — 없으면 직선 거리로 어림한다 */
+  roads: Roads = NO_ROADS,
 ): Destination[] {
   const overlapping = festivals.filter((f) => window.overlapDays(f.start, f.end) > 0);
   const byRegion = Map.groupBy(overlapping, (f) => f.region.code);
@@ -64,9 +67,10 @@ export function recommendDestinations(
 
   return [...byRegion.values()]
     .map((group) => {
-      const center = Coordinate.centerOf(group.map((f) => f.location));
+      const { code } = group[0].region;
+      const center = roads.pointOf(code) ?? Coordinate.centerOf(group.map((f) => f.location));
       const distanceKm = origin.distanceKm(center);
-      return { region: group[0].region, center, distanceKm, driveMinutes: estimateTripMinutes(distanceKm), group };
+      return { region: group[0].region, center, distanceKm, driveMinutes: roads.minutesTo(code) ?? estimateTripMinutes(distanceKm), group };
     })
     .map(({ group, ...rest }) => ({
       ...rest,
