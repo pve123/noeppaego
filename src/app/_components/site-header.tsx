@@ -62,6 +62,7 @@ const SOURCES = [
   { what: "관광 정보와 사진", who: "한국관광공사" },
   { what: "날씨", who: "기상청" },
   { what: "지도와 맛집", who: "카카오" },
+  { what: "길과 이동 시간", who: "OpenStreetMap" },
 ];
 
 export function SiteFooter() {
