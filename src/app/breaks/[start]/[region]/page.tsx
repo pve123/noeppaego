@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/calendar";
-import { describeItinerary, planItinerary, type ItineraryView } from "@/contexts/itinerary";
+import { aiSummariesOn, describeItinerary, planItinerary, type ItineraryView } from "@/contexts/itinerary";
 import { rangeText } from "@/shared/kernel/korean";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { currentUser } from "@/shared/auth/session";
@@ -104,7 +104,9 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
 
   // 소개 글은 기다리지 않는다 — 날마다 Suspense 로 늦게 채운다(호출은 한 번).
   // 사용자가 바꾸거나 취향을 고른 일정에는 붙이지 않는다 — 바꿀 때마다 부르면 조합 수만큼 비용이 는다.
-  const summaries = plan.customized || plan.tailored ? Promise.resolve(undefined) : describeItinerary(plan);
+  // 키를 빼 AI 를 꺼 두었으면 자리(「AI가 소개를 쓰는 중」)와 안내도 그리지 않는다
+  const ai = aiSummariesOn();
+  const summaries = !ai || plan.customized || plan.tailored ? Promise.resolve(undefined) : describeItinerary(plan);
   const noWeather = plan.days.every((d) => !d.weather);
 
   const mapDays: MapDay[] = plan.days.map((day) => ({
@@ -171,7 +173,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
                 </Link>
               }
             >
-              직접 바꾼 칸이 있어요. 바꾼 일정에는 AI 소개가 붙지 않아요.
+              {ai ? "직접 바꾼 칸이 있어요. 바꾼 일정에는 AI 소개가 붙지 않아요." : "직접 바꾼 칸이 있어요."}
             </Notice>
           )}
           {noWeather && <Notice>날씨는 출발 10일 전부터 일정에 반영해요.</Notice>}
@@ -185,9 +187,11 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
               day={day}
               hrefFor={(slotKey, placeId) => hrefWith(base, prefsQuery, picks, slotKey, placeId)}
               summary={
-                <Suspense fallback={<DaySummarySkeleton />}>
-                  <DaySummary summaries={summaries} index={i} />
-                </Suspense>
+                ai && (
+                  <Suspense fallback={<DaySummarySkeleton />}>
+                    <DaySummary summaries={summaries} index={i} />
+                  </Suspense>
+                )
               }
             />
           ))}

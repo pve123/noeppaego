@@ -1,5 +1,6 @@
 import "server-only";
 import { cacheLife } from "next/cache";
+import { kakaoGet } from "@/shared/kakao/kakao-rest";
 import { Place, PlacePages } from "../domain/place";
 import { isSamePlace, normalizeName } from "./place-match";
 
@@ -12,36 +13,20 @@ type KakaoDoc = { place_name: string; place_url: string; distance: string };
  */
 async function findKakaoPage(title: string, lat: number, lng: number): Promise<string | undefined> {
   "use cache";
-  const key = process.env.KAKAO_REST_API_KEY;
-  if (!key) {
-    cacheLife("seconds");
-    return undefined;
-  }
-  const url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json");
-  url.searchParams.set("query", title.replace(/\([^)]*\)/g, "").trim() || normalizeName(title));
-  url.searchParams.set("category_group_code", "AD5");
-  url.searchParams.set("x", String(lng));
-  url.searchParams.set("y", String(lat));
-  url.searchParams.set("radius", "500");
-  url.searchParams.set("sort", "distance");
-  url.searchParams.set("size", "5");
-  try {
-    const res = await fetch(url, { headers: { Authorization: `KakaoAK ${key}` }, signal: AbortSignal.timeout(5_000) });
-    if (!res.ok) {
-      console.warn(`[kakao:place-page] 응답 ${res.status}`);
-      cacheLife("minutes");
-      return undefined;
-    }
-    const { documents } = (await res.json()) as { documents: KakaoDoc[] };
-    const match = documents.find((d) => isSamePlace(title, d.place_name, Number(d.distance)));
-    if (match) cacheLife("hours");
-    else cacheLife("minutes");
-    return match?.place_url;
-  } catch (e) {
-    console.warn(`[kakao:place-page] 연결 실패: ${(e as Error).name}`);
-    cacheLife("minutes");
-    return undefined;
-  }
+  const result = await kakaoGet<{ documents: KakaoDoc[] }>("kakao:place-page", "https://dapi.kakao.com/v2/local/search/keyword.json", {
+    query: title.replace(/\([^)]*\)/g, "").trim() || normalizeName(title),
+    category_group_code: "AD5",
+    x: lng,
+    y: lat,
+    radius: 500,
+    sort: "distance",
+    size: 5,
+  });
+  const match = result.ok ? result.data.documents.find((d) => isSamePlace(title, d.place_name, Number(d.distance))) : undefined;
+  // 찾은 결과는 몇 시간, 못 찾음·실패는 몇 분만(장소 이름이 고쳐지면 다시 찾게)
+  if (match) cacheLife("hours");
+  else cacheLife("minutes");
+  return match?.place_url;
 }
 
 export class KakaoPlacePages implements PlacePages {

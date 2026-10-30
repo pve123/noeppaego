@@ -17,7 +17,7 @@ export type DayWeather = {
 };
 
 /** 강수확률이 이 이상이면 비 오는 반나절로 본다 */
-export const WET_CHANCE = 60;
+const WET_CHANCE = 60;
 
 export function isWet(half: HalfDay | undefined): boolean {
   if (!half) return false;

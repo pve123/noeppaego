@@ -28,9 +28,9 @@ export function reachKm(days: number, preference: ReachPreference = "auto"): num
  * 아이와 함께라 가까운 곳만, 기차로 멀리 가려 짧은 연휴에도 멀리 — 같은 연휴라도 사람마다 다르다.
  */
 export type ReachPreference = "near" | "auto" | "far";
-export const REACH_PREFERENCES: readonly ReachPreference[] = ["near", "auto", "far"];
+const REACH_PREFERENCES: readonly ReachPreference[] = ["near", "auto", "far"];
 /** 「가까운 곳만」 — 차로 대략 한 시간 남짓 */
-export const NEAR_KM = 80;
+const NEAR_KM = 80;
 export const reachPreferenceOf = (value: unknown): ReachPreference =>
   REACH_PREFERENCES.includes(value as ReachPreference) ? (value as ReachPreference) : "auto";
 
@@ -43,7 +43,7 @@ const JEJU_MIN_DAYS = 4;
 const isJeju = (code: string) => code.split("-")[0] === JEJU_SIDO;
 
 /** 출발지에서 이보다 가까운 곳은 여행지가 아니라 동네다 — 서울시청에서 서울 끝까지 약 15km. */
-export const MIN_DISTANCE_KM = 20;
+const MIN_DISTANCE_KM = 20;
 
 /**
  * 연휴에 갈 만한 지역(도메인 서비스, 순수 함수).

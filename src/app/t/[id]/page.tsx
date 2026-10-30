@@ -5,7 +5,7 @@ import { findSavedItinerary, type SavedItineraryView } from "@/contexts/itinerar
 import { currentUserId } from "@/shared/auth/session";
 import { rangeText } from "@/shared/kernel/korean";
 import { toggleFavoriteAction } from "../../actions";
-import { DAY_TONES, ItineraryDay } from "../../_components/itinerary-day";
+import { AiSummary, DAY_TONES, ItineraryDay } from "../../_components/itinerary-day";
 import { ItineraryMap, type MapDay } from "../../_components/itinerary-map";
 import { BAND_BUTTON, BAND_LINE, BAND_OUTLINE, BAND_ROW } from "../../_components/band-button";
 import { PageBand } from "../../_components/page-band";
@@ -146,14 +146,7 @@ async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
               dayCount={plan.days.length}
               // 저장한 때의 예보라 지금과 다를 수 있어 날씨는 보여 주지 않는다
               day={{ ...day, weather: undefined }}
-              summary={
-                view.summaries?.[i] ? (
-                  <p className="mt-3 max-w-3xl leading-relaxed">
-                    <span className="mr-2 inline-block rounded-full bg-lavender px-2 py-0.5 align-[2px] text-xs font-bold">AI 소개</span>
-                    {view.summaries[i]}
-                  </p>
-                ) : undefined
-              }
+              summary={view.summaries?.[i] ? <AiSummary text={view.summaries[i]} /> : undefined}
             />
           ))}
         </div>

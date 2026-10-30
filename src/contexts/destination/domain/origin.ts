@@ -36,7 +36,7 @@ const roughly = (n: number) => Math.round(n * 100) / 100;
 const inKorea = (lat: number, lng: number) => lat >= 33 && lat <= 39 && lng >= 124 && lng <= 132;
 
 /** 「내 위치」 출발지 — `here:위도,경도`. 형식이 틀리거나 우리나라 밖이면 undefined */
-export function hereOrigin(id: string | undefined): Origin | undefined {
+function hereOrigin(id: string | undefined): Origin | undefined {
   if (!id?.startsWith(HERE)) return undefined;
   const [lat, lng] = id.slice(HERE.length).split(",").map(Number);
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || !inKorea(lat, lng)) return undefined;
