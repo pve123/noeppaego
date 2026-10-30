@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ParkingChip } from "./parking-sheet";
+import { PinIcon } from "./icons";
 
 /**
  * 카드 아래 주소 줄 — 📍 주소(한 줄, 넘치면 … · 누르면 전체) · 복사 · 지도 · 주차(좌표가 있을 때).
@@ -23,9 +24,7 @@ export function AddressBar({
     "inline-flex size-8 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[12px] font-bold transition-colors sm:h-7 sm:w-auto sm:px-2.5";
   return (
     <div className={`flex gap-2 border-t-2 border-dashed border-ink/15 px-3 py-2 sm:px-4 ${full ? "items-start" : "items-center"}`}>
-      <svg viewBox="0 0 24 24" aria-hidden className={`size-4 shrink-0 text-coral ${full ? "mt-1" : ""}`} fill="currentColor">
-        <path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z" />
-      </svg>
+      <PinIcon className={`size-4 shrink-0 text-coral ${full ? "mt-1" : ""}`} />
       {/* 휴대폰엔 마우스 올림이 없어 잘린 주소를 누르면 전체로 편다 */}
       <button
         type="button"

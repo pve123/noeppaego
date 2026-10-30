@@ -28,7 +28,28 @@ export const ORIGINS: readonly Origin[] = [
   { id: "suncheon", name: "순천", at: new Coordinate(34.9507, 127.4872) },
 ];
 
-/** 모르는 id 면 서울 */
+/** 「내 위치」 출발지 id 의 머리 — `here:37.57,126.98` */
+const HERE = "here:";
+/** 소수 둘째 자리(약 1km)로 줄인다 — 거리 계산엔 충분하고, 주소·접속 기록에 정확한 위치가 남지 않는다 */
+const roughly = (n: number) => Math.round(n * 100) / 100;
+/** 우리나라 안만 — 바다 건너 엉뚱한 좌표로 추천하지 않게 */
+const inKorea = (lat: number, lng: number) => lat >= 33 && lat <= 39 && lng >= 124 && lng <= 132;
+
+/** 「내 위치」 출발지 — `here:위도,경도`. 형식이 틀리거나 우리나라 밖이면 undefined */
+export function hereOrigin(id: string | undefined): Origin | undefined {
+  if (!id?.startsWith(HERE)) return undefined;
+  const [lat, lng] = id.slice(HERE.length).split(",").map(Number);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !inKorea(lat, lng)) return undefined;
+  const at = new Coordinate(roughly(lat), roughly(lng));
+  return { id: `${HERE}${at.lat},${at.lng}`, name: "내 위치", at };
+}
+
+/** 포트 — 좌표가 속한 동네 이름(「종로구」). 모르면 undefined */
+export interface AreaNames {
+  nameAt(at: Coordinate): Promise<string | undefined>;
+}
+
+/** 모르는 id 면 서울. `here:위도,경도` 면 내 위치 */
 export function originOf(id: string | undefined): Origin {
-  return ORIGINS.find((o) => o.id === id) ?? ORIGINS[0];
+  return hereOrigin(id) ?? ORIGINS.find((o) => o.id === id) ?? ORIGINS[0];
 }

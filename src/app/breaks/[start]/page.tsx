@@ -96,7 +96,7 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
     <section aria-label="추천 지역" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       {/* 출발지·거리를 한 상자에 — 출발지 목록은 그 자리에서 펼쳐져 아래 카드를 덮지 않는다 */}
       <div className="flex flex-col gap-4 rounded-3xl border-[2.5px] border-ink bg-surface p-4 sm:p-5">
-        <OriginSelect origins={view.origins} selected={view.originId} basePath={basePath} query={reachQuery(view.reach)} />
+        <OriginSelect origins={view.origins} selected={view.originId} selectedName={view.originName} basePath={basePath} query={reachQuery(view.reach)} />
         <ReachChips basePath={basePath} originId={view.originId} selected={view.reach} />
       </div>
       {/* 목록 머리 — 문장 대신 몇 곳인지와 어떤 조건으로 골랐는지를 칩으로 */}

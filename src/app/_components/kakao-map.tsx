@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { CrosshairIcon } from "./icons";
 
 export type MapPin = {
   id: string;
@@ -229,11 +230,7 @@ export function KakaoMap({
                           active ? "border-ink bg-ink text-cream" : "border-ink/20 text-ink/60"
                         }`}
                       >
-                        <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                          <circle cx="12" cy="12" r="6.5" />
-                          <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none" />
-                          <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" />
-                        </svg>
+                        <CrosshairIcon className="size-4" />
                       </span>
                     </button>
                   </li>
