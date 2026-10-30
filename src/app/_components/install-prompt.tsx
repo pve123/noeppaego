@@ -141,7 +141,7 @@ export function InstallPrompt() {
   return (
     <section
       aria-labelledby={titleId}
-      className="install-in fixed inset-x-3 bottom-[max(12px,env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-[26px] border-[3px] border-ink bg-surface p-4 shadow-pop sm:inset-x-auto sm:right-6 sm:bottom-6"
+      className="install-in fixed inset-x-3 bottom-[calc(var(--tab-bar-h)_+_12px_+_env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-[26px] border-[3px] border-ink bg-surface p-4 shadow-pop sm:inset-x-auto sm:right-6 sm:bottom-6"
     >
       <button
         type="button"

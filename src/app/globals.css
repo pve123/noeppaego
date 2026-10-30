@@ -122,10 +122,20 @@ html {
   scroll-padding-top: 84px;
 }
 
-/* ── 휴대폰 아래 고정 저장 바가 있으면 그만큼 페이지 끝을 띄운다(푸터가 가리지 않게) ── */
+/* ── 휴대폰 아래 탭(TabBar)·저장 바: 그만큼 페이지 끝을 띄운다(푸터가 가리지 않게). 저장 바는 탭 위에 얹힌다 ── */
+:root {
+  --tab-bar-h: 64px;
+}
 @media (max-width: 639.98px) {
+  body {
+    padding-bottom: calc(var(--tab-bar-h) + env(safe-area-inset-bottom));
+  }
   body:has([data-save-bar]) {
-    padding-bottom: calc(92px + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--tab-bar-h) + 80px + env(safe-area-inset-bottom));
+  }
+  /* 알림은 저장 바와 겹치지 않게 그 위로 */
+  body:has([data-save-bar]) .toast {
+    bottom: calc(var(--tab-bar-h) + 96px + env(safe-area-inset-bottom));
   }
 }
 

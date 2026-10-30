@@ -29,3 +29,33 @@ export function CrosshairIcon({ className = "size-4" }: { className?: string }) 
     </svg>
   );
 }
+
+/** 집 — 하단 탭 「홈」 */
+export function HomeIcon({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.5 11 12 4l8.5 7" />
+      <path d="M6 9.5V20h12V9.5" />
+      <path d="M10 20v-5.5h4V20" />
+    </svg>
+  );
+}
+
+/** 하트 — 하단 탭 「찜」 */
+export function HeartIcon({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round">
+      <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z" />
+    </svg>
+  );
+}
+
+/** 사람 — 하단 탭 「내 계정」 */
+export function UserIcon({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={className} fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+      <circle cx="12" cy="8.5" r="3.8" />
+      <path d="M4.5 20c1.2-3.8 4-5.6 7.5-5.6s6.3 1.8 7.5 5.6" />
+    </svg>
+  );
+}

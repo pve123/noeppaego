@@ -5,6 +5,7 @@ import "./globals.css";
 import { ServiceWorker } from "./_components/service-worker";
 import { InstallPrompt } from "./_components/install-prompt";
 import { ScrollToTop } from "./_components/scroll-to-top";
+import { TabBar } from "./_components/tab-bar";
 
 // 한글 글꼴은 subset 이 커서 미리 받지 않는다(preload: false) — 쓰는 글자만 그때 받는다.
 const jua = Jua({ weight: "400", subsets: ["latin"], preload: false, variable: "--font-jua" });
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense>
           <InstallPrompt />
           <ScrollToTop />
+          <TabBar />
         </Suspense>
       </body>
     </html>
