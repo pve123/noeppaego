@@ -6,7 +6,7 @@ import { CalendarIcon } from "./icons";
 const withoutYear = (label: string) => label.replace(/^\d{4}\./, "");
 
 /** 「2026.12.25(금)부터 12.27(일)까지」 — 끝날이 같은 해면 연도를 뺀다(해를 넘기면 그대로) */
-function periodText(option: BreakOptionView): string {
+export function periodText(option: BreakOptionView): string {
   const sameYear = option.startIso.slice(0, 4) === option.endIso.slice(0, 4);
   return rangeText(option.startLabel, sameYear ? withoutYear(option.endLabel) : option.endLabel);
 }

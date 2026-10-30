@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 const TONES = {
-  info: { box: "bg-surface", icon: "bg-mint", mark: "i" },
+  info: { box: "bg-surface", icon: "bg-lavender", mark: "i" },
   highlight: { box: "bg-yellow", icon: "bg-surface", mark: "!" },
 } as const;
 

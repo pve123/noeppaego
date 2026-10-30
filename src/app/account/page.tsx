@@ -76,7 +76,7 @@ async function Account() {
 
       <Link
         href="/saved"
-        className="flex items-center justify-between gap-3 rounded-3xl border-[3px] border-ink bg-mint px-5 py-4 font-display text-lg transition-transform hover:-translate-y-0.5 sm:px-6"
+        className="flex items-center justify-between gap-3 rounded-3xl border-[3px] border-ink bg-surface px-5 py-4 font-display text-lg transition-transform hover:-translate-y-0.5 sm:px-6"
       >
         <span>찜한 일정 {favorites.length}개</span>
         <span aria-hidden>→</span>

@@ -24,7 +24,7 @@ describe("googleCalendarUrl", () => {
 
   it("설명에 날마다 장소가 있는 칸과 공유 링크를 적는다", () => {
     expect(url.searchParams.get("details")).toBe(
-      "1일차 · 2026.12.30(수)\n점심 국밥집\n숙소 파주 호텔\n\n2일차 · 2026.12.31(목)\n오전 임진각\n\n3일차 · 2027.01.01(금)\n\n일정 자세히 보기: https://example.com/t/abc",
+      "1일차 2026.12.30(수)\n점심 국밥집\n숙소 파주 호텔\n\n2일차 2026.12.31(목)\n오전 임진각\n\n3일차 2027.01.01(금)\n\n일정 자세히 보기: https://example.com/t/abc",
     );
   });
 });

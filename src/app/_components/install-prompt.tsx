@@ -146,7 +146,7 @@ export function InstallPrompt() {
       <button
         type="button"
         onClick={close}
-        aria-label="닫기 — 2주 동안 다시 묻지 않아요"
+        aria-label="닫기. 2주 동안 다시 묻지 않아요."
         className="absolute right-2.5 top-2.5 flex size-9 items-center justify-center rounded-full text-muted hover:bg-cream hover:text-ink"
       >
         <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden>

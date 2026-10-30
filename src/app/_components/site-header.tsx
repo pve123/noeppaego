@@ -66,7 +66,7 @@ const SOURCES = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t-[3px] border-ink bg-mint">
+    <footer className="mt-16 border-t-[3px] border-ink bg-surface">
       <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-between gap-8 px-4 py-12 sm:px-6">
         <div className="flex items-start gap-3">
           <Logo size={56} />
@@ -113,7 +113,7 @@ export function SiteFooter() {
               )}
               <Link
                 href={l.href}
-                className="-mx-1 rounded-md px-1 py-1 underline decoration-ink/30 decoration-2 underline-offset-4 transition-colors hover:bg-surface/60 hover:decoration-ink"
+                className="-mx-1 rounded-md px-1 py-1 underline decoration-ink/30 decoration-2 underline-offset-4 transition-colors hover:bg-ink/5 hover:decoration-ink"
               >
                 {l.label}
               </Link>
