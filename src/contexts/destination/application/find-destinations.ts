@@ -1,7 +1,7 @@
 import { durationLabel } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dotDate, TravelWindow } from "@/shared/kernel/travel-window";
-import { isJeju, recommendDestinations, reachMinutes, type ReachPreference } from "../domain/destination-recommender";
+import { isJeju, recommendDestinations, recommendedReach, reachMinutes, type ReachPreference } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
 import { AreaNames, ORIGINS, originOf } from "../domain/origin";
 
@@ -13,7 +13,7 @@ export type FindDestinations = {
   end: string;
   /** 출발지 id — 모르면 서울 */
   originId?: string;
-  /** 얼마나 멀리 — 없으면 연휴 길이대로 */
+  /** 얼마나 멀리 — 없으면 연휴 길이에 맞게(recommendedReach) */
   reach?: ReachPreference;
 };
 
@@ -36,7 +36,7 @@ export type DestinationView = {
   code: string;
   name: string;
   center: LatLng;
-  /** 「차로 약 2시간 50분」 — 직선 거리로 어림한 값이라 10분 단위. 제주는 「비행기·배」 */
+  /** 「차로 약 2시간 50분」 — 직선 거리로 어림한 값이라 10분 단위. 제주는 「비행기나 배로」 */
   travelLabel: string;
   festivals: FestivalView[];
 };
@@ -47,10 +47,12 @@ export type DestinationsView = {
   origin: LatLng;
   /** 고를 수 있는 출발지 */
   origins: { id: string; name: string }[];
-  /** 「차로 약 6시간 30분 안」 같은 거리 안내. 제한이 없으면 undefined */
+  /** 「차로 약 2시간 안」 같은 거리 안내. 제한이 없으면 undefined */
   reachText?: string;
   /** 고른 거리 */
   reach: ReachPreference;
+  /** 연휴 길이에 맞는 거리 — 칩에 「추천」을 붙이고, 이 값이면 주소에 남기지 않는다 */
+  recommended: ReachPreference;
   destinations: DestinationView[];
 };
 
@@ -66,8 +68,9 @@ export async function findDestinations(
   // 내 위치는 동네 이름을 붙여 어디서 재는지 보이게 — 못 찾으면 「내 위치」 그대로
   const area = origin.id.startsWith("here:") ? await areas.nameAt(origin.at) : undefined;
   const festivals = await repository.findOverlapping(window);
-  const preference = query.reach ?? "auto";
-  const reach = reachMinutes(window.days, preference);
+  const recommended = recommendedReach(window.days);
+  const preference = query.reach ?? recommended;
+  const reach = reachMinutes(preference);
   const destinations = recommendDestinations(festivals, window, origin.at, undefined, preference);
 
   return {
@@ -77,11 +80,12 @@ export async function findDestinations(
     origins: ORIGINS.map(({ id, name }) => ({ id, name })),
     reachText: Number.isFinite(reach) ? `차로 ${durationLabel(reach)} 안` : undefined,
     reach: preference,
+    recommended,
     destinations: destinations.map((d) => ({
       code: d.region.code,
       name: d.region.name,
       center: { lat: d.center.lat, lng: d.center.lng },
-      travelLabel: isJeju(d.region.code) ? "비행기·배" : `차로 ${durationLabel(Math.round(d.driveMinutes / 10) * 10)}`,
+      travelLabel: isJeju(d.region.code) ? "비행기나 배로" : `차로 ${durationLabel(Math.round(d.driveMinutes / 10) * 10)}`,
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,
