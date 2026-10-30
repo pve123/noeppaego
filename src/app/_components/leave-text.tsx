@@ -1,5 +1,6 @@
 import type { BreakOptionView } from "@/contexts/calendar";
 import { joinWithAnd, rangeText } from "@/shared/kernel/korean";
+import { CalendarIcon } from "./icons";
 
 /** `2026.01.02(금)` → `01.02(금)` — 같은 해 안에서는 연도를 한 번만 쓴다 */
 const withoutYear = (label: string) => label.replace(/^\d{4}\./, "");
@@ -17,10 +18,7 @@ export function periodText(option: BreakOptionView): string {
 export function PeriodLine({ option, className = "" }: { option: BreakOptionView; className?: string }) {
   return (
     <p className={`flex items-center gap-2 font-bold ${className}`}>
-      <svg viewBox="0 0 24 24" aria-hidden className="size-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-        <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
-        <path d="M3.5 10h17M8 3v4M16 3v4" />
-      </svg>
+      <CalendarIcon className="size-[18px] shrink-0" />
       {periodText(option)}
     </p>
   );

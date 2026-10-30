@@ -2,7 +2,7 @@ import { rangeText } from "@/shared/kernel/korean";
 import { dotDate, TravelWindow } from "@/shared/kernel/travel-window";
 import { recommendDestinations, reachKm, type ReachPreference } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
-import { ORIGINS, originOf } from "../domain/origin";
+import { AreaNames, ORIGINS, originOf } from "../domain/origin";
 
 // ── 쿼리 ─────────────────────────────────────────────
 
@@ -58,9 +58,12 @@ export type DestinationsView = {
 export async function findDestinations(
   query: FindDestinations,
   repository: FestivalRepository,
+  areas: AreaNames,
 ): Promise<DestinationsView> {
   const window = TravelWindow.of(query.start, query.end);
   const origin = originOf(query.originId);
+  // 내 위치는 동네 이름을 붙여 어디서 재는지 보이게 — 못 찾으면 「내 위치」 그대로
+  const area = origin.id.startsWith("here:") ? await areas.nameAt(origin.at) : undefined;
   const festivals = await repository.findOverlapping(window);
   const preference = query.reach ?? "auto";
   const reach = reachKm(window.days, preference);
@@ -68,7 +71,7 @@ export async function findDestinations(
 
   return {
     originId: origin.id,
-    originName: origin.name,
+    originName: area ? `${area} 근처` : origin.name,
     origin: { lat: origin.at.lat, lng: origin.at.lng },
     origins: ORIGINS.map(({ id, name }) => ({ id, name })),
     reachKm: Number.isFinite(reach) ? reach : undefined,

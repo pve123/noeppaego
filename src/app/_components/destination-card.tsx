@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { DestinationView, FestivalView } from "@/contexts/destination";
+import { CalendarIcon } from "./icons";
 
 const BANDS = ["bg-yellow", "bg-mint", "bg-coral", "bg-lavender"];
 /** 카드에 보이는 축제 수 — 고르는 데는 두 개면 충분하다. 사진은 맨 위에 하나만 크게 */
@@ -69,10 +70,7 @@ function FestivalRow({ festival }: { festival: FestivalView }) {
         {/* 기간은 달력 아이콘과 굵은 글씨로, 연휴 내내 열리면 민트 뱃지를 붙인다 */}
         <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
           <span className="inline-flex items-center gap-1.5 font-bold text-ink/80">
-            <svg viewBox="0 0 24 24" aria-hidden className="size-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
-              <path d="M3.5 10h17M8 3v4M16 3v4" />
-            </svg>
+            <CalendarIcon className="size-4 shrink-0" />
             {festival.dateLabel}
           </span>
           {festival.wholeBreak && <span className="rounded-full border-2 border-ink bg-mint px-2 py-px text-[12px] font-bold">연휴 내내</span>}
