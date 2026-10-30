@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { currentUser } from "@/shared/auth/session";
 import { AccountMenu, LoginNotice } from "./account-menu";
+import { NAV_ITEM_WIDE } from "./nav-item";
 
 /** 서비스 이름 — 「J」만 노랑으로 띄워 MBTI 의 J(계획형)가 눈에 들어오게 */
 function BrandName() {
@@ -28,7 +29,7 @@ export function SiteHeader() {
         </span>
       </Link>
       <nav aria-label="주 메뉴" className="flex items-center gap-1">
-        <Link href="/#breaks" className="hidden rounded-full px-3 py-2 font-display text-[17px] hover:bg-yellow sm:inline-block">
+        <Link href="/#breaks" className={NAV_ITEM_WIDE}>
           연휴 목록
         </Link>
         <Suspense fallback={<span className="inline-block h-10 w-28" />}>

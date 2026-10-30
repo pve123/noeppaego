@@ -271,7 +271,7 @@ function Group({
             ? "grid grid-cols-3 gap-2"
             : scroll
               ? // 휴대폰은 옆으로 밀어 본다 — 칩이 줄을 넘겨 시트가 길어지지 않게
-                "-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+                "no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
               : "flex flex-wrap gap-2"
         }`}
       >
