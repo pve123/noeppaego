@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { durationLabel, estimateDriveMinutes } from "./duration";
+import { durationLabel, estimateDriveMinutes, estimateTripMinutes } from "./duration";
 
 describe("durationLabel", () => {
   it("10분 미만은 분 그대로, 그 위는 5분 단위", () => {
@@ -23,5 +23,12 @@ describe("estimateDriveMinutes", () => {
 
   it("거리가 0 이어도 출발·주차 몇 분은 든다", () => {
     expect(durationLabel(estimateDriveMinutes(0))).toBe("약 2분");
+  });
+});
+
+describe("estimateTripMinutes", () => {
+  it("직선 165km(서울–강릉)는 약 2시간 50분, 325km(서울–부산)는 약 5시간 25분", () => {
+    expect(durationLabel(estimateTripMinutes(165))).toBe("약 2시간 50분");
+    expect(durationLabel(estimateTripMinutes(325))).toBe("약 5시간 25분");
   });
 });

@@ -13,6 +13,21 @@ export function estimateDriveMinutes(straightKm: number): number {
   return (straightKm * ROAD_FACTOR * 60) / LOCAL_KMH + OVERHEAD_MINUTES;
 }
 
+/** 도시 사이 길은 직선보다 덜 돌아간다 — 고속도로 기준 대략 1.3배 */
+const INTERCITY_ROAD_FACTOR = 1.3;
+/** 고속도로와 국도를 섞은 평균 차 속도(km/h) */
+const INTERCITY_KMH = 80;
+/** 시내를 빠져나가고 들어가는 데 드는 시간(분) */
+const INTERCITY_OVERHEAD_MINUTES = 10;
+
+/**
+ * 출발 도시에서 다른 지역까지 직선 거리로 어림한 차 이동 시간(분) — 서울에서 강릉(약 165km) 약 2시간 50분, 부산(약 325km) 약 5시간 25분.
+ * 막히지 않을 때 기준이다. 섬은 배·비행기라 맞지 않는다.
+ */
+export function estimateTripMinutes(straightKm: number): number {
+  return (straightKm * INTERCITY_ROAD_FACTOR * 60) / INTERCITY_KMH + INTERCITY_OVERHEAD_MINUTES;
+}
+
 /** 화면용 이동 시간 — 「약 2시간 10분」「약 12분」. 5분 단위로 반올림(10분 미만은 그대로). */
 export function durationLabel(minutes: number): string {
   const rounded = minutes < 10 ? Math.max(1, Math.round(minutes)) : Math.round(minutes / 5) * 5;

@@ -105,7 +105,7 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
           <h2 className="font-display text-[24px] leading-tight">추천 지역 {view.destinations.length}곳</h2>
           <ul aria-label="고른 기준" className="flex flex-wrap gap-1.5 text-[13px] font-bold">
             <li className="rounded-full bg-soft-ink px-2.5 py-1">
-              {view.originName}에서 {view.reachKm ? `${view.reachKm}km 안` : "거리 제한 없이"}
+              {view.originName}에서 {view.reachText ?? "거리 제한 없이"}
             </li>
             <li className="rounded-full bg-soft-ink px-2.5 py-1">축제 많은 순</li>
           </ul>
@@ -113,7 +113,7 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
       )}
 
       {view.destinations.length === 0 ? (
-        <EmptyDestinations basePath={basePath} originId={view.originId} reach={view.reach} reachKm={view.reachKm} />
+        <EmptyDestinations basePath={basePath} originId={view.originId} reach={view.reach} reachText={view.reachText} />
       ) : (
         <>
           <ol className="mt-4 grid gap-5 md:grid-cols-2">
@@ -146,7 +146,7 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
               }))}
               legend={view.destinations.map((d, i) => ({
                 badge: String(i + 1),
-                text: `${d.name} ${d.distanceKm}km`,
+                text: `${d.name} ${d.travelLabel}`,
                 tone: PIN_TONES[i % PIN_TONES.length],
                 // 누르면 출발지와 이 지역, 그 사이 선만
                 pinIds: ["origin", d.code],
@@ -165,19 +165,19 @@ function EmptyDestinations({
   basePath,
   originId,
   reach,
-  reachKm,
+  reachText,
 }: {
   basePath: string;
   originId: string;
   reach: ReachPreference;
-  reachKm?: number;
+  reachText?: string;
 }) {
   // 이미 거리 제한이 없으면(4일 이상 등) 넓혀도 같다 — 버튼을 주지 않는다
-  const wider = reachKm ? widerThan(reach) : undefined;
+  const wider = reachText ? widerThan(reach) : undefined;
   return (
     <div className="mt-6 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
       <p className="font-display text-[22px] text-balance">
-        {wider && reachKm ? `${reachKm}km 안에는 이 기간 축제가 없어요.` : "이 기간에 등록된 축제가 아직 없어요."}
+        {wider && reachText ? `${reachText}에는 이 기간 축제가 없어요.` : "이 기간에 등록된 축제가 아직 없어요."}
       </p>
       <p className="mt-2 text-muted">{wider ? "범위를 넓히면 갈 곳이 나올 수 있어요." : "날짜가 가까워지면 다시 확인해 주세요."}</p>
       {wider && (
