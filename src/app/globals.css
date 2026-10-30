@@ -190,3 +190,27 @@ html {
 html:has(dialog[open]:modal) {
   overflow: hidden;
 }
+
+/* ── 알림(Toast): 아래에서 살짝 올라온다 ── */
+.toast {
+  animation: toast-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+/* ── 누르는 느낌: 버튼·버튼 모양 링크를 누르는 순간 살짝 눌린다(휴대폰엔 마우스 올림이 없어 이게 유일한 반응) ── */
+:where(button, [role="button"], a[class*="rounded"]):not(:disabled):active {
+  scale: 0.96;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+  :where(button, [role="button"], a[class*="rounded"]):active {
+    scale: none;
+  }
+}
