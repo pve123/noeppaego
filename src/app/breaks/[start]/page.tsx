@@ -34,7 +34,15 @@ export default function BreakPage({ params, searchParams }: PageProps<"/breaks/[
       <SiteNotice />
       <main>
         <Steps current={2} hrefs={["/#breaks"]} />
-        <RevealSuspense fallback={<BandSkeleton steps={["연휴를 확인하는 중"]} />}>
+        {/* 띠와 카드 자리를 함께 — 다 그린 화면과 같은 모양이라 새로고침해도 아래가 들썩이지 않는다 */}
+        <RevealSuspense
+          fallback={
+            <>
+              <BandSkeleton steps={["연휴를 확인하는 중"]} />
+              <DestinationsSkeleton />
+            </>
+          }
+        >
           <BreakDetail params={params} searchParams={searchParams} />
         </RevealSuspense>
       </main>

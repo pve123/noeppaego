@@ -39,6 +39,11 @@ body {
   word-break: keep-all;
 }
 
+/* 본문은 적어도 한 화면 — 불러오는 동안 푸터가 첫 화면에 올라왔다가 밀려 내려가지 않게 */
+main {
+  min-height: 100svh;
+}
+
 /* ── 키보드 초점 — 모든 버튼·링크가 같은 테두리 ───────────── */
 :where(a, button, input, select, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--ink);
