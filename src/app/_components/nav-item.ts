@@ -4,7 +4,5 @@
  */
 const NAV_ITEM_SHAPE =
   "h-10 items-center whitespace-nowrap rounded-full px-2.5 font-display text-[17px] leading-none transition-colors hover:bg-yellow sm:px-3";
-/** 늘 보이는 메뉴 */
-export const NAV_ITEM = `inline-flex ${NAV_ITEM_SHAPE}`;
-/** 넓은 화면에서만 보이는 메뉴 — hidden 과 inline-flex 가 한 요소에서 다투지 않게 따로 둔다 */
+/** 넓은 화면에서만 보이는 메뉴 — 휴대폰은 아래 탭(TabBar)이 대신한다 */
 export const NAV_ITEM_WIDE = `hidden sm:inline-flex ${NAV_ITEM_SHAPE}`;

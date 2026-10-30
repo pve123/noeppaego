@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { KakaoLoginButton } from "./kakao-login-button";
-import { NAV_ITEM } from "./nav-item";
+import { NAV_ITEM_WIDE } from "./nav-item";
 import { usePathname, useSearchParams } from "next/navigation";
 
-/** 헤더 오른쪽 — 로그인했으면 찜한 일정·내 계정(로그아웃·탈퇴는 그 안에), 아니면 카카오 로그인. 로그인 뒤에는 보던 화면으로 돌아온다 */
+/** 헤더 오른쪽 — 로그인했으면 찜한 일정·내 계정(로그아웃·탈퇴는 그 안에, 휴대폰은 아래 탭이 대신한다), 아니면 카카오 로그인. 로그인 뒤에는 보던 화면으로 돌아온다 */
 export function AccountMenu({ loggedIn, nickname }: { loggedIn: boolean; nickname?: string }) {
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -20,10 +20,10 @@ export function AccountMenu({ loggedIn, nickname }: { loggedIn: boolean; nicknam
           {nickname}님
         </span>
       )}
-      <Link href="/saved" className={NAV_ITEM}>
+      <Link href="/saved" className={NAV_ITEM_WIDE}>
         찜한 일정
       </Link>
-      <Link href="/account" className={NAV_ITEM}>
+      <Link href="/account" className={NAV_ITEM_WIDE}>
         내 계정
       </Link>
     </div>

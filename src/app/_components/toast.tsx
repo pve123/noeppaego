@@ -36,7 +36,7 @@ export function Toast() {
   return (
     <p
       role="status"
-      className="toast fixed inset-x-4 bottom-[max(24px,env(safe-area-inset-bottom))] z-[60] mx-auto flex w-fit max-w-[calc(100%-32px)] items-center gap-2 rounded-full border-[2.5px] border-ink bg-surface px-5 py-3 text-[15px] font-bold text-ink shadow-pop"
+      className="toast fixed inset-x-4 bottom-[calc(var(--tab-bar-h)_+_16px_+_env(safe-area-inset-bottom))] sm:bottom-6 z-[60] mx-auto flex w-fit max-w-[calc(100%-32px)] items-center gap-2 rounded-full border-[2.5px] border-ink bg-surface px-5 py-3 text-[15px] font-bold text-ink shadow-pop"
     >
       <span aria-hidden className="flex size-5 shrink-0 items-center justify-center rounded-full bg-mint text-[12px] text-ink">
         ✓
