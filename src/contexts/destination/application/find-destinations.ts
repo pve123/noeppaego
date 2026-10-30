@@ -1,6 +1,7 @@
+import { durationLabel } from "@/shared/kernel/duration";
 import { rangeText } from "@/shared/kernel/korean";
 import { dotDate, TravelWindow } from "@/shared/kernel/travel-window";
-import { recommendDestinations, reachKm, type ReachPreference } from "../domain/destination-recommender";
+import { isJeju, recommendDestinations, reachMinutes, type ReachPreference } from "../domain/destination-recommender";
 import { FestivalRepository } from "../domain/festival";
 import { AreaNames, ORIGINS, originOf } from "../domain/origin";
 
@@ -35,8 +36,8 @@ export type DestinationView = {
   code: string;
   name: string;
   center: LatLng;
-  /** 출발지에서 직선 거리. 차 시간은 섬처럼 못 구하는 곳이 있어 카드마다 달라지므로 거리 하나로 맞춘다 */
-  distanceKm: number;
+  /** 「차로 약 2시간 50분」 — 직선 거리로 어림한 값이라 10분 단위. 제주는 「비행기·배」 */
+  travelLabel: string;
   festivals: FestivalView[];
 };
 
@@ -46,8 +47,8 @@ export type DestinationsView = {
   origin: LatLng;
   /** 고를 수 있는 출발지 */
   origins: { id: string; name: string }[];
-  /** 「400km 안」 같은 거리 안내. 제한이 없으면 undefined */
-  reachKm?: number;
+  /** 「차로 약 6시간 30분 안」 같은 거리 안내. 제한이 없으면 undefined */
+  reachText?: string;
   /** 고른 거리 */
   reach: ReachPreference;
   destinations: DestinationView[];
@@ -66,7 +67,7 @@ export async function findDestinations(
   const area = origin.id.startsWith("here:") ? await areas.nameAt(origin.at) : undefined;
   const festivals = await repository.findOverlapping(window);
   const preference = query.reach ?? "auto";
-  const reach = reachKm(window.days, preference);
+  const reach = reachMinutes(window.days, preference);
   const destinations = recommendDestinations(festivals, window, origin.at, undefined, preference);
 
   return {
@@ -74,13 +75,13 @@ export async function findDestinations(
     originName: area ? `${area} 근처` : origin.name,
     origin: { lat: origin.at.lat, lng: origin.at.lng },
     origins: ORIGINS.map(({ id, name }) => ({ id, name })),
-    reachKm: Number.isFinite(reach) ? reach : undefined,
+    reachText: Number.isFinite(reach) ? `차로 ${durationLabel(reach)} 안` : undefined,
     reach: preference,
     destinations: destinations.map((d) => ({
       code: d.region.code,
       name: d.region.name,
       center: { lat: d.center.lat, lng: d.center.lng },
-      distanceKm: Math.round(d.distanceKm),
+      travelLabel: isJeju(d.region.code) ? "비행기·배" : `차로 ${durationLabel(Math.round(d.driveMinutes / 10) * 10)}`,
       festivals: d.festivals.map((f) => ({
         id: f.id,
         title: f.title,

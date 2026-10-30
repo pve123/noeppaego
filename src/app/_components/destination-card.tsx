@@ -31,7 +31,7 @@ export function DestinationCard({
             {destination.name}
           </h3>
           <span className="shrink-0 rounded-full border-[2.5px] border-ink bg-surface px-3 py-0.5 font-display text-[15px] tabular-nums">
-            {destination.distanceKm}km
+            {destination.travelLabel}
           </span>
         </div>
 

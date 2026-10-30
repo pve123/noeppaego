@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { Coordinate, SEOUL } from "@/shared/kernel/coordinate";
-import { recommendDestinations, reachKm, reachPreferenceOf } from "./destination-recommender";
+import { recommendDestinations, reachMinutes, reachPreferenceOf } from "./destination-recommender";
 import { Festival } from "./festival";
 import { TravelWindow } from "@/shared/kernel/travel-window";
 
-const GANGNEUNG = new Coordinate(37.7519, 128.8761); // 서울에서 약 165km
-const BUSAN = new Coordinate(35.1796, 129.0756); // 약 325km
+const GANGNEUNG = new Coordinate(37.7519, 128.8761); // 서울에서 약 165km, 차로 약 2시간 50분
+const BUSAN = new Coordinate(35.1796, 129.0756); // 약 325km, 차로 약 5시간 25분
 const JEJU = new Coordinate(33.4996, 126.5312); // 약 450km
 const PAJU = new Coordinate(37.7599, 126.78); // 약 27km
 
@@ -64,15 +64,15 @@ describe("recommendDestinations", () => {
     expect(codes(TravelWindow.of("2026-12-24", "2026-12-27"), jeju)).toEqual(["50-110"]);
   });
 
-  it("남쪽 출발지에서 직선 400km 안이어도 사흘 연휴엔 제주를 뺀다", () => {
+  it("남쪽 출발지에서 차로 6시간 30분 안이어도 사흘 연휴엔 제주를 뺀다", () => {
     const GWANGJU = new Coordinate(35.1595, 126.8526); // 제주까지 약 180km
     const jeju = [festival("50-110", JEJU, "2026-12-01", "2027-01-31")];
     expect(recommendDestinations(jeju, threeDays, GWANGJU)).toEqual([]);
     expect(recommendDestinations(jeju, TravelWindow.of("2026-12-24", "2026-12-27"), GWANGJU)).toHaveLength(1);
   });
 
-  it("이틀 연휴는 150km 안만 — 강릉은 빠진다", () => {
-    expect(reachKm(2)).toBe(150);
+  it("이틀 연휴는 차로 2시간 30분 안만 — 강릉은 빠진다", () => {
+    expect(reachMinutes(2)).toBe(150);
     const twoDays = TravelWindow.of("2026-12-26", "2026-12-27");
     expect(
       codes(twoDays, [
@@ -112,13 +112,13 @@ describe("recommendDestinations", () => {
 });
 
 describe("얼마나 멀리 — 사용자가 고른 거리", () => {
-  it("가까운 곳만은 80km, 멀어도 괜찮으면 한 단계 넓힌다", () => {
-    expect([2, 3, 5].map((d) => reachKm(d, "near"))).toEqual([80, 80, 80]);
-    expect([2, 3, 5].map((d) => reachKm(d, "far"))).toEqual([400, Infinity, Infinity]);
-    expect([2, 3, 5].map((d) => reachKm(d))).toEqual([150, 400, Infinity]);
+  it("가까운 곳만은 차로 1시간 30분, 멀어도 괜찮으면 한 단계 넓힌다", () => {
+    expect([2, 3, 5].map((d) => reachMinutes(d, "near"))).toEqual([90, 90, 90]);
+    expect([2, 3, 5].map((d) => reachMinutes(d, "far"))).toEqual([390, Infinity, Infinity]);
+    expect([2, 3, 5].map((d) => reachMinutes(d))).toEqual([150, 390, Infinity]);
   });
 
-  it("사흘 연휴에 가까운 곳만 고르면 강릉(약 165km)은 빠지고 파주만", () => {
+  it("사흘 연휴에 가까운 곳만 고르면 강릉(차로 약 2시간 50분)은 빠지고 파주만", () => {
     const threeDays = TravelWindow.of("2026-12-25", "2026-12-27");
     const list = [festival("강릉", GANGNEUNG, "2026-12-25", "2026-12-25"), festival("파주", PAJU, "2026-12-25", "2026-12-25")];
     expect(recommendDestinations(list, threeDays, SEOUL, 5, "near").map((d) => d.region.code)).toEqual(["파주"]);
