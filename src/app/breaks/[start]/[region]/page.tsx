@@ -181,6 +181,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
           {plan.days.map((day, i) => (
             <ItineraryDay
               key={day.dayNumber}
+              dayCount={plan.days.length}
               day={day}
               hrefFor={(slotKey, placeId) => hrefWith(base, prefsQuery, picks, slotKey, placeId)}
               summary={

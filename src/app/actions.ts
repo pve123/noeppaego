@@ -79,8 +79,9 @@ export async function toggleFavoriteAction(form: FormData): Promise<void> {
   const itineraryId = String(form.get("id") ?? "");
   const back = safeNext(String(form.get("back") ?? `/t/${itineraryId}`));
   const userId = await memberOrLogin(back);
-  await toggleFavorite({ userId, itineraryId, favorite: form.get("favorite") === "1" });
-  redirect(back);
+  const favorite = form.get("favorite") === "1";
+  await toggleFavorite({ userId, itineraryId, favorite });
+  redirect(withQuery(back, `fav=${favorite ? "on" : "off"}`)); // 돌아가서 「찜했어요」 알림을 띄운다
 }
 
 /**

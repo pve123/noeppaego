@@ -44,14 +44,14 @@ function shareTextOf(view: SavedItineraryView): { title: string; description: st
   };
 }
 
-export default function SharedPage({ params, searchParams }: PageProps<"/t/[id]">) {
+export default function SharedPage({ params }: PageProps<"/t/[id]">) {
   return (
     <>
       <SiteHeader />
       <SiteNotice />
       <main>
         <RevealSuspense fallback={<BandSkeleton steps={["저장한 일정을 불러오는 중"]} />}>
-          <Shared params={params} searchParams={searchParams} />
+          <Shared params={params} />
         </RevealSuspense>
       </main>
       <SiteFooter />
@@ -59,9 +59,8 @@ export default function SharedPage({ params, searchParams }: PageProps<"/t/[id]"
   );
 }
 
-async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
+async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
   const { id } = await params;
-  const { saved: justSaved } = await searchParams;
   const viewerId = await currentUserId();
   const view = await findSavedItinerary({ id, viewerId });
   if (!view) notFound();
@@ -99,7 +98,6 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
           </>
         }
       >
-        {justSaved && view.mine && <p className="mt-2 font-bold text-yellow">저장했어요. 카톡으로 보내거나 캘린더에 추가해 보세요.</p>}
         <div className={`mt-4 ${BAND_LINE}`}>
           <ShareButtons
             id={view.id}
@@ -145,6 +143,7 @@ async function Shared({ params, searchParams }: PageProps<"/t/[id]">) {
           {plan.days.map((day, i) => (
             <ItineraryDay
               key={day.dayNumber}
+              dayCount={plan.days.length}
               // 저장한 때의 예보라 지금과 다를 수 있어 날씨는 보여 주지 않는다
               day={{ ...day, weather: undefined }}
               summary={

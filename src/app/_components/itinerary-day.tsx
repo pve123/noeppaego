@@ -47,10 +47,13 @@ export type HrefFor = (slotKey: string, placeId?: string) => string;
 
 export function ItineraryDay({
   day,
+  dayCount,
   summary,
   hrefFor,
 }: {
   day: DayView;
+  /** 일정 전체 날수 — 둘 이상이면 제목 옆에 다른 날로 바로 가는 칩을 둔다 */
+  dayCount: number;
   /** 그날 소개 글(늦게 채워진다) */
   summary?: ReactNode;
   /** 칸 바꾸기 주소 — 없으면 바꾸기를 보여 주지 않는다(저장한 일정) */
@@ -58,16 +61,18 @@ export function ItineraryDay({
 }) {
   const tone = DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length];
   return (
-    <section aria-labelledby={`day-${day.dayNumber}`}>
-      <h2
-        id={`day-${day.dayNumber}`}
-        className="sticky top-[68px] z-30 -mx-4 flex flex-wrap items-baseline gap-3 bg-cream/90 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6"
-      >
-        <span className={`-rotate-2 rounded-2xl border-[3px] border-ink px-4 py-0.5 font-display text-[28px] ${DAY_BG[tone]}`}>
-          {day.dayNumber}일차
-        </span>
-        <span className="font-display text-[22px] text-muted">{day.dateLabel}</span>
-      </h2>
+    // scroll-mt — 위 칩으로 넘어왔을 때 제목 띠(68px) 밑에 맞춰 선다
+    <section id={`d${day.dayNumber}`} aria-labelledby={`day-${day.dayNumber}`} className="scroll-mt-[68px]">
+      {/* 제목 띠는 위에 붙어 따라오고, 오른쪽 칩으로 다른 날로 바로 넘어간다 — 긴 일정을 스크롤로 찾지 않게 */}
+      <div className="sticky top-[68px] z-30 -mx-4 flex items-center gap-3 bg-cream/90 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6">
+        <h2 id={`day-${day.dayNumber}`} className="flex min-w-0 flex-wrap items-baseline gap-x-3">
+          <span className={`-rotate-2 rounded-2xl border-[3px] border-ink px-4 py-0.5 font-display text-[28px] ${DAY_BG[tone]}`}>
+            {day.dayNumber}일차
+          </span>
+          <span className="font-display text-[20px] text-muted sm:text-[22px]">{day.dateLabel}</span>
+        </h2>
+        {dayCount > 1 && <DayJump current={day.dayNumber} count={dayCount} />}
+      </div>
       {day.weather && <WeatherChips weather={day.weather} />}
       {summary}
 
@@ -80,6 +85,30 @@ export function ItineraryDay({
         ))}
       </ol>
     </section>
+  );
+}
+
+/** 다른 날로 바로 가기 — 1·2·3 동그라미, 지금 날은 그날 색으로 채운다 */
+function DayJump({ current, count }: { current: number; count: number }) {
+  return (
+    <nav aria-label="다른 날로 가기" className="ml-auto flex shrink-0 gap-1">
+      {Array.from({ length: count }, (_, i) => i + 1).map((n) => {
+        const here = n === current;
+        return (
+          <a
+            key={n}
+            href={`#d${n}`}
+            aria-current={here ? "true" : undefined}
+            aria-label={`${n}일차로`}
+            className={`flex size-8 items-center justify-center rounded-full border-2 font-display text-[15px] transition-colors ${
+              here ? `border-ink ${DAY_BG[DAY_TONES[(n - 1) % DAY_TONES.length]]}` : "border-ink/25 bg-surface text-ink/70 hover:border-ink"
+            }`}
+          >
+            {n}
+          </a>
+        );
+      })}
+    </nav>
   );
 }
 

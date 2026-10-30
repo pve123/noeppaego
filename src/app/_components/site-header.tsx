@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { currentUser } from "@/shared/auth/session";
 import { AccountMenu, LoginNotice } from "./account-menu";
 import { NAV_ITEM_WIDE } from "./nav-item";
+import { Toast } from "./toast";
 
 /** 서비스 이름 — 「J」만 노랑으로 띄워 MBTI 의 J(계획형)가 눈에 들어오게 */
 function BrandName() {
@@ -46,11 +47,12 @@ async function Account() {
   return <AccountMenu loggedIn={Boolean(user)} nickname={user?.nickname} />;
 }
 
-/** 로그인 실패 안내 — 헤더 아래 */
+/** 로그인 실패 안내(헤더 아래)와 저장·찜 알림(화면 아래) — 둘 다 주소의 표시를 본다 */
 export function SiteNotice() {
   return (
     <Suspense>
       <LoginNotice />
+      <Toast />
     </Suspense>
   );
 }
