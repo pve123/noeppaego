@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { PageBand } from "../_components/page-band";
 import { SiteFooter, SiteHeader } from "../_components/site-header";
+import { CONTACT_EMAIL } from "../_components/contact";
 
 export const metadata: Metadata = {
   title: "개인정보처리방침 | 계획은 J가",
@@ -11,8 +12,6 @@ export const metadata: Metadata = {
 
 /** 시행일 — 내용을 바꾸면 날짜도 바꾸고 「바뀐 내용」에 한 줄 남긴다 */
 const EFFECTIVE = "2026년 10월 30일";
-/** 개인정보 문의 — 스토어 등록 정보의 연락처와 같게 */
-const CONTACT_EMAIL = "tkddlfdlfemd@gmail.com";
 
 const SECTIONS = [
   { id: "collect", title: "받는 정보" },

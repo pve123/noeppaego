@@ -3,7 +3,7 @@
  * 화면은 두 줄로 줄여 보여 주고 「더보기」로 편다 — 그래서 여기서는 넉넉히 둔다.
  * 소개에는 <br>·&nbsp; 같은 HTML 이 섞여 온다.
  */
-export const INTRO_MAX = 200;
+const INTRO_MAX = 200;
 
 export function firstSentence(overview: string, max = INTRO_MAX): string | undefined {
   const text = overview

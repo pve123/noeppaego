@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife } from "next/cache";
 import { Coordinate } from "@/shared/kernel/coordinate";
+import { kakaoGet } from "./kakao-rest";
 
 type DriveResult = { ok: true; minutes: number } | { ok: false };
 
@@ -10,39 +11,22 @@ type DriveResult = { ok: true; minutes: number } | { ok: false };
  */
 async function fetchDriveMinutes(fromLat: number, fromLng: number, toLat: number, toLng: number): Promise<DriveResult> {
   "use cache";
-  const key = process.env.KAKAO_REST_API_KEY;
-  if (!key) {
-    cacheLife("seconds");
-    return { ok: false };
-  }
-
-  const url = new URL("https://apis-navi.kakaomobility.com/v1/directions");
-  url.searchParams.set("origin", `${fromLng},${fromLat}`);
-  url.searchParams.set("destination", `${toLng},${toLat}`);
-  url.searchParams.set("priority", "RECOMMEND");
-  url.searchParams.set("summary", "true");
-
-  try {
-    const res = await fetch(url, { headers: { Authorization: `KakaoAK ${key}` }, signal: AbortSignal.timeout(5_000) });
-    if (!res.ok) {
-      console.warn(`[kakao:directions] 응답 ${res.status}`);
-      cacheLife("minutes");
-      return { ok: false };
-    }
-    const json = (await res.json()) as { routes?: { result_code: number; summary?: { duration: number } }[] };
-    const route = json.routes?.[0];
-    if (!route || route.result_code !== 0 || !route.summary) {
-      // 길이 없음(섬 등)·출발지와 도착지가 너무 가까움 — 실패가 아니라 「모름」이다.
-      cacheLife("days");
-      return { ok: false };
-    }
-    cacheLife("days");
-    return { ok: true, minutes: route.summary.duration / 60 };
-  } catch (e) {
-    console.warn(`[kakao:directions] 연결 실패: ${(e as Error).name}`);
+  type Directions = { routes?: { result_code: number; summary?: { duration: number } }[] };
+  const result = await kakaoGet<Directions>("kakao:directions", "https://apis-navi.kakaomobility.com/v1/directions", {
+    origin: `${fromLng},${fromLat}`,
+    destination: `${toLng},${toLat}`,
+    priority: "RECOMMEND",
+    summary: "true",
+  });
+  if (!result.ok) {
     cacheLife("minutes");
     return { ok: false };
   }
+  const route = result.data.routes?.[0];
+  cacheLife("days");
+  // 길이 없음(섬 등)·출발지와 도착지가 너무 가까움 — 실패가 아니라 「모름」이다.
+  if (!route || route.result_code !== 0 || !route.summary) return { ok: false };
+  return { ok: true, minutes: route.summary.duration / 60 };
 }
 
 const round = (n: number) => Math.round(n * 10_000) / 10_000;

@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife } from "next/cache";
 import { Coordinate } from "@/shared/kernel/coordinate";
+import { kakaoGet } from "@/shared/kakao/kakao-rest";
 import { ParkingFinder, ParkingLot } from "../domain/place";
 
 /** 이보다 멀면 차를 대고 걷기에 멀다 */
@@ -16,39 +17,24 @@ type CachedLot = { name: string; address: string; lat: number; lng: number; dist
  */
 async function searchKakaoParking(lat: number, lng: number): Promise<CachedLot[]> {
   "use cache";
-  const key = process.env.KAKAO_REST_API_KEY;
-  if (!key) {
-    cacheLife("seconds");
-    return [];
-  }
-  const url = new URL("https://dapi.kakao.com/v2/local/search/category.json");
-  url.searchParams.set("category_group_code", "PK6");
-  url.searchParams.set("x", String(lng));
-  url.searchParams.set("y", String(lat));
-  url.searchParams.set("radius", String(RADIUS_M));
-  url.searchParams.set("sort", "distance");
-  url.searchParams.set("size", "15"); // 대행 업체를 거르고도 세 곳이 남게
-  try {
-    const res = await fetch(url, { headers: { Authorization: `KakaoAK ${key}` }, signal: AbortSignal.timeout(5_000) });
-    if (!res.ok) {
-      console.warn(`[kakao:parking] 응답 ${res.status}`);
-      cacheLife("seconds");
-      return [];
-    }
-    const { documents } = (await res.json()) as { documents: KakaoParking[] };
-    cacheLife("hours");
-    return documents.map((d) => ({
-      name: d.place_name,
-      address: d.road_address_name || d.address_name,
-      lat: Number(d.y),
-      lng: Number(d.x),
-      distanceM: Number(d.distance) || 0,
-    }));
-  } catch (e) {
-    console.warn(`[kakao:parking] 연결 실패: ${(e as Error).name}`);
-    cacheLife("seconds");
-    return [];
-  }
+  const result = await kakaoGet<{ documents: KakaoParking[] }>("kakao:parking", "https://dapi.kakao.com/v2/local/search/category.json", {
+    category_group_code: "PK6",
+    x: lng,
+    y: lat,
+    radius: RADIUS_M,
+    sort: "distance",
+    size: 15, // 대행 업체를 거르고도 세 곳이 남게
+  });
+  if (result.ok) cacheLife("hours");
+  else cacheLife("seconds");
+  if (!result.ok) return [];
+  return result.data.documents.map((d) => ({
+    name: d.place_name,
+    address: d.road_address_name || d.address_name,
+    lat: Number(d.y),
+    lng: Number(d.x),
+    distanceM: Number(d.distance) || 0,
+  }));
 }
 
 export class KakaoParkingFinder implements ParkingFinder {

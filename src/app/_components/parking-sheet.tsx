@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { FacilityParkingView, ParkingView } from "@/contexts/itinerary";
+import { Sheet } from "./sheet";
 import { fetchFacilityParking, fetchParking, hasFacilityParking, parkingRouteUrl } from "./parking-client";
 
 type Lots = "loading" | "failed" | ParkingView[];
@@ -62,29 +63,16 @@ export function ParkingChip({
         <span className="hidden sm:inline">주차</span>
       </button>
 
-      <dialog
-        ref={dialog}
-        aria-labelledby={`parking-${lat}-${lng}`}
-        // 바깥(어두운 곳)을 누르면 닫는다
-        onClick={(e) => e.target === e.currentTarget && dialog.current?.close()}
-        className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-3xl border-[3px] border-b-0 border-ink bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-w-md sm:rounded-3xl sm:border-b-[3px]"
+      <Sheet
+        dialogRef={dialog}
+        titleId={`parking-${lat}-${lng}`}
+        title={
+          <>
+            <ParkingMark className="size-6 text-[14px]" />
+            <span className="truncate">근처 주차장</span>
+          </>
+        }
       >
-        <div className="px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-3">
-          <div aria-hidden className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-ink/20 sm:hidden" />
-          <div className="flex items-center justify-between gap-3">
-            <h2 id={`parking-${lat}-${lng}`} className="flex min-w-0 items-center gap-2 font-display text-[20px]">
-              <ParkingMark className="size-6 text-[14px]" />
-              <span className="truncate">근처 주차장</span>
-            </h2>
-            <button
-              type="button"
-              onClick={() => dialog.current?.close()}
-              className="flex size-11 shrink-0 items-center justify-center rounded-full text-2xl text-ink/60 hover:bg-ink/5 hover:text-ink"
-              aria-label="닫기"
-            >
-              ×
-            </button>
-          </div>
           <p className="truncate text-sm text-muted">{placeName}에서 가까운 순이에요.</p>
 
           {/* 시설 자체 주차 — 근처 주차장과 출처가 달라 따로 둔다 */}
@@ -145,8 +133,7 @@ export function ParkingChip({
             )}
           </div>
           <p className="mt-3 text-[13px] text-muted">요금과 빈자리는 현장에서 확인해 주세요.</p>
-        </div>
-      </dialog>
+      </Sheet>
     </>
   );
 }

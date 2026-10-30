@@ -1,6 +1,7 @@
 import "server-only";
 import { cacheLife } from "next/cache";
 import { Coordinate } from "@/shared/kernel/coordinate";
+import { kakaoGet } from "@/shared/kakao/kakao-rest";
 import { ContentType, fetchNearbyItems } from "@/shared/tour-api/tour-api";
 import { CafeFinder, Place, RestaurantFinder } from "../domain/place";
 import { foodTagsOf } from "./place-tags";
@@ -78,37 +79,23 @@ async function searchKakaoPlaces(
   by: "popular" | "nearby",
 ): Promise<KakaoResult> {
   "use cache";
-  const key = process.env.KAKAO_REST_API_KEY;
-  if (!key) {
-    cacheLife("seconds");
-    return { ok: false };
-  }
-
   const { code, keyword } = KAKAO_GROUP[group];
-  const url = new URL(`https://dapi.kakao.com/v2/local/search/${by === "popular" ? "keyword" : "category"}.json`);
-  if (by === "popular") url.searchParams.set("query", keyword);
-  url.searchParams.set("category_group_code", code);
-  url.searchParams.set("x", String(lng));
-  url.searchParams.set("y", String(lat));
-  url.searchParams.set("radius", String(RADIUS_M));
-  url.searchParams.set("sort", by === "popular" ? "accuracy" : "distance");
-  url.searchParams.set("size", "15");
-
-  try {
-    const res = await fetch(url, { headers: { Authorization: `KakaoAK ${key}` }, signal: AbortSignal.timeout(5_000) });
-    if (!res.ok) {
-      console.warn(`[kakao:local] 응답 ${res.status}`);
-      cacheLife("seconds");
-      return { ok: false };
-    }
-    const json = (await res.json()) as { documents: KakaoPlace[] };
-    cacheLife("hours");
-    return { ok: true, places: json.documents };
-  } catch (e) {
-    console.warn(`[kakao:local] 연결 실패: ${(e as Error).name}`);
-    cacheLife("seconds");
-    return { ok: false };
-  }
+  const result = await kakaoGet<{ documents: KakaoPlace[] }>(
+    "kakao:local",
+    `https://dapi.kakao.com/v2/local/search/${by === "popular" ? "keyword" : "category"}.json`,
+    {
+      ...(by === "popular" ? { query: keyword } : {}),
+      category_group_code: code,
+      x: lng,
+      y: lat,
+      radius: RADIUS_M,
+      sort: by === "popular" ? "accuracy" : "distance",
+      size: 15,
+    },
+  );
+  if (result.ok) cacheLife("hours");
+  else cacheLife("seconds");
+  return result.ok ? { ok: true, places: result.data.documents } : { ok: false };
 }
 
 /** 많이 찾는 곳이 이보다 적으면 가까운 곳으로 채운다 — 고를 곳 하나 + 바꿀 후보 둘 + 여유 하나 */

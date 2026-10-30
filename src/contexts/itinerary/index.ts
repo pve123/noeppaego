@@ -51,6 +51,8 @@ const outlook = preview ? new PreviewWeatherOutlook(preview) : new KmaWeatherOut
 export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, cafes, driveTimes, outlook, pages, intros);
 /** 하루마다 AI 소개 글 — 못 쓰면 undefined */
 export const describeItinerary = (plan: ItineraryView) => describe(plan, writer);
+/** AI 소개를 쓰는가 — 키(OPENAI_API_KEY)가 없으면 꺼 둔 것. 화면은 이때 AI 자리·안내를 아예 그리지 않는다 */
+export const aiSummariesOn = () => Boolean(process.env.OPENAI_API_KEY);
 
 const parking = new KakaoParkingFinder();
 /** 장소 근처 주차장 — 일정 카드의 「주차」를 눌렀을 때만 부른다 */

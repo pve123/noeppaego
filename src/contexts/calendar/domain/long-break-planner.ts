@@ -11,7 +11,7 @@ export type PlanRule = {
   readonly maxTies: number;
 };
 
-export const DEFAULT_PLAN_RULE: PlanRule = {
+const DEFAULT_PLAN_RULE: PlanRule = {
   maxLeave: 2,
   minLength: 3,
   maxLength: 16,
