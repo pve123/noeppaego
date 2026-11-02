@@ -8,7 +8,8 @@ import { foodTagsOf } from "./place-tags";
 import { cafeCategoryOf, isChainBranch, isMeal } from "./restaurant-filters";
 import { toPlaces } from "./tour-place-catalog";
 
-const RADIUS_M = 2_000;
+/** 식사 칸에서 이 안의 가게를 찾는다 — 차로 10분 안팎. 그 안에서는 거리보다 많이 찾는 순서를 따른다(fillMeals) */
+const RADIUS_M = 5_000;
 
 /**
  * 카카오맵 검색 화면 주소 — 관광공사 가게도 영업시간·리뷰를 볼 수 있게. API 를 부르지 않는 링크라 데이터를 받거나 남기지 않는다.
@@ -148,7 +149,7 @@ export class KakaoRestaurantFinder implements RestaurantFinder {
 
   /**
    * 많이 찾는 집부터, 끼니가 아닌 곳(빵집·디저트·술집·카페)과 체인 지점은 빼고 넘긴다.
-   * 순서(많이 찾는 순)를 지켜 넘기면 도메인(fillMeals)이 걸어갈 만한 곳 안에서 그 순서대로 고른다.
+   * 순서(많이 찾는 순)를 지켜 넘기면 도메인(fillMeals)이 거리와 상관없이 그 순서대로 고른다.
    * 고기·해산물·매운 음식은 tags 로 붙인다(못 먹는 음식을 뺄 때 쓴다).
    */
   async near(at: Coordinate, limit: number): Promise<Place[]> {

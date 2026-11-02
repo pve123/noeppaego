@@ -202,7 +202,7 @@ export function mealsOf(days: readonly TripDay[]): Meal[] {
 }
 
 /**
- * 식사·카페 칸마다 고른다 — 걸어갈 만한 곳(WALK_KM) 안에서는 후보 순서(찾는 쪽이 매긴 많이 찾는 순), 그 밖은 가까운 순.
+ * 식사·카페 칸마다 고른다 — 차로 10분 안팎(POPULAR_KM) 안에서는 거리와 상관없이 후보 순서(찾는 쪽이 매긴 많이 찾는 순), 그 밖은 가까운 순.
  * 같은 날 식사는 메뉴 종류(category)가 겹치지 않는 곳을 먼저 고른다(「한식」처럼 넓은 분류는 따지지 않는다).
  * 이미 고른 곳(같은 id·같은 이름)은 다시 고르지 않는다.
  * 사용자가 고른 곳(picks)은 그 칸에 고정하고 다른 칸이 먼저 가져가지 않게 예약해 둔다.
@@ -317,19 +317,19 @@ function nearest(places: readonly Place[], from: Coordinate | undefined): Place 
   return sortByDistance(places, from)[0];
 }
 
-/** 걸어서 갈 만한 거리(km) — 이 안에서는 가까운 것보다 많이 찾는 곳이 낫다 */
-const WALK_KM = 1;
+/** 차로 10분 안팎(km) — 이 안에서는 가까운 것보다 많이 찾는 곳이 낫다(동선이 크게 꼬이지 않는 거리) */
+const POPULAR_KM = 5;
 /** 메뉴가 겹쳐도 괜찮은 넓은 분류(관광공사 분류 등) — 이것끼리는 겹침을 따지지 않는다 */
 const BROAD_MENUS = new Set(["한식", "외국 음식", "간편식", "음식점", "카페"]);
 
 const repeatsMenu = (place: Place, menus: ReadonlySet<string>) =>
   place.kind === "restaurant" && !!place.category && !BROAD_MENUS.has(place.category) && menus.has(place.category);
 
-/** 걸어갈 만한 곳은 받은 순서(많이 찾는 순) 그대로 앞에, 그보다 먼 곳은 가까운 순으로 뒤에 */
+/** POPULAR_KM 안은 받은 순서(많이 찾는 순) 그대로 앞에, 그보다 먼 곳은 가까운 순으로 뒤에 */
 function byPreference(places: readonly Place[], from: Coordinate): Place[] {
-  const walkable = places.filter((p) => from.distanceKm(p.location) <= WALK_KM);
-  const farther = places.filter((p) => from.distanceKm(p.location) > WALK_KM);
-  return [...walkable, ...sortByDistance(farther, from)];
+  const within = places.filter((p) => from.distanceKm(p.location) <= POPULAR_KM);
+  const farther = places.filter((p) => from.distanceKm(p.location) > POPULAR_KM);
+  return [...within, ...sortByDistance(farther, from)];
 }
 
 function sortByDistance(places: readonly Place[], from: Coordinate): Place[] {
