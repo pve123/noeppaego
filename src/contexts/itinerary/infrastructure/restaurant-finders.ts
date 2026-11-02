@@ -10,6 +10,14 @@ import { toPlaces } from "./tour-place-catalog";
 
 const RADIUS_M = 2_000;
 
+/**
+ * 카카오맵 검색 화면 주소 — 관광공사 가게도 영업시간·리뷰를 볼 수 있게. API 를 부르지 않는 링크라 데이터를 받거나 남기지 않는다.
+ * 같은 이름이 많으니 주소 앞 두 낱말(「강원특별자치도 강릉시」)을 붙인다.
+ */
+const mapSearchUrl = (place: Place) =>
+  `https://map.kakao.com/link/search/${encodeURIComponent(`${place.address.split(/\s+/).slice(0, 2).join(" ")} ${place.title}`.trim())}`;
+const withMapSearch = (place: Place): Place => (place.url ? place : { ...place, url: mapSearchUrl(place) });
+
 // ── 관광공사 음식점(키 하나로 되는 기본) ───────────────────
 
 /** 관광공사 신분류(lclsSystm3) 앞 4자리 → 짧은 분류. 카페·주점은 끼니로 고르지 않는다. */
@@ -31,7 +39,7 @@ export class TourRestaurantFinder implements RestaurantFinder {
         const category = TOUR_FOOD_CATEGORY[code];
         if (category === null) return [];
         // 관광공사 분류에는 고기·해산물이 없다 — 상호로 어림한다
-        return toPlaces([item], "restaurant", category ?? "음식점").map((p) => ({ ...p, tags: foodTagsOf("", p.title) }));
+        return toPlaces([item], "restaurant", category ?? "음식점").map((p) => withMapSearch({ ...p, tags: foodTagsOf("", p.title) }));
       })
       .slice(0, limit);
   }
@@ -42,7 +50,7 @@ export class TourCafeFinder implements CafeFinder {
   async near(at: Coordinate, limit: number): Promise<Place[]> {
     const result = await fetchNearbyItems(at.lat, at.lng, RADIUS_M, ContentType.restaurant, limit * 3);
     if (!result.ok) return []; // 카페가 없어도 일정은 보여 준다 — 실패는 tour-api 가 warn 으로 남겼다
-    return toPlaces(result.value.filter((item) => item.lclsSystm3?.startsWith("FD05")), "cafe", "카페").slice(0, limit);
+    return toPlaces(result.value.filter((item) => item.lclsSystm3?.startsWith("FD05")), "cafe", "카페").slice(0, limit).map(withMapSearch);
   }
 }
 
@@ -140,7 +148,7 @@ export class KakaoRestaurantFinder implements RestaurantFinder {
 
   /**
    * 많이 찾는 집부터, 끼니가 아닌 곳(빵집·디저트·술집·카페)과 체인 지점은 빼고 넘긴다.
-   * 그중 어디를 고를지는 도메인(fillMeals)이 식사 칸에서 가까운 순으로 정한다 — 「많이 찾는 집 중 가까운 곳」.
+   * 순서(많이 찾는 순)를 지켜 넘기면 도메인(fillMeals)이 걸어갈 만한 곳 안에서 그 순서대로 고른다.
    * 고기·해산물·매운 음식은 tags 로 붙인다(못 먹는 음식을 뺄 때 쓴다).
    */
   async near(at: Coordinate, limit: number): Promise<Place[]> {

@@ -84,6 +84,35 @@ describe("draftTrip", () => {
 });
 
 describe("fillMeals", () => {
+  it("걸어갈 만한 곳(1km) 안에서는 가까운 곳보다 많이 찾는 곳(앞 순서)을 고른다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
+    const popularButFarther = place("인기", 0.8, { kind: "restaurant" }); // 약 720m
+    const closest = place("가까움", 0.1, { kind: "restaurant" });
+    const [lunch] = mealsOf(fillMeals(days, [[popularButFarther, closest], [], []]));
+    expect(lunch.choice?.id).toBe("인기");
+  });
+
+  it("1km 밖은 가까운 순 — 걸어갈 만한 곳이 없으면 가장 가까운 곳", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
+    const [lunch] = mealsOf(fillMeals(days, [[place("멀다", 3, { kind: "restaurant" }), place("덜 멀다", 1.5, { kind: "restaurant" })], [], []]));
+    expect(lunch.choice?.id).toBe("덜 멀다");
+  });
+
+  it("같은 날 저녁은 점심과 다른 메뉴부터 — 「한식」처럼 넓은 분류는 따지지 않는다", () => {
+    const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
+    const lunch = [place("해장국집", 0.1, { kind: "restaurant", category: "해장국" })];
+    const dinner = [
+      place("또 해장국", 10.1, { kind: "restaurant", category: "해장국" }),
+      place("막국수집", 10.2, { kind: "restaurant", category: "막국수" }),
+    ];
+    const [, , d] = mealsOf(fillMeals(days, [lunch, [], dinner]));
+    expect(d.choice?.id).toBe("막국수집");
+
+    const broad = [place("한식1", 0.1, { kind: "restaurant", category: "한식" })];
+    const broadDinner = [place("한식2", 10.1, { kind: "restaurant", category: "한식" }), place("한식3", 10.2, { kind: "restaurant", category: "한식" })];
+    expect(mealsOf(fillMeals(days, [broad, [], broadDinner]))[2].choice?.id).toBe("한식2");
+  });
+
   it("가장 가까운 곳을 고르고, 이미 고른 곳(같은 이름 포함)은 다음 끼니에 다시 고르지 않는다", () => {
     const days = draftTrip(["2026-12-25"], [place("A", 0), place("B", 10)], []);
     const near = [place("국밥", 0.1, { kind: "restaurant" }), place("파스타", 0.5, { kind: "restaurant" })];
