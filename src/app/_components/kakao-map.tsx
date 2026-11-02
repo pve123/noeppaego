@@ -15,7 +15,7 @@ export type MapPin = {
   /** 주차장 — 일정 장소보다 작은 파란 네모 P(주차 표지판 모양) */
   parking?: boolean;
   /** 누르면 핀 위에 이름과 이 링크(「여기로 길찾기」 등)를 말풍선으로 띄운다 — 휴대폰엔 마우스 올림이 없다 */
-  link?: { href: string; text: string };
+  link?: PinAction;
   /** 기준점(출발지) — 작게 그리고 겹침 계산에서 빼 번호 핀을 가리지 않는다. 늘 보인다 */
   anchor?: boolean;
 };
@@ -44,11 +44,17 @@ export type MapLegendItem = {
   routeIndexes: number[];
 };
 
+/** 핀 말풍선의 버튼 — href 면 새 창 링크, onClick 이면 앱 안에서 할 일(길찾기 앱 고르기 등) */
+export type PinAction = { text: string; href?: string; onClick?: () => void };
+
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
 
 /** 넘기지 않았을 때의 빈 목록 — 렌더마다 새 배열(`= []`)을 만들면 지도 그리기가 끝없이 다시 돈다 */
 const NO_ROUTES: MapRoute[] = [];
 const NO_LEGEND: MapLegendItem[] = [];
+
+/** 핀이 하나일 때 축척 — 카카오 지도 4레벨은 골목과 큰 길이 함께 보이는 정도 */
+const SINGLE_PIN_LEVEL = 4;
 
 /** 화면에서 이보다 가까운 번호 핀은 겹친 것으로 본다(px) — 배지 지름보다 조금 크게 */
 const MIN_GAP = 38;
@@ -172,7 +178,11 @@ export function KakaoMap({
         const fit = () => {
           map.relayout();
           if (pins.length > 1) map.setBounds(bounds, 40, 40, 40, 40);
-          else map.setCenter(new maps.LatLng(pins[0].lat, pins[0].lng));
+          else {
+            // 핀이 하나면 그 동네가 보이게 확대한다(처음 축척은 전국을 보는 크기)
+            map.setLevel(SINGLE_PIN_LEVEL);
+            map.setCenter(new maps.LatLng(pins[0].lat, pins[0].lng));
+          }
         };
         maps.event.addListener(map, "zoom_changed", declutter);
         maps.event.addListener(map, "idle", declutter);
@@ -323,7 +333,7 @@ function pinElement(pin: MapPin): HTMLElement {
 }
 
 /** 핀 위 말풍선 — 이름과 링크 버튼, 닫기. 지도 위라 Tailwind 대신 인라인 스타일 */
-function bubbleElement(label: string, link: { href: string; text: string }, close: () => void): HTMLElement {
+function bubbleElement(label: string, link: PinAction, close: () => void): HTMLElement {
   const box = document.createElement("div");
   box.style.cssText =
     "position:relative;margin-bottom:22px;display:flex;flex-direction:column;gap:8px;max-width:220px;padding:10px 12px;border:1px solid rgb(34 34 59 / 0.1);border-radius:14px;background:#fff;color:#22223b;box-shadow:0 10px 28px -8px rgb(34 34 59 / 0.3);font:600 14px/1.35 var(--font-noto),sans-serif";
@@ -342,13 +352,23 @@ function bubbleElement(label: string, link: { href: string; text: string }, clos
     close();
   });
   head.append(name, x);
-  const a = document.createElement("a");
-  a.href = link.href;
-  a.target = "_blank";
-  a.rel = "noopener noreferrer";
+  const a = document.createElement(link.onClick ? "button" : "a");
+  if (link.onClick) {
+    const run = link.onClick;
+    (a as HTMLButtonElement).type = "button";
+    a.addEventListener("click", (e) => {
+      e.stopPropagation();
+      close();
+      run();
+    });
+  } else if (a instanceof HTMLAnchorElement && link.href) {
+    a.href = link.href;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+  }
   a.textContent = link.text;
   a.style.cssText =
-    "display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 14px;border:0;border-radius:999px;background:#ffd84d;color:#22223b;font-weight:700;text-decoration:none";
+    "display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 14px;border:0;border-radius:999px;background:#ffd84d;color:#22223b;font:700 14px/1 var(--font-noto),sans-serif;text-decoration:none;cursor:pointer";
   box.append(head, a);
   box.addEventListener("click", (e) => e.stopPropagation());
   return box;

@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import type { FacilityParkingView, ParkingView } from "@/contexts/itinerary";
 import { Sheet } from "./sheet";
-import { fetchFacilityParking, fetchParking, hasFacilityParking, parkingRouteUrl } from "./parking-client";
+import { fetchFacilityParking, fetchParking, hasFacilityParking } from "./parking-client";
+import { useRouteChooser } from "./route-sheet";
 
 type Lots = "loading" | "failed" | ParkingView[];
 
@@ -33,6 +34,7 @@ export function ParkingChip({
   const [lots, setLots] = useState<Lots>();
   /** 시설 자체 주차 안내(관광공사) — 없거나 아직 모르면 null */
   const [facility, setFacility] = useState<FacilityParkingView | null>(null);
+  const route = useRouteChooser();
 
   const load = async () => {
     setLots("loading");
@@ -127,15 +129,14 @@ export function ParkingChip({
                         {lot.address}
                       </p>
                     </div>
-                    <a
-                      href={parkingRouteUrl(lot)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => route.open({ name: lot.name, lat: lot.lat, lng: lot.lng })}
                       aria-label={`${lot.name}로 길찾기`}
                       className="inline-flex h-11 shrink-0 items-center rounded-full border border-ink/15 bg-yellow px-3.5 font-display text-[15px]"
                     >
                       길찾기
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -143,6 +144,7 @@ export function ParkingChip({
           </div>
           <p className="mt-3 text-[13px] text-muted">요금과 빈자리는 현장에서 확인해 주세요.</p>
       </Sheet>
+      {route.sheet}
     </>
   );
 }

@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
+import { KakaoMap } from "./kakao-map";
 import { ParkingChip } from "./parking-sheet";
 import { PinIcon } from "./icons";
+import { useRouteChooser } from "./route-sheet";
+import { Sheet } from "./sheet";
 
 /**
  * 카드 아래 주소 줄 — 📍 주소(한 줄, 넘치면 … · 누르면 전체) · 복사 · 지도 · 주차(좌표가 있을 때).
@@ -55,22 +58,88 @@ export function AddressBar({
         </svg>
         <span className="hidden sm:inline">{copied ? "복사했어요 ✓" : "복사"}</span>
       </button>
-      <a
-        href={`https://map.kakao.com/link/search/${encodeURIComponent(address)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="카카오맵에서 이 주소 보기"
-        className={`${pill} border-ink/25 bg-surface text-ink/75 hover:border-ink/30 hover:text-ink`}
-      >
-        <svg viewBox="0 0 24 24" aria-hidden className="size-4 sm:hidden" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4zM9 4v14M15 6v14" />
-        </svg>
-        <span className="hidden sm:inline">
-          지도 <span aria-hidden className="ml-0.5">↗</span>
-        </span>
-      </a>
+      {place ? (
+        <MapSheetButton place={place} address={address} pill={pill} />
+      ) : (
+        <a
+          href={`https://map.kakao.com/link/search/${encodeURIComponent(address)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="카카오맵에서 이 주소 보기"
+          className={`${pill} border-ink/25 bg-surface text-ink/75 hover:border-ink/30 hover:text-ink`}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden className="size-4 sm:hidden" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4zM9 4v14M15 6v14" />
+          </svg>
+          <span className="hidden sm:inline">
+            지도 <span aria-hidden className="ml-0.5">↗</span>
+          </span>
+        </a>
+      )}
       {/* 칸의 장소를 바꾸면 좌표가 바뀐다 — key 로 새로 만들어 앞 장소의 주차장 목록이 남지 않게 */}
       {place && <ParkingChip key={`${place.id},${place.lat},${place.lng}`} place={place} pill={pill} />}
     </div>
+  );
+}
+
+const MAP_ICON = (
+  <svg viewBox="0 0 24 24" aria-hidden className="size-4 sm:hidden" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4zM9 4v14M15 6v14" />
+  </svg>
+);
+
+/**
+ * 「지도」 — 앱 밖 카카오맵 대신 이 자리에서 지도 시트를 연다(핀 하나와 길찾기).
+ * 지도는 처음 열 때만 그린다(아무도 안 누르면 지도 SDK 를 부르지 않는다).
+ */
+function MapSheetButton({
+  place,
+  address,
+  pill,
+}: {
+  place: { id: string; title: string; lat: number; lng: number };
+  address: string;
+  pill: string;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const [opened, setOpened] = useState(false);
+  const route = useRouteChooser();
+  const destination = { name: place.title, lat: place.lat, lng: place.lng };
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setOpened(true);
+          dialog.current?.showModal();
+        }}
+        aria-haspopup="dialog"
+        aria-label={`${place.title} 지도에서 보기`}
+        className={`${pill} border-ink/25 bg-surface text-ink/75 hover:border-ink/30 hover:text-ink`}
+      >
+        {MAP_ICON}
+        <span className="hidden sm:inline">지도</span>
+      </button>
+      <Sheet dialogRef={dialog} titleId={titleId} title={<span className="truncate">{place.title}</span>}>
+        <p className="truncate text-sm text-muted">{address}</p>
+        <div className="mt-4">
+          {opened && (
+            <KakaoMap
+              pins={[{ id: place.id, lat: place.lat, lng: place.lng, badge: "", label: place.title, tone: "coral" }]}
+              label={`${place.title} 위치 지도`}
+            />
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => route.open(destination)}
+          className="mt-4 flex h-12 w-full items-center justify-center rounded-2xl bg-yellow font-display text-[17px] shadow-pop-sm"
+        >
+          길찾기
+        </button>
+      </Sheet>
+      {route.sheet}
+    </>
   );
 }
