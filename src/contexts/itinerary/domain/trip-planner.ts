@@ -202,9 +202,11 @@ export function mealsOf(days: readonly TripDay[]): Meal[] {
 }
 
 /**
- * 식사·카페 칸마다 가장 가까운 곳을 고른다. 이미 고른 곳(같은 id·같은 이름)은 다시 고르지 않는다.
+ * 식사·카페 칸마다 고른다 — 걸어갈 만한 곳(WALK_KM) 안에서는 후보 순서(찾는 쪽이 매긴 많이 찾는 순), 그 밖은 가까운 순.
+ * 같은 날 식사는 메뉴 종류(category)가 겹치지 않는 곳을 먼저 고른다(「한식」처럼 넓은 분류는 따지지 않는다).
+ * 이미 고른 곳(같은 id·같은 이름)은 다시 고르지 않는다.
  * 사용자가 고른 곳(picks)은 그 칸에 고정하고 다른 칸이 먼저 가져가지 않게 예약해 둔다.
- * @param candidates mealsOf 순서대로, 칸마다 근처 식당 목록
+ * @param candidates mealsOf 순서대로, 칸마다 근처 식당 목록 — 앞일수록 많이 찾는 곳
  */
 export function fillMeals(
   days: readonly TripDay[],
@@ -227,20 +229,26 @@ export function fillMeals(
   // 관광지로 이미 넣은 곳은 식사·카페로 다시 고르지 않는다 — 관광공사 관광지와 카카오 카페가 같은 곳일 때가 있다
   const chosen = new Set<string>(days.flatMap((d) => d.slots).flatMap((s) => (s.kind === "visit" ? [s.place.title] : [])));
   index = 0;
-  const filled = days.map((day) => ({
-    ...day,
-    slots: day.slots.map((slot) => {
-      if (slot.kind !== "meal") return { slot };
-      const pickedId = picks.get(slotKeyOf(day.date, slot.time));
-      const fresh = sortByDistance(candidates[index++] ?? [], slot.near).filter(
-        (p) => !chosen.has(p.id) && !chosen.has(p.title),
-      );
-      const picked = fresh.find((p) => p.id === pickedId);
-      const choice = picked ?? fresh.find((p) => !reserved.has(p.id));
-      if (choice) chosen.add(choice.id).add(choice.title);
-      return { slot: { ...slot, choice, picked: picked ? true : undefined }, fresh };
-    }),
-  }));
+  const filled = days.map((day) => {
+    /** 이날 이미 고른 식사 메뉴 — 점심 해장국이면 저녁은 다른 메뉴부터 */
+    const menus = new Set<string>();
+    return {
+      ...day,
+      slots: day.slots.map((slot) => {
+        if (slot.kind !== "meal") return { slot };
+        const pickedId = picks.get(slotKeyOf(day.date, slot.time));
+        const fresh = byPreference(candidates[index++] ?? [], slot.near).filter((p) => !chosen.has(p.id) && !chosen.has(p.title));
+        const picked = fresh.find((p) => p.id === pickedId);
+        const open = fresh.filter((p) => !reserved.has(p.id));
+        const choice = picked ?? open.find((p) => !repeatsMenu(p, menus)) ?? open[0];
+        if (choice) {
+          chosen.add(choice.id).add(choice.title);
+          if (choice.kind === "restaurant" && choice.category) menus.add(choice.category);
+        }
+        return { slot: { ...slot, choice, picked: picked ? true : undefined }, fresh };
+      }),
+    };
+  });
   // 바꿀 후보는 다른 끼니가 이미 쓰는 식당을 뺀다 — 고르면 그 끼니가 저절로 바뀌니까
   return filled.map((day) => ({
     ...day,
@@ -307,6 +315,21 @@ const firstFilled = <T>(...lists: T[][]): T[] => lists.find((l) => l.length > 0)
 function nearest(places: readonly Place[], from: Coordinate | undefined): Place | undefined {
   if (!from) return places[0];
   return sortByDistance(places, from)[0];
+}
+
+/** 걸어서 갈 만한 거리(km) — 이 안에서는 가까운 것보다 많이 찾는 곳이 낫다 */
+const WALK_KM = 1;
+/** 메뉴가 겹쳐도 괜찮은 넓은 분류(관광공사 분류 등) — 이것끼리는 겹침을 따지지 않는다 */
+const BROAD_MENUS = new Set(["한식", "외국 음식", "간편식", "음식점", "카페"]);
+
+const repeatsMenu = (place: Place, menus: ReadonlySet<string>) =>
+  place.kind === "restaurant" && !!place.category && !BROAD_MENUS.has(place.category) && menus.has(place.category);
+
+/** 걸어갈 만한 곳은 받은 순서(많이 찾는 순) 그대로 앞에, 그보다 먼 곳은 가까운 순으로 뒤에 */
+function byPreference(places: readonly Place[], from: Coordinate): Place[] {
+  const walkable = places.filter((p) => from.distanceKm(p.location) <= WALK_KM);
+  const farther = places.filter((p) => from.distanceKm(p.location) > WALK_KM);
+  return [...walkable, ...sortByDistance(farther, from)];
 }
 
 function sortByDistance(places: readonly Place[], from: Coordinate): Place[] {
