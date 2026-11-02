@@ -28,16 +28,16 @@ import { KakaoParkingFinder } from "./infrastructure/kakao-parking-finder";
 import { TourFacilityParking } from "./infrastructure/tour-facility-parking";
 import { KakaoPlacePages } from "./infrastructure/kakao-place-pages";
 import { TourPlaceIntros } from "./infrastructure/tour-place-intros";
-import { KakaoCafeFinder, KakaoRestaurantFinder, TourCafeFinder, TourRestaurantFinder } from "./infrastructure/restaurant-finders";
+import { KakaoCafeFinder, KakaoRestaurantFinder, TourCafeFinder, TourRestaurantFinder, WithTourPhotos } from "./infrastructure/restaurant-finders";
 import { TourPlaceCatalog } from "./infrastructure/tour-place-catalog";
 
 const catalog = new TourPlaceCatalog();
 // 카카오 REST 키가 있으면 카카오 로컬(맛집이 훨씬 많다), 실패하거나 없으면 관광공사 음식점.
 const restaurants = process.env.KAKAO_REST_API_KEY
-  ? new KakaoRestaurantFinder(new TourRestaurantFinder())
+  ? new WithTourPhotos(new KakaoRestaurantFinder(new TourRestaurantFinder()))
   : new TourRestaurantFinder();
 // 카페도 같다 — 관광공사엔 카페가 적어 카카오가 없으면 카페 칸이 자주 빈다.
-const cafes = process.env.KAKAO_REST_API_KEY ? new KakaoCafeFinder(new TourCafeFinder()) : new TourCafeFinder();
+const cafes = process.env.KAKAO_REST_API_KEY ? new WithTourPhotos(new KakaoCafeFinder(new TourCafeFinder())) : new TourCafeFinder();
 
 const driveTimes = new KakaoDriveTimes();
 const pages = new KakaoPlacePages();
