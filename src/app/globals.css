@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* 디자인: 「주말 여행 어디가지」 캔버스의 「웹 · 귀엽고 경쾌한」 시안 — 라이트 전용 */
+/* 디자인: 소프트 팝 — 노랑·코랄 브랜드 색은 살리고, 얇은 연한 테두리와 부드러운 그림자로 정돈한다. 라이트 전용 */
 :root {
   color-scheme: light;
   --cream: #fffbea;
@@ -27,9 +27,12 @@
   --color-peach: var(--peach);
   --color-soft-ink: var(--soft-ink);
   --font-sans: var(--font-noto), system-ui, sans-serif;
-  --font-display: var(--font-jua), var(--font-noto), sans-serif;
-  --shadow-pop: 5px 5px 0 var(--ink);
-  --shadow-pop-sm: 3px 3px 0 var(--ink);
+  /* 제목·버튼은 굵은 본문 글꼴, 둥근 손글씨(Jua)는 로고·첫 화면 제목·큰 숫자에만(font-brand) */
+  --font-display: var(--font-noto), system-ui, sans-serif;
+  --font-brand: var(--font-jua), var(--font-noto), sans-serif;
+  /* 퍼지는 그림자 — 비껴 찍은 스티커 그림자 대신 */
+  --shadow-pop: 0 1px 2px rgb(34 34 59 / 0.05), 0 10px 28px -8px rgb(34 34 59 / 0.16);
+  --shadow-pop-sm: 0 1px 2px rgb(34 34 59 / 0.05), 0 4px 14px -6px rgb(34 34 59 / 0.18);
 }
 
 body {
@@ -37,6 +40,20 @@ body {
   color: var(--ink);
   font-family: var(--font-sans);
   word-break: keep-all;
+}
+
+/* 줄바꿈 — 본문은 끝줄에 한 글자만 남지 않게, 제목은 줄 길이를 고르게 */
+p,
+li,
+dd,
+figcaption {
+  text-wrap: pretty;
+}
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
 }
 
 /* 본문은 적어도 한 화면 — 불러오는 동안 푸터가 첫 화면에 올라왔다가 밀려 내려가지 않게 */
@@ -227,5 +244,22 @@ html:has(dialog[open]:modal) {
   }
   :where(button, [role="button"], a[class*="rounded"]):active {
     scale: none;
+  }
+}
+
+/* 제목·버튼 글꼴 — 굵게, 글자 사이는 살짝 좁혀 단단하게 */
+@layer utilities {
+  .font-display {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  /* Jua 는 굵은 글꼴이 없다 — 굵게 놓인 곳에서도 억지로 굵히지 않는다 */
+  .font-brand {
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  :is(h1, h2).font-display {
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 }

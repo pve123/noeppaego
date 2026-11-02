@@ -16,11 +16,11 @@ export function DeleteAccountForm() {
   return (
     <form action={deleteAccountAction} className="mt-5 flex flex-col gap-4">
       {failed && (
-        <p role="alert" className="rounded-2xl border-[2.5px] border-ink bg-coral px-4 py-3 text-[15px] font-bold">
+        <p role="alert" className="rounded-2xl border border-ink/15 bg-coral px-4 py-3 text-[15px] font-bold">
           탈퇴를 마치지 못했어요. 아무것도 지우지 않았으니 잠시 뒤 다시 눌러 주세요.
         </p>
       )}
-      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-cream px-4 py-3.5 has-[:checked]:bg-yellow">
+      <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-ink/15 bg-cream px-4 py-3.5 has-[:checked]:bg-yellow">
         <input
           type="checkbox"
           name="confirm"
@@ -44,7 +44,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
       type="submit"
       disabled={disabled || pending}
       aria-busy={pending}
-      className="inline-flex h-13 items-center justify-center gap-2 self-start rounded-[16px] border-[3px] border-ink bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:border-ink/30 disabled:bg-surface disabled:text-ink/40 disabled:shadow-none"
+      className="inline-flex h-13 items-center justify-center gap-2 self-start rounded-[16px] border border-ink/10 bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:border-ink/30 disabled:bg-surface disabled:text-ink/40 disabled:shadow-none"
     >
       {pending ? "지우는 중…" : "계정과 데이터 모두 삭제하기"}
     </button>

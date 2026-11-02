@@ -24,7 +24,7 @@ export function Sheet({
       aria-labelledby={titleId}
       // 바깥(어두운 곳)을 누르면 닫는다
       onClick={(e) => e.target === e.currentTarget && close()}
-      className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-3xl border-[3px] border-b-0 border-ink bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-w-md sm:rounded-3xl sm:border-b-[3px]"
+      className="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-3xl border border-b-0 border-ink/10 bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-w-md sm:rounded-3xl sm:border-b-[3px]"
     >
       <div className="px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-3">
         <div aria-hidden className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-ink/20 sm:hidden" />

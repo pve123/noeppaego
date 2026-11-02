@@ -56,7 +56,7 @@ export function ParkingChip({
         onClick={open}
         aria-haspopup="dialog"
         aria-label={`${placeName} 근처 주차장 보기`}
-        className={`${pill} sm:gap-1 border-ink/25 bg-surface text-ink/75 hover:border-ink hover:text-ink`}
+        className={`${pill} sm:gap-1 border-ink/25 bg-surface text-ink/75 hover:border-ink/30 hover:text-ink`}
       >
         <ParkingMark />
         {/* 휴대폰은 P 만 — 주소 자리를 넓힌다 */}
@@ -123,7 +123,7 @@ export function ParkingChip({
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`${lot.name}로 길찾기`}
-                      className="inline-flex h-11 shrink-0 items-center rounded-full border-[2.5px] border-ink bg-yellow px-3.5 font-display text-[15px]"
+                      className="inline-flex h-11 shrink-0 items-center rounded-full border border-ink/15 bg-yellow px-3.5 font-display text-[15px]"
                     >
                       길찾기
                     </a>

@@ -29,7 +29,7 @@ export function PeriodLine({ option, className = "" }: { option: BreakOptionView
  * 뱃지 색은 날짜 띠(DayStrip)와 같다 — 연차는 노랑, 연차 없음은 민트.
  */
 export function LeaveLine({ option, className = "" }: { option: BreakOptionView; className?: string }) {
-  const badge = "shrink-0 rounded-full border-2 border-ink px-2.5 py-0.5 text-[13px] font-bold text-ink";
+  const badge = "shrink-0 rounded-full border border-ink/15 px-2.5 py-0.5 text-[13px] font-bold text-ink";
   if (option.leaveCount === 0) {
     return (
       <p className={`flex items-center ${className}`}>

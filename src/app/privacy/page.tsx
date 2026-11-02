@@ -63,7 +63,7 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
-          <nav aria-label="목차" className="mt-10 rounded-3xl border-[2.5px] border-ink bg-surface p-5">
+          <nav aria-label="목차" className="mt-10 rounded-3xl border border-ink/15 bg-surface p-5">
             <p className="font-display text-lg">목차</p>
             <ol className="mt-2 grid gap-x-6 gap-y-1 text-[15px] sm:grid-cols-2">
               {SECTIONS.map((s, i) => (
@@ -227,8 +227,8 @@ export default function PrivacyPage() {
 
 function Summary({ tone, title, children }: { tone: string; title: string; children: ReactNode }) {
   return (
-    <li className="flex gap-3 rounded-3xl border-[2.5px] border-ink bg-surface p-4">
-      <span aria-hidden className={`mt-1 size-3.5 shrink-0 rounded-full border-2 border-ink ${tone}`} />
+    <li className="flex gap-3 rounded-3xl border border-ink/15 bg-surface p-4">
+      <span aria-hidden className={`mt-1 size-3.5 shrink-0 rounded-full border border-ink/15 ${tone}`} />
       <div>
         <p className="font-display text-lg leading-tight">{title}</p>
         <p className="mt-1 text-[15px] leading-relaxed text-muted">{children}</p>
@@ -252,7 +252,7 @@ function Section({ n, children }: { n: number; children: ReactNode }) {
 
 function Table({ head, rows }: { head: string[]; rows: string[][] }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border-[2.5px] border-ink">
+    <div className="overflow-x-auto rounded-2xl border border-ink/15">
       <table className="w-full text-left text-[14px] sm:text-[15px]">
         <thead className="bg-cream">
           <tr>

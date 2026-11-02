@@ -38,7 +38,7 @@ async function Account() {
   const user = await currentUser();
   if (!user) {
     return (
-      <div className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
+      <div className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
         <p className="font-display text-[22px] text-balance">로그인하면 계정을 관리할 수 있어요.</p>
         <p className="mt-2 text-muted">탈퇴하려는 경우에도 먼저 로그인해 주세요.</p>
         <div className="mt-5">
@@ -54,9 +54,9 @@ async function Account() {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border-[3px] border-ink bg-surface p-5 shadow-pop sm:p-6">
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-ink/10 bg-surface p-5 shadow-pop sm:p-6">
         <div className="flex min-w-0 items-center gap-3">
-          <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink bg-[#fee500]">
+          <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-full border border-ink/15 bg-[#fee500]">
             <svg width="22" height="22" viewBox="0 0 24 24">
               <path fill="#000" d="M12 3C6.48 3 2 6.58 2 11c0 2.85 1.86 5.35 4.66 6.77l-.95 3.5a.4.4 0 0 0 .61.44l4.13-2.75c.51.06 1.03.09 1.55.09 5.52 0 10-3.58 10-8S17.52 3 12 3z" />
             </svg>
@@ -68,7 +68,7 @@ async function Account() {
         </div>
         <form action="/api/auth/logout" method="post">
           <input type="hidden" name="next" value="/" />
-          <button type="submit" className="h-11 rounded-full border-[2.5px] border-ink bg-surface px-5 font-display text-[17px] hover:bg-yellow">
+          <button type="submit" className="h-11 rounded-full border border-ink/15 bg-surface px-5 font-display text-[17px] hover:bg-yellow">
             로그아웃
           </button>
         </form>
@@ -76,19 +76,19 @@ async function Account() {
 
       <Link
         href="/saved"
-        className="flex items-center justify-between gap-3 rounded-3xl border-[3px] border-ink bg-surface px-5 py-4 font-display text-lg transition-transform hover:-translate-y-0.5 sm:px-6"
+        className="flex items-center justify-between gap-3 rounded-3xl border border-ink/10 bg-surface px-5 py-4 font-display text-lg transition-transform hover:-translate-y-0.5 sm:px-6"
       >
         <span>찜한 일정 {favorites.length}개</span>
         <span aria-hidden>→</span>
       </Link>
 
-      <section id="delete" aria-labelledby="delete-title" className="scroll-mt-24 rounded-3xl border-[3px] border-ink bg-surface p-5 sm:p-6">
+      <section id="delete" aria-labelledby="delete-title" className="scroll-mt-24 rounded-3xl border border-ink/10 bg-surface p-5 sm:p-6">
         <h2 id="delete-title" className="font-display text-[24px]">
           탈퇴하기
         </h2>
         <p className="mt-1 text-[15px] text-muted">탈퇴하면 아래 정보가 바로 지워지고 되돌릴 수 없어요.</p>
 
-        <ul className="mt-4 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border-[2.5px] border-ink text-[15px]">
+        <ul className="mt-4 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border border-ink/15 text-[15px]">
           <Consequence label="내가 저장한 일정" value={`${mine}개`} note={mine > 0 ? "공유한 링크도 더 이상 열리지 않아요" : undefined} />
           <Consequence label="공유받아 찜한 일정" value={`${others}개`} note={others > 0 ? "원래 일정은 남고 내 찜만 지워져요" : undefined} />
           <Consequence label="카카오 회원 번호" value="삭제" note="다시 로그인하면 새 계정으로 시작해요" />

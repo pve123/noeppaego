@@ -64,7 +64,7 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
         )}
 
         {view.notPublished ? (
-          <p className="mt-8 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center font-display text-[22px]">
+          <p className="mt-8 rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center font-display text-[22px]">
             {view.year}년 공휴일은 아직 발표되지 않았어요. 보통 전년도 여름에 나와요.
           </p>
         ) : (

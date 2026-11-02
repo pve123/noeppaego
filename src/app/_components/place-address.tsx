@@ -48,7 +48,7 @@ export function AddressBar({
           }
         }}
         aria-label={copied ? "주소를 복사했어요" : "주소 복사"}
-        className={`${pill} ${copied ? "border-ink bg-mint text-ink" : "border-ink/25 bg-surface text-ink/75 hover:border-ink hover:text-ink"}`}
+        className={`${pill} ${copied ? "border-ink/10 bg-mint text-ink" : "border-ink/25 bg-surface text-ink/75 hover:border-ink/30 hover:text-ink"}`}
       >
         <svg viewBox="0 0 24 24" aria-hidden className="size-4 sm:hidden" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           {copied ? <path d="M5 12.5l4.5 4.5L19 7.5" /> : <><rect x="8" y="8" width="12" height="12" rx="2.5" /><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8" /></>}
@@ -60,7 +60,7 @@ export function AddressBar({
         target="_blank"
         rel="noopener noreferrer"
         aria-label="카카오맵에서 이 주소 보기"
-        className={`${pill} border-ink/25 bg-surface text-ink/75 hover:border-ink hover:text-ink`}
+        className={`${pill} border-ink/25 bg-surface text-ink/75 hover:border-ink/30 hover:text-ink`}
       >
         <svg viewBox="0 0 24 24" aria-hidden className="size-4 sm:hidden" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4zM9 4v14M15 6v14" />

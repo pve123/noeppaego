@@ -20,7 +20,7 @@ export function SourceError({
 }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <div role="alert" className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
+      <div role="alert" className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
         <p className="font-display text-[26px]">{subject}를 불러오지 못했어요</p>
         <p className="mx-auto mt-2 max-w-xl text-[15px] leading-relaxed">{MESSAGE[failure]}</p>
         {code && <p className="mt-3 text-sm text-muted">결과 코드 {code}</p>}

@@ -11,7 +11,7 @@ export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextY
       <DayLegend />
 
       {coming.length === 0 ? (
-        <p className="mt-6 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center font-display text-[22px]">
+        <p className="mt-6 rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center font-display text-[22px]">
           올해 남은 연휴가 없어요. {nextYear}년을 눌러 보세요.
         </p>
       ) : (
@@ -22,7 +22,7 @@ export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextY
         <details className="group mt-12">
           <summary className="inline-flex cursor-pointer list-none items-center gap-1 font-display text-lg underline underline-offset-4">
             지난 연휴 {past.length}개
-            <span className="transition-transform group-open:rotate-180" aria-hidden>
+            <span className="transition-transform " aria-hidden>
               ▾
             </span>
           </summary>

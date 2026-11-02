@@ -105,7 +105,7 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
   return (
     <section aria-label="추천 지역" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       {/* 출발지·거리를 한 상자에 — 출발지 목록은 그 자리에서 펼쳐져 아래 카드를 덮지 않는다 */}
-      <div className="flex flex-col gap-4 rounded-3xl border-[2.5px] border-ink bg-surface p-4 sm:p-5">
+      <div className="flex flex-col gap-4 rounded-3xl border border-ink/15 bg-surface p-4 sm:p-5">
         <OriginSelect origins={view.origins} selected={view.originId} selectedName={view.originName} basePath={basePath} query={reachQuery(view.reach, view.recommended)} />
         <ReachChips basePath={basePath} originId={view.originId} selected={view.reach} recommended={view.recommended} />
       </div>
@@ -188,7 +188,7 @@ function EmptyDestinations({
   // 이미 거리 제한이 없으면(4일 이상 등) 넓혀도 같다 — 버튼을 주지 않는다
   const wider = reachText ? widerThan(reach) : undefined;
   return (
-    <div className="mt-6 rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
+    <div className="mt-6 rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
       <p className="font-display text-[22px] text-balance">
         {wider && reachText ? `${reachText}에는 이 기간 축제가 없어요.` : "이 기간에 등록된 축제가 아직 없어요."}
       </p>
@@ -197,7 +197,7 @@ function EmptyDestinations({
         <Link
           href={`${basePath}?from=${originId}${reachQuery(wider, recommended)}`}
           scroll={false}
-          className="mt-5 inline-flex h-12 items-center rounded-[16px] border-[3px] border-ink bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5"
+          className="mt-5 inline-flex h-12 items-center rounded-[16px] border border-ink/10 bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5"
         >
           「{reachLabel(wider)}」로 넓혀 보기
         </Link>
