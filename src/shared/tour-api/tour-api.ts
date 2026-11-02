@@ -120,10 +120,25 @@ export async function fetchOverview(contentId: string): Promise<PublicDataResult
   return { ok: true, value: result.value[0]?.overview ?? "" };
 }
 
-/** 소개 정보(detailIntro2) 중 주차 칸 — 타입마다 이름이 다르다. 값에 `<br>` 같은 태그가 섞여 온다 */
-type IntroParking = { parking?: string; parkingculture?: string; parkingfee?: string; parkinglodging?: string };
+/**
+ * 홈페이지 칸(detailCommon2 의 homepage) 그대로 — `<a href="…">` 처럼 태그가 섞여 온다. 없으면 빈 문자열.
+ * 거의 안 바뀌어 며칠 캐시한다.
+ */
+export async function fetchHomepage(contentId: string): Promise<PublicDataResult<string>> {
+  "use cache";
+  const result = await requestItems<{ homepage?: string }>("tour:homepage", `${BASE}/detailCommon2`, { ...COMMON, contentId });
+  if (!result.ok) {
+    cacheLife("seconds");
+    return result;
+  }
+  cacheLife("days");
+  return { ok: true, value: result.value[0]?.homepage ?? "" };
+}
 
-/** 시설 주차 안내 — 관광지·문화시설·숙소만 칸이 있다. 거의 안 바뀌어 며칠 캐시한다. 없으면 빈 값 */
+/** 소개 정보(detailIntro2) 중 주차 칸 — 타입마다 이름이 다르다. 값에 `<br>` 같은 태그가 섞여 온다 */
+type IntroParking = { parking?: string; parkingculture?: string; parkingfee?: string; parkinglodging?: string; parkingfood?: string };
+
+/** 시설 주차 안내 — 관광지·문화시설·숙소·음식점(카페 포함)만 칸이 있다. 거의 안 바뀌어 며칠 캐시한다. 없으면 빈 값 */
 export async function fetchIntroParking(
   contentId: string,
   contentTypeId: ContentTypeId,
@@ -136,7 +151,7 @@ export async function fetchIntroParking(
   }
   cacheLife("days");
   const item = result.value[0] ?? {};
-  return { ok: true, value: { parking: item.parking ?? item.parkingculture ?? item.parkinglodging ?? "", fee: item.parkingfee ?? "" } };
+  return { ok: true, value: { parking: item.parking ?? item.parkingculture ?? item.parkinglodging ?? item.parkingfood ?? "", fee: item.parkingfee ?? "" } };
 }
 
 // ── 항목 해석 ─────────────────────────────────────────

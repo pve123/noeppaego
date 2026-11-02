@@ -25,7 +25,7 @@ export function ParkingChip({
   place,
   pill,
 }: {
-  place: { id: string; kind?: string; title: string; lat: number; lng: number };
+  place: { id: string; kind?: string; title: string; lat: number; lng: number; url?: string };
   pill: string;
 }) {
   const { title: placeName, lat, lng } = place;
@@ -75,13 +75,22 @@ export function ParkingChip({
       >
           <p className="truncate text-sm text-muted">{placeName}에서 가까운 순이에요.</p>
 
-          {/* 시설 자체 주차 — 근처 주차장과 출처가 달라 따로 둔다 */}
+          {/* 장소 자체 주차 — 근처 주차장과 출처가 달라 따로 둔다 */}
           {facility && (
-            <div className="mt-4 rounded-2xl border-2 border-[#1d5fd6]/30 bg-[#1d5fd6]/5 px-4 py-3">
-              <p className="text-[13px] font-bold text-[#1d5fd6]">시설 주차</p>
+            <div className="mt-4 rounded-2xl border border-[#1d5fd6]/20 bg-[#1d5fd6]/5 px-4 py-3">
+              <p className="text-[13px] font-bold text-[#1d5fd6]">{place.kind === "festival" ? "축제 주차" : "이 장소 주차"}</p>
               <p className="mt-0.5 text-[15px] leading-snug">{facility.text}</p>
               {facility.fee && <p className="mt-0.5 text-[13px] text-muted">요금: {facility.fee}</p>}
-              <p className="mt-1 text-[12px] text-muted">한국관광공사 안내예요.</p>
+              {facility.homepage && <OutLink href={facility.homepage}>축제 홈페이지에서 확인하기</OutLink>}
+              {!facility.general && <p className="mt-1 text-[12px] text-muted">한국관광공사 안내예요.</p>}
+            </div>
+          )}
+          {/* 카카오 가게는 API 에 주차 정보가 없다 — 카카오맵 장소 화면(주차 가능 여부가 보통 있다)으로 보낸다 */}
+          {!facility && place.id.startsWith("kakao:") && place.url && (
+            <div className="mt-4 rounded-2xl border border-[#1d5fd6]/20 bg-[#1d5fd6]/5 px-4 py-3">
+              <p className="text-[13px] font-bold text-[#1d5fd6]">이 가게 주차</p>
+              <p className="mt-0.5 text-[15px] leading-snug">가게 주차 정보는 카카오맵에서 확인해 주세요.</p>
+              <OutLink href={place.url}>카카오맵에서 보기</OutLink>
             </div>
           )}
 
@@ -135,5 +144,19 @@ export function ParkingChip({
           <p className="mt-3 text-[13px] text-muted">요금과 빈자리는 현장에서 확인해 주세요.</p>
       </Sheet>
     </>
+  );
+}
+
+/** 앱 밖으로 나가는 링크 — 새 창, ↗ 로 밖이라는 걸 알린다 */
+function OutLink({ href, children }: { href: string; children: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-2 inline-flex h-9 items-center gap-1 rounded-full border border-ink/15 bg-surface px-3 text-sm font-bold hover:bg-yellow"
+    >
+      {children} <span aria-hidden>↗</span>
+    </a>
   );
 }
