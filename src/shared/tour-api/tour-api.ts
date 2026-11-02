@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheLife } from "next/cache";
+import { cacheFor } from "@/shared/cache";
 import { requestItems, type PublicDataResult } from "@/shared/public-data/public-data";
 
 /**
@@ -57,8 +57,7 @@ export async function fetchFestivals(start: string, end: string): Promise<Public
     pageNo: "1",
     arrange: "C",
   });
-  if (result.ok) cacheLife("hours");
-  else cacheLife("seconds");
+  cacheFor(result.ok, "hours");
   return result;
 }
 
@@ -79,8 +78,7 @@ export async function fetchAreaItems(
     numOfRows: String(rows),
     pageNo: "1",
   });
-  if (result.ok) cacheLife("hours");
-  else cacheLife("seconds");
+  cacheFor(result.ok, "hours");
   return result;
 }
 
@@ -103,8 +101,7 @@ export async function fetchNearbyItems(
     numOfRows: String(rows),
     pageNo: "1",
   });
-  if (result.ok) cacheLife("hours");
-  else cacheLife("seconds");
+  cacheFor(result.ok, "hours");
   return result;
 }
 
@@ -112,11 +109,8 @@ export async function fetchNearbyItems(
 export async function fetchOverview(contentId: string): Promise<PublicDataResult<string>> {
   "use cache";
   const result = await requestItems<{ overview?: string }>("tour:overview", `${BASE}/detailCommon2`, { ...COMMON, contentId });
-  if (!result.ok) {
-    cacheLife("seconds");
-    return result;
-  }
-  cacheLife("days");
+  cacheFor(result.ok, "days");
+  if (!result.ok) return result;
   return { ok: true, value: result.value[0]?.overview ?? "" };
 }
 
@@ -127,11 +121,8 @@ export async function fetchOverview(contentId: string): Promise<PublicDataResult
 export async function fetchHomepage(contentId: string): Promise<PublicDataResult<string>> {
   "use cache";
   const result = await requestItems<{ homepage?: string }>("tour:homepage", `${BASE}/detailCommon2`, { ...COMMON, contentId });
-  if (!result.ok) {
-    cacheLife("seconds");
-    return result;
-  }
-  cacheLife("days");
+  cacheFor(result.ok, "days");
+  if (!result.ok) return result;
   return { ok: true, value: result.value[0]?.homepage ?? "" };
 }
 
@@ -145,11 +136,8 @@ export async function fetchIntroParking(
 ): Promise<PublicDataResult<{ parking: string; fee: string }>> {
   "use cache";
   const result = await requestItems<IntroParking>("tour:intro", `${BASE}/detailIntro2`, { ...COMMON, contentId, contentTypeId });
-  if (!result.ok) {
-    cacheLife("seconds");
-    return result;
-  }
-  cacheLife("days");
+  cacheFor(result.ok, "days");
+  if (!result.ok) return result;
   const item = result.value[0] ?? {};
   return { ok: true, value: { parking: item.parking ?? item.parkingculture ?? item.parkinglodging ?? item.parkingfood ?? "", fee: item.parkingfee ?? "" } };
 }

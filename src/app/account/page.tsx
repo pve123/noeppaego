@@ -8,6 +8,7 @@ import { KakaoLoginButton } from "../_components/kakao-login-button";
 import { PageBand } from "../_components/page-band";
 import { RevealSuspense, Shimmer } from "../_components/reveal";
 import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
+import { EMPTY_BOX } from "../_components/empty-box";
 
 export const metadata: Metadata = {
   title: "내 계정 | 계획은 J가",
@@ -38,7 +39,7 @@ async function Account() {
   const user = await currentUser();
   if (!user) {
     return (
-      <div className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
+      <div className={EMPTY_BOX}>
         <p className="font-display text-[22px] text-balance">로그인하면 계정을 관리할 수 있어요.</p>
         <p className="mt-2 text-muted">탈퇴하려는 경우에도 먼저 로그인해 주세요.</p>
         <div className="mt-5">

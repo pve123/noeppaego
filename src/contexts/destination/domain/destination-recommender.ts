@@ -4,7 +4,7 @@ import { Festival, Region } from "./festival";
 import { NO_ROADS, type Roads } from "./roads";
 import { TravelWindow } from "@/shared/kernel/travel-window";
 
-export type Destination = {
+type Destination = {
   readonly region: Region;
   /** 지역 대표 좌표(시청·군청). 모르면 지역 축제들의 가운데 */
   readonly center: Coordinate;

@@ -1,7 +1,7 @@
 import "server-only";
 
 /** 카카오 REST 호출 결과 — 키가 없거나 응답·연결이 실패하면 ok:false(실패는 이미 warn 으로 남겼다) */
-export type KakaoGet<T> = { ok: true; data: T } | { ok: false };
+type KakaoGet<T> = { ok: true; data: T } | { ok: false };
 
 /**
  * 카카오 REST(로컬·모빌리티) GET 공통 — 주소 만들기, 키(KAKAO_REST_API_KEY, 서버에서만), 5초 제한, 실패 로그.

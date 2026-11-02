@@ -94,7 +94,7 @@ export async function findSavedItinerary(
   };
 }
 
-export type FavoriteView = {
+type FavoriteView = {
   id: string;
   breakTitle: string;
   /** 「경기도 파주시 2박 3일」 */

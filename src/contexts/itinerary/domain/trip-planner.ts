@@ -8,7 +8,7 @@ export const MAX_TRIP_DAYS = 3;
 /** 방문 칸 — 오전·오후, 「꽉 차게」면 저녁 뒤 밤 산책 */
 type VisitTime = "morning" | "afternoon" | "evening";
 
-export type Visit = {
+type Visit = {
   readonly time: VisitTime;
   readonly kind: "visit";
   readonly place: Place;
@@ -31,7 +31,7 @@ export type Meal = {
   /** 사용자가 직접 골랐다 */
   readonly picked?: boolean;
 };
-export type Stay = {
+type Stay = {
   readonly time: "night";
   readonly kind: "stay";
   readonly near: Coordinate;
@@ -41,14 +41,14 @@ export type Stay = {
   /** 바꿀 후보 — 같은 기준으로 그다음 숙소 */
   readonly alternatives?: readonly Place[];
 };
-export type Home = { readonly time: "home"; readonly kind: "home" };
+type Home = { readonly time: "home"; readonly kind: "home" };
 export type Slot = Visit | Meal | Stay | Home;
 export type SlotTime = Slot["time"];
 
 export type TripDay = { readonly date: string; readonly slots: readonly Slot[] };
 
 /** 사용자가 칸마다 고른 곳 — 칸 키(slotKeyOf) → 장소 id */
-export type Picks = ReadonlyMap<string, string>;
+type Picks = ReadonlyMap<string, string>;
 
 /** 칸 키 `2026-12-25-lunch` */
 export const slotKeyOf = (date: string, time: SlotTime) => `${date}-${time}`;

@@ -33,10 +33,10 @@ const TONE: Record<MapPin["tone"], { bg: string; fg: string; line: string }> = {
  * 선 — dashed 는 실제 길이 아니라 「어디서 어디까지」만 잇는 점선 직선.
  * onlyWhenFocused 는 처음엔 그리지 않고 번호표나 핀을 눌렀을 때만 그린다(선이 많으면 뒤엉킨다).
  */
-export type MapRoute = { tone: MapPin["tone"]; points: { lat: number; lng: number }[]; dashed?: boolean; onlyWhenFocused?: boolean };
+type MapRoute = { tone: MapPin["tone"]; points: { lat: number; lng: number }[]; dashed?: boolean; onlyWhenFocused?: boolean };
 
 /** 번호표 한 줄 — 누르면 pinIds 핀과 routeIndexes 선만 남긴다 */
-export type MapLegendItem = {
+type MapLegendItem = {
   badge: string;
   text: string;
   tone: MapPin["tone"];

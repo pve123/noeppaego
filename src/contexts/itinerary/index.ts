@@ -92,5 +92,5 @@ export const forgetItinerariesOf = (userId: string) => forget(userId, saved);
 
 export type { DayView, ItineraryView, PlaceView, SlotView, WeatherView } from "./application/plan-itinerary";
 export type { FacilityParkingView, ParkingView } from "./application/find-parking";
-export type { FavoriteView, SavedItineraryView } from "./application/saved-itineraries";
+export type { SavedItineraryView } from "./application/saved-itineraries";
 export type { Companion, DessertTime, FoodAvoid, Interest, Pace, TripPrefs } from "./domain/preferences";
