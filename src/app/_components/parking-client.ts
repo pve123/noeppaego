@@ -17,9 +17,9 @@ export function fetchParking(lat: number, lng: number): Promise<ParkingView[]> {
   return found;
 }
 
-/** 시설 주차 안내를 받는 장소 — 관광공사 장소(tour:…)의 관광지·문화시설·숙소 */
-export const hasFacilityParking = (placeId: string, kind?: string) =>
-  placeId.startsWith("tour:") && (kind === "sight" || kind === "culture" || kind === "lodging");
+/** 장소 자체 주차 안내를 받는 종류 — 관광공사 장소(tour:…)만 */
+const FACILITY_KINDS = new Set(["sight", "culture", "lodging", "restaurant", "cafe", "festival"]);
+export const hasFacilityParking = (placeId: string, kind?: string) => placeId.startsWith("tour:") && !!kind && FACILITY_KINDS.has(kind);
 
 const facility = new Map<string, Promise<FacilityParkingView | null>>();
 

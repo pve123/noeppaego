@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { findFacilityParking } from "@/contexts/itinerary";
 
 const PLACE_ID = /^tour:\d{1,12}$/;
-const KINDS = ["sight", "culture", "lodging"] as const;
+const KINDS = ["sight", "culture", "lodging", "restaurant", "cafe", "festival"] as const;
 type Kind = (typeof KINDS)[number];
 
 /** 장소 자체 주차 안내(관광공사) — 일정 카드의 「주차」 시트를 열 때 부른다. 관광공사 장소만 받는다 */

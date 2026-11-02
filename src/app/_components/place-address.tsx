@@ -15,7 +15,7 @@ export function AddressBar({
   place,
 }: {
   address: string;
-  place?: { id: string; kind?: string; title: string; lat: number; lng: number };
+  place?: { id: string; kind?: string; title: string; lat: number; lng: number; url?: string };
 }) {
   const [copied, setCopied] = useState(false);
   const [full, setFull] = useState(false);

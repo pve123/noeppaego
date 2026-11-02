@@ -42,18 +42,24 @@ body {
   word-break: keep-all;
 }
 
-/* 줄바꿈 — 본문은 끝줄에 한 글자만 남지 않게, 제목은 줄 길이를 고르게 */
-p,
-li,
-dd,
-figcaption {
-  text-wrap: pretty;
-}
-h1,
-h2,
-h3,
-h4 {
-  text-wrap: balance;
+/*
+ * 줄바꿈 — 본문은 끝줄에 한 글자만 남지 않게, 제목은 줄 길이를 고르게.
+ * 「어디서 끊을지」(text-wrap-style)만 정하고 「넘길지」는 건드리지 않는다 — truncate(한 줄 …)가 그대로 동작하게.
+ * base 레이어에 둬 Tailwind 유틸리티(text-balance 등)가 이긴다.
+ */
+@layer base {
+  p,
+  li,
+  dd,
+  figcaption {
+    text-wrap-style: pretty;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap-style: balance;
+  }
 }
 
 /* 본문은 적어도 한 화면 — 불러오는 동안 푸터가 첫 화면에 올라왔다가 밀려 내려가지 않게 */

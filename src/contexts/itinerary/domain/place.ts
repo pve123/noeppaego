@@ -88,7 +88,11 @@ export type ParkingLot = {
 };
 
 /** 시설 자체 주차 안내 — 「가능(소형 150대)」처럼 기관이 적은 글 그대로 */
-export type FacilityParking = { readonly text: string; readonly fee?: string };
+/**
+ * 장소 자체 주차 안내. general 이면 관광공사가 적은 글이 아니라 우리가 쓴 일반 안내(축제 등)다.
+ * homepage 는 더 정확한 안내가 있는 곳(축제 홈페이지).
+ */
+export type FacilityParking = { readonly text: string; readonly fee?: string; readonly homepage?: string; readonly general?: boolean };
 
 /** 포트 — 장소(id·종류)의 시설 주차 안내. 안내가 없거나 모르는 장소면 undefined */
 export interface FacilityParkingSource {

@@ -34,14 +34,21 @@ export async function findParking(at: Coordinate, finder: ParkingFinder): Promis
   }));
 }
 
-export type FacilityParkingView = { text: string; fee?: string };
+export type FacilityParkingView = {
+  text: string;
+  fee?: string;
+  /** 더 정확한 안내가 있는 곳(축제 홈페이지) */
+  homepage?: string;
+  /** 관광공사 글이 아니라 일반 안내 — 출처 줄을 달지 않는다 */
+  general?: boolean;
+};
 
-/** 장소 자체 주차 안내(Query) — 관광지·문화시설·숙소만. 없으면 null */
+/** 장소 자체 주차 안내(Query) — 관광공사 관광지·문화시설·숙소·식당·카페, 축제는 일반 안내와 홈페이지. 없으면 null */
 export async function findFacilityParking(
   placeId: string,
   kind: PlaceKind,
   source: FacilityParkingSource,
 ): Promise<FacilityParkingView | null> {
   const found = await source.parkingOf(placeId, kind);
-  return found ? { text: found.text, fee: found.fee } : null;
+  return found ? { text: found.text, fee: found.fee, homepage: found.homepage, general: found.general } : null;
 }
