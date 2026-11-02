@@ -66,9 +66,9 @@ export function TripPrefsSheet({
     <>
       <section
         aria-labelledby="prefs-title"
-        className="relative overflow-hidden rounded-3xl border-[3px] border-ink bg-surface p-5 shadow-pop sm:p-6"
+        className="relative overflow-hidden rounded-3xl border border-ink/10 bg-surface p-5 shadow-pop sm:p-6"
       >
-        <span aria-hidden className="pointer-events-none absolute -right-3 -top-4 rotate-12 select-none text-[64px] opacity-90 sm:text-[80px]">
+        <span aria-hidden className="pointer-events-none absolute -right-3 -top-4 select-none text-[64px] opacity-90 sm:text-[80px]">
           {chosen ? "🎒" : "✨"}
         </span>
         <h2 id="prefs-title" className="pr-14 font-display text-[24px] leading-tight">
@@ -83,7 +83,7 @@ export function TripPrefsSheet({
             <li
               key={s}
               className={`rounded-full border-2 px-3 py-1 text-[13px] font-bold ${
-                chosen ? "border-ink bg-surface" : "border-dashed border-ink/40 bg-surface/60 text-ink/70"
+                chosen ? "border-ink/10 bg-surface" : "border-dashed border-ink/40 bg-surface/60 text-ink/70"
               }`}
             >
               {s}
@@ -97,11 +97,11 @@ export function TripPrefsSheet({
             onClick={() => dialog.current?.showModal()}
             disabled={pending}
             aria-haspopup="dialog"
-            className="inline-flex h-12 items-center gap-2 rounded-[16px] border-[3px] border-ink bg-yellow px-5 font-display text-[17px] shadow-pop-sm transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
+            className="inline-flex h-12 items-center gap-2 rounded-[16px] border border-ink/10 bg-yellow px-5 font-display text-[17px] shadow-pop-sm transition-transform hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-70"
           >
             {pending ? (
               <>
-                <span aria-hidden className="size-4 animate-spin rounded-full border-[3px] border-ink border-t-transparent" />
+                <span aria-hidden className="size-4 animate-spin rounded-full border border-ink/10 border-t-transparent" />
                 다시 짜는 중…
               </>
             ) : chosen ? (
@@ -123,7 +123,7 @@ export function TripPrefsSheet({
         aria-labelledby="prefs-sheet-title"
         onClick={(e) => e.target === e.currentTarget && dialog.current?.close()}
         // overflow-clip — 시트 자체는 스크롤되지 않는다(hidden 은 초점이 갈 때 브라우저가 밀어 올릴 수 있다). 스크롤은 안쪽 본문만.
-        className="fixed inset-x-0 bottom-0 top-auto m-0 max-h-[90dvh] w-full max-w-none overflow-clip rounded-t-3xl border-[3px] border-b-0 border-ink bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-h-[85dvh] sm:max-w-xl sm:rounded-3xl sm:border-b-[3px]"
+        className="fixed inset-x-0 bottom-0 top-auto m-0 max-h-[90dvh] w-full max-w-none overflow-clip rounded-t-3xl border border-b-0 border-ink/10 bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-h-[85dvh] sm:max-w-xl sm:rounded-3xl sm:border-b-[3px]"
       >
         <form ref={form} onSubmit={submit} onChange={() => setCount(prefsEntries(read()).length)} className="flex max-h-[inherit] flex-col">
           <header className="shrink-0 px-5 pt-3">
@@ -158,7 +158,7 @@ export function TripPrefsSheet({
               {PACES.map((o) => (
                 <label
                   key={o.value}
-                  className="relative flex cursor-pointer flex-col items-center gap-0.5 rounded-2xl border-[2.5px] border-ink bg-surface px-2 py-3 text-center transition-transform hover:-translate-y-0.5 has-[:checked]:bg-yellow has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2"
+                  className="relative flex cursor-pointer flex-col items-center gap-0.5 rounded-2xl border border-ink/15 bg-surface px-2 py-3 text-center transition-transform hover:-translate-y-0.5 has-[:checked]:bg-yellow has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2"
                 >
                   <input type="radio" name="pace" value={o.value} defaultChecked={(prefs.pace ?? "normal") === o.value} className="sr-only" />
                   <span aria-hidden className="text-[28px] leading-none">
@@ -183,9 +183,9 @@ export function TripPrefsSheet({
               {days.map((day) => {
                 const p = prefs.days?.[day.date];
                 return (
-                  <div key={day.date} className="rounded-2xl border-[2.5px] border-ink bg-surface p-4">
+                  <div key={day.date} className="rounded-2xl border border-ink/15 bg-surface p-4">
                     <p className="flex items-baseline gap-2">
-                      <span className={`-rotate-2 rounded-xl border-[2.5px] border-ink px-2.5 font-display text-[17px] ${day.toneClass}`}>
+                      <span className={`rounded-xl border border-ink/15 px-2.5 font-display text-[17px] ${day.toneClass}`}>
                         {day.dayNumber}일차
                       </span>
                       <span className="font-display text-[15px] text-muted">{day.dateLabel}</span>
@@ -223,7 +223,7 @@ export function TripPrefsSheet({
             </section>
           </div>
 
-          <footer className="shrink-0 border-t-[3px] border-ink bg-cream/95 px-5 pb-[max(14px,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+          <footer className="shrink-0 border-t border-ink/10 bg-cream/95 px-5 pb-[max(14px,env(safe-area-inset-bottom))] pt-3 backdrop-blur">
             {hasPicks && <p className="mb-2 text-[13px] text-muted">직접 바꾼 칸은 처음 일정으로 돌아가요.</p>}
             <div className="flex items-center gap-3">
               <span aria-live="polite" className="shrink-0 text-[14px] font-bold text-ink/70">
@@ -231,7 +231,7 @@ export function TripPrefsSheet({
               </span>
               <button
                 type="submit"
-                className="ml-auto inline-flex h-13 min-w-0 flex-1 items-center justify-center gap-2 rounded-[18px] border-[3px] border-ink bg-coral px-5 font-display text-[18px] shadow-pop-sm transition-transform hover:-translate-y-0.5 sm:flex-none"
+                className="ml-auto inline-flex h-13 min-w-0 flex-1 items-center justify-center gap-2 rounded-[18px] border border-ink/10 bg-coral px-5 font-display text-[18px] shadow-pop-sm transition-transform hover:-translate-y-0.5 sm:flex-none"
               >
                 이대로 다시 짜기
               </button>
@@ -306,7 +306,7 @@ function Chip({
 }) {
   return (
     <label
-      className={`relative inline-flex h-11 shrink-0 cursor-pointer select-none items-center gap-1.5 whitespace-nowrap rounded-full border-[2.5px] border-ink bg-surface px-4 font-display text-[16px] transition-transform hover:-translate-y-0.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:border-ink/25 has-[:disabled]:text-ink/35 has-[:disabled]:hover:translate-y-0 ${CHECKED_TONE[tone]}`}
+      className={`relative inline-flex h-11 shrink-0 cursor-pointer select-none items-center gap-1.5 whitespace-nowrap rounded-full border border-ink/15 bg-surface px-4 font-display text-[16px] transition-transform hover:-translate-y-0.5 has-[:focus-visible]:outline has-[:focus-visible]:outline-[3px] has-[:focus-visible]:outline-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:border-ink/25 has-[:disabled]:text-ink/35 has-[:disabled]:hover:translate-y-0 ${CHECKED_TONE[tone]}`}
     >
       <input type={type} name={name} value={value} defaultChecked={defaultChecked} disabled={disabled} className="sr-only" />
       {children}

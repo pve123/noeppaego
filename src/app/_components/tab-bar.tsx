@@ -23,7 +23,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="아래 메뉴"
-      className="fixed inset-x-0 bottom-0 z-40 border-t-2 border-ink bg-cream/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md sm:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-ink/10 bg-cream/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md sm:hidden"
     >
       <ul className="grid h-[var(--tab-bar-h)] grid-cols-4">
         {TABS.map((tab) => {

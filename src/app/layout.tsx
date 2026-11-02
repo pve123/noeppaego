@@ -10,7 +10,7 @@ import { TabBar } from "./_components/tab-bar";
 // 한글 글꼴은 subset 이 커서 미리 받지 않는다(preload: false) — 쓰는 글자만 그때 받는다.
 const jua = Jua({ weight: "400", subsets: ["latin"], preload: false, variable: "--font-jua" });
 const noto = Noto_Sans_KR({
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "700", "800"],
   subsets: ["latin"],
   preload: false,
   variable: "--font-noto",

@@ -141,7 +141,7 @@ export function InstallPrompt() {
   return (
     <section
       aria-labelledby={titleId}
-      className="install-in fixed inset-x-3 bottom-[calc(var(--tab-bar-h)_+_12px_+_env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-[26px] border-[3px] border-ink bg-surface p-4 shadow-pop sm:inset-x-auto sm:right-6 sm:bottom-6"
+      className="install-in fixed inset-x-3 bottom-[calc(var(--tab-bar-h)_+_12px_+_env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-[26px] border border-ink/10 bg-surface p-4 shadow-pop sm:inset-x-auto sm:right-6 sm:bottom-6"
     >
       <button
         type="button"
@@ -156,8 +156,8 @@ export function InstallPrompt() {
 
       <div className="flex items-center gap-3.5 pr-8">
         <span className="install-bob relative shrink-0">
-          <Image src="/icons/icon-192.png" alt="" width={56} height={56} className="size-14 rounded-2xl border-[2.5px] border-ink" />
-          <span aria-hidden className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border-2 border-ink bg-mint text-[13px] font-bold">
+          <Image src="/icons/icon-192.png" alt="" width={56} height={56} className="size-14 rounded-2xl border border-ink/15" />
+          <span aria-hidden className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border border-ink/15 bg-mint text-[13px] font-bold">
             +
           </span>
         </span>
@@ -174,7 +174,7 @@ export function InstallPrompt() {
           <button
             type="button"
             onClick={install}
-            className="h-12 flex-1 rounded-[16px] border-[3px] border-ink bg-coral font-display text-[17px] shadow-pop-sm transition-transform active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
+            className="h-12 flex-1 rounded-[16px] border border-ink/10 bg-coral font-display text-[17px] shadow-pop-sm transition-transform active:translate-x-[3px] active:translate-y-[3px] active:shadow-none"
           >
             홈 화면에 추가
           </button>
@@ -207,7 +207,7 @@ export function InstallPrompt() {
 
 function Step({ n }: { n: number }) {
   return (
-    <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-yellow font-display text-[13px]">
+    <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full border border-ink/15 bg-yellow font-display text-[13px]">
       {n}
     </span>
   );

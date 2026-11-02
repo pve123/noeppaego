@@ -15,7 +15,7 @@ export function SaveCard({ loggedIn, target }: { loggedIn: boolean; target: Save
     <section
       id="save"
       aria-labelledby="save-title"
-      className="scroll-mt-6 rounded-3xl border-[3px] border-ink bg-surface p-5 shadow-pop sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6"
+      className="scroll-mt-6 rounded-3xl border border-ink/10 bg-surface p-5 shadow-pop sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6"
     >
       <div>
         <h2 id="save-title" className="font-display text-[24px] leading-tight">
@@ -51,7 +51,7 @@ export function SaveCard({ loggedIn, target }: { loggedIn: boolean; target: Save
 /** 휴대폰 아래 고정 바 — 긴 일정을 내려도 저장(또는 로그인)이 손 닿는 곳에 있다. 아래 탭 바로 위에 얹힌다 */
 export function SaveBar({ loggedIn, target }: { loggedIn: boolean; target: SaveTarget }) {
   return (
-    <div data-save-bar className="fixed inset-x-0 bottom-[calc(var(--tab-bar-h)_+_env(safe-area-inset-bottom))] z-40 border-t-[3px] border-ink bg-cream/95 px-4 py-3 backdrop-blur sm:hidden">
+    <div data-save-bar className="fixed inset-x-0 bottom-[calc(var(--tab-bar-h)_+_env(safe-area-inset-bottom))] z-40 border-t border-ink/10 bg-cream/95 px-4 py-3 backdrop-blur sm:hidden">
       {loggedIn ? (
         <SaveButton target={target} full />
       ) : (
@@ -71,7 +71,7 @@ function SaveButton({ target, full = false }: { target: SaveTarget; full?: boole
       <input type="hidden" name="back" value={target.here} />
       <button
         type="submit"
-        className={`inline-flex h-14 items-center justify-center gap-2 rounded-[18px] border-[3px] border-ink bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5 ${
+        className={`inline-flex h-14 items-center justify-center gap-2 rounded-[18px] border border-ink/10 bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5 ${
           full ? "w-full" : ""
         }`}
       >

@@ -20,12 +20,13 @@ export type MapPin = {
   anchor?: boolean;
 };
 
-const TONE: Record<MapPin["tone"], { bg: string; fg: string }> = {
-  coral: { bg: "#ff6b6b", fg: "#22223b" },
-  yellow: { bg: "#ffd84d", fg: "#22223b" },
-  mint: { bg: "#3ccfb4", fg: "#22223b" },
-  lavender: { bg: "#b8b5ff", fg: "#22223b" },
-  ink: { bg: "#22223b", fg: "#fffbea" },
+/** bg 는 핀, line 은 선 — 노랑·라벤더는 흰 외곽선 위에서 묻혀 선만 한 단계 진하게 */
+const TONE: Record<MapPin["tone"], { bg: string; fg: string; line: string }> = {
+  coral: { bg: "#ff6b6b", fg: "#22223b", line: "#f25555" },
+  yellow: { bg: "#ffd84d", fg: "#22223b", line: "#f2b705" },
+  mint: { bg: "#3ccfb4", fg: "#22223b", line: "#20b39a" },
+  lavender: { bg: "#b8b5ff", fg: "#22223b", line: "#8b86f2" },
+  ink: { bg: "#22223b", fg: "#fffbea", line: "#22223b" },
 };
 
 /**
@@ -107,15 +108,15 @@ export function KakaoMap({
         const map = new maps.Map(container.current, { center: new maps.LatLng(pins[0].lat, pins[0].lng), level: 12 });
         const bounds = new maps.LatLngBounds();
 
-        // 선 — 잉크 테두리 위에 색 선. 핀보다 아래에 깔린다. 점선은 길이 아니라서 테두리 없이 얇게
+        // 선 — 흰 외곽선 위에 진한 색 선(흐린 지도 위에서 또렷하게). 핀보다 아래에 깔린다. 점선은 길이 아니라서 외곽선 없이 얇게
         for (const route of routes.filter((r) => r.points.length > 1)) {
           const path = route.points.map((p) => new maps.LatLng(p.lat, p.lng));
           if (route.dashed) {
             new maps.Polyline({ path, strokeWeight: 3, strokeColor: "#22223b", strokeOpacity: 0.6, strokeStyle: "shortdash", zIndex: 0 }).setMap(map);
             continue;
           }
-          new maps.Polyline({ path, strokeWeight: 8, strokeColor: "#22223b", strokeOpacity: 0.85, zIndex: 0 }).setMap(map);
-          new maps.Polyline({ path, strokeWeight: 4, strokeColor: TONE[route.tone].bg, strokeOpacity: 1, zIndex: 1 }).setMap(map);
+          new maps.Polyline({ path, strokeWeight: 8, strokeColor: "#ffffff", strokeOpacity: 1, zIndex: 0 }).setMap(map);
+          new maps.Polyline({ path, strokeWeight: 5, strokeColor: TONE[route.tone].line, strokeOpacity: 1, zIndex: 1 }).setMap(map);
         }
 
         // 링크가 있는 핀을 누르면 뜨는 말풍선 — 하나만 두고 옮겨 쓴다. 지도 빈 곳을 누르면 닫는다
@@ -199,11 +200,11 @@ export function KakaoMap({
             ref={container}
             role="img"
             aria-label={label}
-            className="size-full overflow-hidden rounded-3xl border-[3px] border-ink bg-soft-ink shadow-pop [&_img]:opacity-90 [&_img]:grayscale-[0.85]"
+            className="size-full overflow-hidden rounded-3xl border border-ink/10 bg-soft-ink shadow-pop [&_img]:opacity-90 [&_img]:grayscale-[0.85]"
           />
           {ready && shownPins.length > 0 && <MapControls onZoom={(d) => controls.current?.zoom(d)} onFit={() => controls.current?.fit()} />}
           {shownPins.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center rounded-3xl border-[3px] border-ink bg-surface">
+            <div className="absolute inset-0 flex items-center justify-center rounded-3xl border border-ink/10 bg-surface">
               <span className="px-4 text-center text-[15px] font-bold text-muted">지도에 표시할 장소가 없어요</span>
             </div>
           )}
@@ -211,7 +212,7 @@ export function KakaoMap({
             <div
               role="status"
               aria-live="polite"
-              className="shimmer absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-3xl border-[3px] border-ink"
+              className="shimmer absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 rounded-3xl border border-ink/10"
             >
               <svg width="40" height="40" viewBox="0 0 24 24" aria-hidden className="loading-pin">
                 <path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z" fill="#ff6b6b" stroke="#22223b" strokeWidth="2" />
@@ -233,12 +234,12 @@ export function KakaoMap({
                       aria-pressed={active}
                       aria-label={`${item.text} 지도에서 보기`}
                       onClick={() => setFocus(active ? undefined : item.badge)}
-                      className={`flex w-full items-start gap-3 rounded-2xl border-[2.5px] border-ink px-3 py-2.5 text-left transition-transform ${
+                      className={`flex w-full items-start gap-3 rounded-2xl border border-ink/15 px-3 py-2.5 text-left transition-transform ${
                         active ? "-translate-y-0.5 bg-yellow shadow-pop-sm" : focus ? "bg-surface opacity-60 hover:opacity-100" : "bg-surface hover:-translate-y-0.5"
                       }`}
                     >
                       <span
-                        className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink font-display"
+                        className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-ink/15 font-display"
                         style={{ background: TONE[item.tone].bg, color: TONE[item.tone].fg }}
                       >
                         {item.badge}
@@ -248,7 +249,7 @@ export function KakaoMap({
                       <span
                         aria-hidden
                         className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-2 ${
-                          active ? "border-ink bg-ink text-cream" : "border-ink/20 text-ink/60"
+                          active ? "border-ink/10 bg-ink text-cream" : "border-ink/20 text-ink/60"
                         }`}
                       >
                         <CrosshairIcon className="size-4" />
@@ -262,7 +263,7 @@ export function KakaoMap({
               <button
                 type="button"
                 onClick={() => setFocus(undefined)}
-                className="mt-3 h-11 rounded-full border-[2.5px] border-ink bg-surface px-5 font-display text-[17px] hover:bg-yellow"
+                className="mt-3 h-11 rounded-full border border-ink/15 bg-surface px-5 font-display text-[17px] hover:bg-yellow"
               >
                 전체 보기
               </button>
@@ -279,7 +280,7 @@ export function KakaoMap({
 function MapControls({ onZoom, onFit }: { onZoom(delta: number): void; onFit(): void }) {
   const button = "flex size-11 items-center justify-center font-display text-[22px] leading-none hover:bg-yellow";
   return (
-    <div className="absolute right-3 top-3 z-[5] flex flex-col overflow-hidden rounded-2xl border-[2.5px] border-ink bg-surface shadow-pop-sm">
+    <div className="absolute right-3 top-3 z-[5] flex flex-col overflow-hidden rounded-2xl border border-ink/15 bg-surface shadow-pop-sm">
       <button type="button" aria-label="확대" onClick={() => onZoom(-1)} className={button}>
         +
       </button>
@@ -301,7 +302,7 @@ function pinElement(pin: MapPin): HTMLElement {
   badge.textContent = pin.badge;
   badge.title = pin.label;
   if (pin.anchor) {
-    badge.style.cssText = `display:flex;align-items:center;height:24px;padding:0 8px;box-sizing:border-box;border:2px solid #fffbea;border-radius:999px;background:#22223b;color:#fffbea;font:700 12px/1 sans-serif;box-shadow:0 0 0 1.5px #22223b;white-space:nowrap`;
+    badge.style.cssText = `display:flex;align-items:center;height:24px;padding:0 8px;box-sizing:border-box;border:2px solid #fff;border-radius:999px;background:#22223b;color:#fffbea;font:700 12px/1 var(--font-noto),sans-serif;box-shadow:0 2px 8px rgb(34 34 59 / 0.35);white-space:nowrap`;
     return badge;
   }
   if (pin.parking) {
@@ -313,7 +314,7 @@ function pinElement(pin: MapPin): HTMLElement {
     return badge;
   }
   const { bg, fg } = TONE[pin.tone];
-  badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;box-sizing:border-box;border:3px solid #22223b;border-radius:999px;background:${bg};color:${fg};font-family:var(--font-jua),sans-serif;font-size:16px;box-shadow:2px 2px 0 #22223b;cursor:default;white-space:nowrap`;
+  badge.style.cssText = `display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 8px;box-sizing:border-box;border:2.5px solid #fff;border-radius:999px;background:${bg};color:${fg};font:800 15px/1 var(--font-noto),sans-serif;box-shadow:0 2px 8px rgb(34 34 59 / 0.35);cursor:default;white-space:nowrap`;
   return badge;
 }
 
@@ -321,7 +322,7 @@ function pinElement(pin: MapPin): HTMLElement {
 function bubbleElement(label: string, link: { href: string; text: string }, close: () => void): HTMLElement {
   const box = document.createElement("div");
   box.style.cssText =
-    "position:relative;margin-bottom:22px;display:flex;flex-direction:column;gap:8px;max-width:220px;padding:10px 12px;border:2.5px solid #22223b;border-radius:14px;background:#fffbea;color:#22223b;box-shadow:2px 2px 0 #22223b;font:600 14px/1.35 sans-serif";
+    "position:relative;margin-bottom:22px;display:flex;flex-direction:column;gap:8px;max-width:220px;padding:10px 12px;border:1px solid rgb(34 34 59 / 0.1);border-radius:14px;background:#fff;color:#22223b;box-shadow:0 10px 28px -8px rgb(34 34 59 / 0.3);font:600 14px/1.35 var(--font-noto),sans-serif";
   const head = document.createElement("div");
   head.style.cssText = "display:flex;align-items:flex-start;gap:8px";
   const name = document.createElement("span");
@@ -343,7 +344,7 @@ function bubbleElement(label: string, link: { href: string; text: string }, clos
   a.rel = "noopener noreferrer";
   a.textContent = link.text;
   a.style.cssText =
-    "display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 14px;border:2.5px solid #22223b;border-radius:999px;background:#ffd84d;color:#22223b;font-weight:700;text-decoration:none";
+    "display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 14px;border:0;border-radius:999px;background:#ffd84d;color:#22223b;font-weight:700;text-decoration:none";
   box.append(head, a);
   box.addEventListener("click", (e) => e.stopPropagation());
   return box;
@@ -352,7 +353,7 @@ function bubbleElement(label: string, link: { href: string; text: string }, clos
 /** 실제 위치 점 — 핀이 비켜 앉아도 어디인지 남긴다 */
 function dotElement(pin: MapPin): HTMLElement {
   const dot = document.createElement("span");
-  dot.style.cssText = `display:block;width:10px;height:10px;border-radius:999px;border:2px solid #22223b;background:${pin.parking ? PARKING_BLUE : TONE[pin.tone].bg}`;
+  dot.style.cssText = `display:block;width:10px;height:10px;border-radius:999px;border:2px solid #fff;box-shadow:0 1px 4px rgb(34 34 59 / 0.35);background:${pin.parking ? PARKING_BLUE : TONE[pin.tone].bg}`;
   return dot;
 }
 

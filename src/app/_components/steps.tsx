@@ -16,7 +16,7 @@ export function Steps({ current, hrefs = [] }: { current: 1 | 2 | 3; hrefs?: str
           const here = step === current;
           const badge = (
             <span
-              className={`flex size-7 items-center justify-center rounded-full border-[2.5px] border-ink font-display text-sm ${
+              className={`flex size-7 items-center justify-center rounded-full border border-ink/15 font-display text-sm ${
                 here ? "bg-yellow" : done ? "bg-mint" : "bg-surface text-muted"
               }`}
             >

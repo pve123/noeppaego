@@ -13,8 +13,8 @@ export function BreakCard({ item }: { item: LongBreakView }) {
 
   return (
     <Link href={`/breaks/${item.key}`} className="group block h-full rounded-3xl outline-offset-4">
-      <article className="flex h-full flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
-        <div className="flex items-center justify-between gap-3 border-b-[3px] border-ink px-5 py-3.5">
+      <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-ink/10 bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
+        <div className="flex items-center justify-between gap-3 border-b border-ink/10 px-5 py-3.5">
           <div className="min-w-0">
             <p className="text-xs font-bold text-ink/70">{item.month}월</p>
             <h4 className="font-display text-[22px] leading-tight">{item.title}</h4>
@@ -23,7 +23,7 @@ export function BreakCard({ item }: { item: LongBreakView }) {
         </div>
 
         <div className="flex flex-1 flex-col gap-1.5 px-5 pb-5 pt-4">
-          <p className="font-display text-[44px] leading-none">{base.length}일</p>
+          <p className="font-brand text-[44px] leading-none">{base.length}일</p>
           <PeriodLine option={base} className="mt-1 text-[15px] text-ink" />
           <LeaveLine option={base} className="text-[14px] text-muted" />
           <DayStrip days={base.days} size="sm" />
@@ -42,8 +42,8 @@ export function BreakCard({ item }: { item: LongBreakView }) {
 }
 
 function StatusBadge({ status }: { status: BreakStatus }) {
-  const sticker = "shrink-0 rounded-full border-[2.5px] border-ink px-3 py-0.5 font-display text-[15px]";
+  const sticker = "shrink-0 rounded-full border border-ink/15 px-3 py-0.5 font-display text-[15px]";
   if (status.kind === "past") return <span className={`${sticker} bg-surface`}>지남</span>;
-  if (status.kind === "ongoing") return <span className={`${sticker} rotate-3 bg-coral`}>연휴 중</span>;
-  return <span className={`${sticker} rotate-3 bg-surface tabular-nums`}>D-{status.daysLeft}</span>;
+  if (status.kind === "ongoing") return <span className={`${sticker} bg-coral`}>연휴 중</span>;
+  return <span className={`${sticker} bg-surface tabular-nums`}>D-{status.daysLeft}</span>;
 }

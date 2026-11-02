@@ -35,7 +35,7 @@ async function Favorites() {
   const user = await currentUser();
   if (!user) {
     return (
-      <div className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
+      <div className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
         <p className="font-display text-[22px] text-balance">로그인하면 찜한 일정을 볼 수 있어요.</p>
         <p className="mt-2 text-muted">일정을 저장하고 찜해 두면 여기에 모여요.</p>
         <div className="mt-5">
@@ -51,10 +51,10 @@ async function Favorites() {
     return (
       <>
         {account}
-        <div className="rounded-3xl border-[3px] border-dashed border-ink bg-surface px-6 py-10 text-center">
+        <div className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
           <p className="font-display text-[22px] text-balance">아직 찜한 일정이 없어요.</p>
           <p className="mt-2 text-muted">일정 화면에서 「일정 저장하고 공유하기」를 눌러 보세요.</p>
-          <Link href="/#breaks" className="mt-4 inline-flex h-12 items-center rounded-full border-[3px] border-ink bg-yellow px-6 font-display text-lg">
+          <Link href="/#breaks" className="mt-4 inline-flex h-12 items-center rounded-full border border-ink/10 bg-yellow px-6 font-display text-lg">
             연휴 고르러 가기
           </Link>
         </div>
@@ -67,8 +67,8 @@ async function Favorites() {
       {account}
       <ul className="grid gap-5 md:grid-cols-2">
         {favorites.map((f) => (
-          <li key={f.id} className="flex flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop">
-            <Link href={`/t/${f.id}`} className="border-b-[3px] border-ink px-5 py-3.5">
+          <li key={f.id} className="flex flex-col overflow-hidden rounded-3xl border border-ink/10 bg-surface shadow-pop">
+            <Link href={`/t/${f.id}`} className="border-b border-ink/10 px-5 py-3.5">
               <p className="text-sm font-bold">{f.breakTitle} 연휴</p>
               <p className="font-display text-[22px] leading-tight">{f.title}</p>
             </Link>
@@ -82,7 +82,7 @@ async function Favorites() {
                 <input type="hidden" name="id" value={f.id} />
                 <input type="hidden" name="favorite" value="0" />
                 <input type="hidden" name="back" value="/saved" />
-                <button type="submit" className="h-10 rounded-full border-2 border-ink/40 px-4 text-sm hover:border-ink">
+                <button type="submit" className="h-10 rounded-full border-2 border-ink/40 px-4 text-sm hover:border-ink/30">
                   찜 풀기
                 </button>
               </form>

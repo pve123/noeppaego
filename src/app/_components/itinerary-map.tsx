@@ -107,8 +107,8 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
                 role="tab"
                 aria-selected={active}
                 onClick={() => selectDay(d)}
-                className={`h-11 rounded-full border-[2.5px] border-ink px-4 font-display text-[17px] transition-transform ${
-                  active ? `-rotate-2 shadow-pop-sm ${TAB_BG[d.tone]}` : "bg-surface hover:-translate-y-0.5"
+                className={`h-11 rounded-full border border-ink/15 px-4 font-display text-[17px] transition-transform ${
+                  active ? `shadow-pop-sm ${TAB_BG[d.tone]}` : "bg-surface hover:-translate-y-0.5"
                 }`}
               >
                 {d.dayNumber}일차
@@ -122,7 +122,7 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
         <div className="relative">
           <KakaoMap pins={pins} routes={routes} label={`${regionName} ${day.dayNumber}일차 동선 지도`} />
           {pins.length > 1 && (
-            <p className="pointer-events-none absolute left-3 top-3 z-[5] flex items-center gap-2 rounded-full border-2 border-ink bg-surface/95 py-1 pl-2 pr-3 text-[13px] font-bold shadow-pop-sm">
+            <p className="pointer-events-none absolute left-3 top-3 z-[5] flex items-center gap-2 rounded-full border border-ink/15 bg-surface/95 py-1 pl-2 pr-3 text-[13px] font-bold shadow-pop-sm">
               <svg viewBox="0 0 28 12" aria-hidden className="h-3 w-7 shrink-0">
                 <path d="M2 9 L10 3 L18 8 L26 3" fill="none" stroke="#22223b" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M2 9 L10 3 L18 8 L26 3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={TONE_TEXT[day.tone]} />
@@ -132,7 +132,7 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
           )}
           {/* 주차장 보기 — 지도 앱의 레이어 버튼처럼 지도 오른쪽 아래에 띄운다. 상태 글은 버튼 위 말풍선으로 */}
           <div className="absolute bottom-3 right-3 z-[5] flex flex-col items-end gap-1.5">
-            <span aria-live="polite" className="empty:hidden max-w-[220px] rounded-xl border-2 border-ink bg-surface/95 px-2.5 py-1 text-right text-[12px] font-bold">
+            <span aria-live="polite" className="empty:hidden max-w-[220px] rounded-xl border border-ink/15 bg-surface/95 px-2.5 py-1 text-right text-[12px] font-bold">
               {dayParking === "loading" && "주차장을 찾는 중이에요"}
               {dayParking === "failed" && "불러오지 못했어요. 다시 켜 보세요."}
               {Array.isArray(dayParking) && dayParking.length === 0 && "근처 500m에 주차장이 없어요"}
@@ -141,7 +141,7 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
               type="button"
               aria-pressed={showParking}
               onClick={toggleParking}
-              className={`inline-flex h-11 items-center gap-1.5 rounded-full border-[2.5px] border-ink pl-2 pr-4 text-[15px] font-bold shadow-pop-sm transition-colors ${
+              className={`inline-flex h-11 items-center gap-1.5 rounded-full border border-ink/15 pl-2 pr-4 text-[15px] font-bold shadow-pop-sm transition-colors ${
                 showParking ? "bg-[#1d5fd6] text-white" : "bg-surface hover:bg-cream"
               }`}
             >
@@ -152,9 +152,9 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
         </div>
         <ol aria-label={`${day.dayNumber}일차 장소`} className="space-y-2 self-start">
           {day.stops.map((s, i) => (
-            <li key={s.id} className="flex items-start gap-3 rounded-2xl border-[2.5px] border-ink bg-surface px-3 py-2.5">
+            <li key={s.id} className="flex items-start gap-3 rounded-2xl border border-ink/15 bg-surface px-3 py-2.5">
               <span
-                className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink font-display ${TAB_BG[day.tone]}`}
+                className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full border border-ink/15 font-display ${TAB_BG[day.tone]}`}
               >
                 {i + 1}
               </span>

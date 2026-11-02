@@ -110,13 +110,13 @@ export function OriginSelect({
           aria-labelledby={`${id}-label ${id}-button`}
           id={`${id}-button`}
           onClick={() => setOpen((v) => !v)}
-          className={`inline-flex h-11 items-center gap-2 rounded-full border-[2.5px] border-ink pl-3 pr-3.5 font-display text-[17px] transition-all hover:-translate-y-0.5 ${
+          className={`inline-flex h-11 items-center gap-2 rounded-full border border-ink/15 pl-3 pr-3.5 font-display text-[17px] transition-all hover:-translate-y-0.5 ${
             open ? "bg-yellow shadow-pop-sm" : "bg-surface"
           } ${pending ? "opacity-60" : ""}`}
         >
           {isHere ? <CrosshairIcon className="size-4" /> : <PinIcon className="size-4" />}
           {selectedName}
-          <svg viewBox="0 0 12 8" aria-hidden className={`ml-1 w-3 transition-transform duration-300 ${open ? "rotate-180" : ""}`}>
+          <svg viewBox="0 0 12 8" aria-hidden className={`ml-1 w-3 transition-transform duration-300 ${open ? "" : ""}`}>
             <path d="M1 1.5 6 6.5 11 1.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
@@ -126,7 +126,7 @@ export function OriginSelect({
             type="button"
             onClick={askLocation}
             disabled={locating}
-            className={`inline-flex h-11 items-center gap-1.5 rounded-full border-[2.5px] border-dashed border-ink/40 bg-surface/60 px-3.5 font-display text-[16px] transition-all hover:-translate-y-0.5 hover:border-solid hover:border-ink hover:bg-surface ${
+            className={`inline-flex h-11 items-center gap-1.5 rounded-full border border-dashed border-ink/25 bg-surface/60 px-3.5 font-display text-[16px] transition-all hover:-translate-y-0.5 hover:border-solid hover:border-ink/30 hover:bg-surface ${
               locating ? "animate-pulse" : ""
             }`}
           >
@@ -163,7 +163,7 @@ export function OriginSelect({
                     aria-current={isSelected ? "true" : undefined}
                     onClick={() => pick(o.id)}
                     className={`inline-flex h-10 w-full items-center justify-center gap-1 rounded-full border-2 px-4 font-display text-[16px] transition-colors ${
-                      isSelected ? "border-ink bg-yellow" : "border-ink/20 bg-surface hover:border-ink"
+                      isSelected ? "border-ink/10 bg-yellow" : "border-ink/20 bg-surface hover:border-ink/30"
                     }`}
                   >
                     {o.name}
@@ -181,7 +181,7 @@ export function OriginSelect({
         titleId={`${id}-locate`}
         title={
           <>
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-mint">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-ink/15 bg-mint">
               <CrosshairIcon className="size-5" />
             </span>
             <span className="truncate">{denied ? "위치가 꺼져 있어요" : "지금 있는 곳에서 출발할까요?"}</span>
@@ -220,7 +220,7 @@ export function OriginSelect({
                 askSheet.current?.close();
                 locate();
               }}
-              className="h-12 rounded-[16px] border-[3px] border-ink bg-yellow font-display text-[17px] shadow-pop-sm"
+              className="h-12 rounded-[16px] border border-ink/10 bg-yellow font-display text-[17px] shadow-pop-sm"
             >
               위치 허용하고 찾기
             </button>

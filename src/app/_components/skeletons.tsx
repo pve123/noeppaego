@@ -34,7 +34,7 @@ export function BandSkeleton({ steps, tall = false }: { steps: string[]; tall?: 
 /** 연휴 카드 한 장 */
 function BreakCardSkeleton() {
   return (
-    <div aria-hidden className="overflow-hidden rounded-3xl border-[3px] border-ink/10 bg-surface">
+    <div aria-hidden className="overflow-hidden rounded-3xl border border-ink/10 bg-surface">
       <div className="shimmer h-[66px]" />
       <div className="space-y-2.5 p-5">
         <Bar className="h-11 w-24" />
@@ -73,7 +73,7 @@ export function DestinationsSkeleton() {
       <LoadingStatus steps={["이 연휴에 열리는 축제를 찾는 중", "출발지에서 거리를 재는 중"]} />
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} aria-hidden className="overflow-hidden rounded-3xl border-[3px] border-ink/10 bg-surface">
+          <div key={i} aria-hidden className="overflow-hidden rounded-3xl border border-ink/10 bg-surface">
             <div className="shimmer h-[58px]" />
             <div className="shimmer aspect-[16/9] opacity-70" />
             <div className="space-y-2.5 p-5">
@@ -91,7 +91,7 @@ export function DestinationsSkeleton() {
 /** 일정 한 칸 */
 function SlotSkeleton({ withImage }: { withImage: boolean }) {
   return (
-    <div aria-hidden className="flex gap-3 rounded-2xl border-[2.5px] border-ink/10 bg-surface p-4">
+    <div aria-hidden className="flex gap-3 rounded-2xl border border-ink/10 bg-surface p-4">
       <Bar className="h-5 w-10" />
       {withImage && <Bar className="size-24 shrink-0 rounded-xl sm:size-32" />}
       <div className="flex-1 space-y-2">
@@ -129,7 +129,7 @@ export function FavoritesSkeleton() {
       <LoadingStatus steps={["찜한 일정을 불러오는 중"]} />
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {[0, 1].map((i) => (
-          <div key={i} aria-hidden className="overflow-hidden rounded-3xl border-[3px] border-ink/10 bg-surface">
+          <div key={i} aria-hidden className="overflow-hidden rounded-3xl border border-ink/10 bg-surface">
             <div className="shimmer h-[72px]" />
             <div className="space-y-2 p-5">
               <Bar className="h-4 w-56" />

@@ -39,7 +39,7 @@ export function ZoomableImage({ src, title, className }: { src: string; title: s
         onClick={(e) => e.target === dialog.current && dialog.current?.close()}
         className="m-auto max-h-[90vh] w-[min(92vw,960px)] overflow-visible bg-transparent p-0 backdrop:bg-ink/80"
       >
-        <figure className="overflow-hidden rounded-3xl border-[3px] border-cream bg-surface">
+        <figure className="overflow-hidden rounded-3xl border border-cream bg-surface">
           {/* eslint-disable-next-line @next/next/no-img-element -- 원본 크기를 모르는 바깥 사진이라 img 로 맞춘다 */}
           <img src={src} alt={title} className="max-h-[75vh] w-full bg-ink object-contain" />
           <figcaption className="flex items-center justify-between gap-3 px-5 py-3">
@@ -47,7 +47,7 @@ export function ZoomableImage({ src, title, className }: { src: string; title: s
             <button
               type="button"
               onClick={() => dialog.current?.close()}
-              className="h-11 shrink-0 rounded-full border-[2.5px] border-ink bg-yellow px-5 font-display text-[17px]"
+              className="h-11 shrink-0 rounded-full border border-ink/15 bg-yellow px-5 font-display text-[17px]"
             >
               닫기
             </button>

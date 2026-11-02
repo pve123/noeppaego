@@ -38,7 +38,7 @@ export function ReachChips({
               href={`${basePath}?from=${originId}${reachQuery(reach, recommended)}`}
               scroll={false}
               aria-current={active ? "true" : undefined}
-              className={`inline-flex h-10 items-center rounded-full border-[2.5px] border-ink px-4 font-display text-[16px] transition-transform ${
+              className={`inline-flex h-10 items-center rounded-full border border-ink/15 px-4 font-display text-[16px] transition-transform ${
                 active ? "bg-yellow" : "bg-surface hover:-translate-y-0.5"
               }`}
             >

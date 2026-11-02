@@ -9,9 +9,9 @@ import { Toast } from "./toast";
 /** 서비스 이름 — 「J」만 노랑으로 띄워 MBTI 의 J(계획형)가 눈에 들어오게 */
 function BrandName() {
   return (
-    <>
+    <span className="font-brand">
       계획은 <span className="rounded-lg bg-yellow px-1.5">J</span>가
-    </>
+    </span>
   );
 }
 
@@ -67,7 +67,7 @@ const SOURCES = [
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t-[3px] border-ink bg-surface">
+    <footer className="mt-16 border-t border-ink/10 bg-surface">
       <div className="mx-auto flex max-w-6xl flex-wrap items-start justify-between gap-8 px-4 py-12 sm:px-6">
         <div className="flex items-start gap-3">
           <Logo size={56} />
@@ -75,23 +75,18 @@ export function SiteFooter() {
             <p className="font-display text-[26px] leading-tight">
               <BrandName />
             </p>
-            {/* 슬로건을 메신저 대화처럼 — 묻는 말풍선(흰색)과 J의 대답(노랑) */}
-            <div className="mt-2.5 flex flex-col items-start gap-1.5 font-display text-[16px]">
-              <p className="-rotate-2 rounded-2xl rounded-bl-sm border-2 border-ink bg-surface px-3 py-1">너 P야?</p>
-              <p className="ml-5 rotate-1 rounded-2xl rounded-br-sm border-2 border-ink bg-yellow px-3 py-1 shadow-pop-sm">
-                계획은 <span className="rounded-md bg-ink px-1 text-cream">J</span>가 다 짤게
-              </p>
-            </div>
+            {/* 슬로건은 말풍선 장식 없이 한 줄 */}
+            <p className="mt-1.5 text-[15px] text-muted">너 P야? 계획은 J가 다 짤게</p>
           </div>
         </div>
         <div className="w-full sm:w-auto">
           <p className="font-display text-lg">정보 출처</p>
           {/* 휴대폰: 한 상자 안에 줄을 맞춘 표 / 넓은 화면: 칩 */}
-          <ul className="mt-2 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border-[2.5px] border-ink bg-surface text-sm sm:flex sm:flex-wrap sm:gap-2 sm:divide-y-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent">
+          <ul className="mt-2 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border border-ink/15 bg-surface text-sm sm:flex sm:flex-wrap sm:gap-2 sm:divide-y-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent">
             {SOURCES.map((s) => (
               <li
                 key={s.who}
-                className="flex items-center justify-between gap-3 px-4 py-2.5 sm:gap-1.5 sm:rounded-full sm:border-[2.5px] sm:border-ink sm:bg-surface sm:px-3 sm:py-1"
+                className="flex items-center justify-between gap-3 px-4 py-2.5 sm:gap-1.5 sm:rounded-full sm:border sm:border-ink/15 sm:bg-surface sm:px-3 sm:py-1"
               >
                 <span className="text-muted">{s.what}</span> <span className="font-bold">{s.who}</span>
               </li>

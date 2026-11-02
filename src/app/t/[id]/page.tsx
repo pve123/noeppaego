@@ -142,7 +142,7 @@ async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="mb-8">
           {/* 카카오 장소 정보에는 영업시간이 없다 — 연휴엔 쉬는 곳이 많아 가기 전에 확인하게 한 번 알린다 */}
-          <Notice>연휴에는 쉬는 식당과 카페가 많아요. 가기 전에 「별점과 리뷰」에서 영업시간을 확인해 주세요.</Notice>
+          <Notice>연휴엔 쉬는 가게가 많아요. 가기 전에 영업시간을 꼭 확인해 주세요.</Notice>
         </div>
         <div className="space-y-12">
           {plan.days.map((day, i) => (

@@ -167,7 +167,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
                 <Link
                   href={prefsOnly}
                   scroll={false}
-                  className="inline-flex h-10 items-center rounded-full border-[2.5px] border-ink bg-surface px-4 font-display"
+                  className="inline-flex h-10 items-center rounded-full border border-ink/15 bg-surface px-4 font-display"
                 >
                   처음 일정으로
                 </Link>
@@ -178,7 +178,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
           )}
           {noWeather && <Notice>날씨는 출발 10일 전부터 일정에 반영해요.</Notice>}
           {/* 카카오 장소 정보에는 영업시간이 없다 — 연휴엔 쉬는 곳이 많아 가기 전에 확인하게 한 번 알린다 */}
-          <Notice>연휴에는 쉬는 식당과 카페가 많아요. 가기 전에 「별점과 리뷰」에서 영업시간을 확인해 주세요.</Notice>
+          <Notice>연휴엔 쉬는 가게가 많아요. 가기 전에 영업시간을 꼭 확인해 주세요.</Notice>
         </div>
 
         <div className="space-y-12">

@@ -25,15 +25,15 @@ export function DestinationCard({
 
   return (
     <Link href={planHref} className="group block h-full rounded-3xl outline-offset-4">
-      <article className="flex h-full flex-col overflow-hidden rounded-3xl border-[3px] border-ink bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
-        <div className="flex flex-col items-start gap-2 border-b-[3px] border-ink px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-ink/10 bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
+        <div className="flex flex-col items-start gap-2 border-b border-ink/10 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <h3 className="flex min-w-0 items-center gap-2.5 font-display text-[22px] leading-tight [overflow-wrap:anywhere]">
-            <span className={`flex size-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink text-[17px] ${RANK_TONES[(rank - 1) % RANK_TONES.length]}`}>
+            <span className={`flex size-8 shrink-0 items-center justify-center rounded-full border border-ink/15 text-[17px] ${RANK_TONES[(rank - 1) % RANK_TONES.length]}`}>
               {rank}
             </span>
             {destination.name}
           </h3>
-          <span className="shrink-0 rounded-full border-[2.5px] border-ink bg-surface px-3 py-0.5 font-display text-[15px] tabular-nums">
+          <span className="shrink-0 rounded-full border border-ink/15 bg-surface px-3 py-0.5 font-display text-[15px] tabular-nums">
             {destination.travelLabel}
           </span>
         </div>
@@ -45,7 +45,7 @@ export function DestinationCard({
             width={640}
             height={360}
             unoptimized
-            className="shimmer aspect-[16/9] w-full border-b-[3px] border-ink object-cover"
+            className="shimmer aspect-[16/9] w-full border-b border-ink/10 object-cover"
           />
         )}
         <div className="flex flex-1 flex-col px-5 pb-5 pt-4">
@@ -67,7 +67,7 @@ export function DestinationCard({
 function FestivalRow({ festival }: { festival: FestivalView }) {
   return (
     <li className="flex gap-3">
-      <span aria-hidden className="mt-1.5 size-2.5 shrink-0 self-start rounded-full bg-coral ring-2 ring-ink" />
+      <span aria-hidden className="mt-1.5 size-2.5 shrink-0 self-start rounded-full bg-coral ring-1 ring-ink/20" />
       <div className="min-w-0">
         <p className="font-bold leading-snug">{festival.title}</p>
         {/* 기간은 달력 아이콘과 굵은 글씨로, 연휴 내내 열리면 민트 뱃지를 붙인다 */}
@@ -76,7 +76,7 @@ function FestivalRow({ festival }: { festival: FestivalView }) {
             <CalendarIcon className="size-4 shrink-0" />
             {festival.dateLabel}
           </span>
-          {festival.wholeBreak && <span className="rounded-full border-2 border-ink bg-mint px-2 py-px text-[12px] font-bold">연휴 내내</span>}
+          {festival.wholeBreak && <span className="rounded-full border border-ink/15 bg-mint px-2 py-px text-[12px] font-bold">연휴 내내</span>}
         </p>
       </div>
     </li>

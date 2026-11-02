@@ -22,7 +22,7 @@ function TravelLeg({ label, tone }: { label: string; tone: MapPin["tone"] }) {
     <div className="mb-1.5 flex items-center gap-2.5 pl-7">
       <span aria-hidden className="h-9 border-l-[3px] border-dashed border-ink/25" />
       <p className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink/15 bg-surface py-0.5 pl-0.5 pr-3 text-[13px] font-bold tabular-nums text-ink/80">
-        <span aria-hidden className={`flex size-7 items-center justify-center rounded-full border-2 border-ink ${DAY_BG[tone]}`}>
+        <span aria-hidden className={`flex size-7 items-center justify-center rounded-full border border-ink/15 ${DAY_BG[tone]}`}>
           {byCar ? (
             <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 16v-3.5l2-4.5h9l3.5 4.5H20a1 1 0 0 1 1 1V16" />
@@ -67,7 +67,7 @@ export function ItineraryDay({
       {/* 제목 띠는 위에 붙어 따라오고, 오른쪽 칩으로 다른 날로 바로 넘어간다 — 긴 일정을 스크롤로 찾지 않게 */}
       <div className="sticky top-[68px] z-30 -mx-4 flex items-center gap-3 bg-cream/90 px-4 py-2 backdrop-blur-md sm:-mx-6 sm:px-6">
         <h2 id={`day-${day.dayNumber}`} className="flex min-w-0 flex-wrap items-baseline gap-x-3">
-          <span className={`-rotate-2 rounded-2xl border-[3px] border-ink px-4 py-0.5 font-display text-[28px] ${DAY_BG[tone]}`}>
+          <span className={`rounded-2xl border border-ink/10 px-4 py-0.5 font-display text-[28px] ${DAY_BG[tone]}`}>
             {day.dayNumber}일차
           </span>
           <span className="font-display text-[20px] text-muted sm:text-[22px]">{day.dateLabel}</span>
@@ -102,7 +102,7 @@ function DayJump({ current, count }: { current: number; count: number }) {
             aria-current={here ? "true" : undefined}
             aria-label={`${n}일차로`}
             className={`flex size-8 items-center justify-center rounded-full border-2 font-display text-[15px] transition-colors ${
-              here ? `border-ink ${DAY_BG[DAY_TONES[(n - 1) % DAY_TONES.length]]}` : "border-ink/25 bg-surface text-ink/70 hover:border-ink"
+              here ? `border-ink/10 ${DAY_BG[DAY_TONES[(n - 1) % DAY_TONES.length]]}` : "border-ink/25 bg-surface text-ink/70 hover:border-ink/30"
             }`}
           >
             {n}
@@ -133,7 +133,7 @@ function WeatherChips({ weather }: { weather: WeatherView }) {
 function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
   const place = slot.place;
   return (
-    <article className="overflow-hidden rounded-2xl border-[2.5px] border-ink bg-surface">
+    <article className="overflow-hidden rounded-2xl border border-ink/15 bg-surface">
       <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
         <span className="hidden w-12 shrink-0 pt-0.5 font-display text-[17px] sm:block">{slot.timeLabel}</span>
 
@@ -141,7 +141,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
           <ZoomableImage
             src={place.imageUrl}
             title={place.title}
-            className="size-20 rounded-xl border-[2.5px] border-ink object-cover sm:size-32"
+            className="size-20 rounded-xl border border-ink/15 object-cover sm:size-32"
           />
         )}
 
@@ -194,7 +194,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
               <Link
                 href={hrefFor(slot.key)}
                 scroll={false}
-                className="rounded-full border-2 border-ink bg-surface px-3 py-0.5 font-bold hover:bg-yellow sm:order-last sm:ml-auto"
+                className="rounded-full border border-ink/15 bg-surface px-3 py-0.5 font-bold hover:bg-yellow sm:order-last sm:ml-auto"
               >
                 원래대로
               </Link>
@@ -209,7 +209,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
                     href={hrefFor(slot.key, p.id)}
                     scroll={false}
                     title={p.category ? `${p.title} (${p.category})` : p.title}
-                    className="block whitespace-nowrap rounded-full border-2 border-ink/25 bg-surface px-2.5 py-0.5 hover:border-ink hover:bg-yellow"
+                    className="block whitespace-nowrap rounded-full border-2 border-ink/25 bg-surface px-2.5 py-0.5 hover:border-ink/30 hover:bg-yellow"
                   >
                     {p.title}
                   </Link>
@@ -230,7 +230,7 @@ function ReviewLink({ href, compact = false }: { href: string; compact?: boolean
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border-2 border-ink bg-surface font-bold hover:bg-yellow ${
+      className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-ink/15 bg-surface font-bold hover:bg-yellow ${
         compact ? "h-7 px-2.5 text-xs" : "h-9 px-3 text-sm"
       }`}
     >
@@ -284,7 +284,7 @@ function KindBadges({ slot, place }: { slot: SlotView; place: PlaceView }) {
   return (
     <ul aria-label="종류" className="mt-1.5 flex flex-wrap gap-1.5">
       {labels.map((label) => (
-        <li key={label} className={`rounded-full border-2 border-ink px-2.5 py-0.5 text-[13px] font-bold ${KIND_TONE[kind]}`}>
+        <li key={label} className={`rounded-full border border-ink/15 px-2.5 py-0.5 text-[13px] font-bold ${KIND_TONE[kind]}`}>
           {label}
         </li>
       ))}
