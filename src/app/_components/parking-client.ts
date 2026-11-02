@@ -38,7 +38,3 @@ export function fetchFacilityParking(placeId: string, kind: string): Promise<Fac
   }
   return found;
 }
-
-/** 주차장으로 바로 길찾기 — 카카오맵 길찾기 링크(키 없이 앱·웹에서 열린다). 이름의 쉼표는 구분자와 겹쳐 뺀다 */
-export const parkingRouteUrl = (lot: Pick<ParkingView, "name" | "lat" | "lng">) =>
-  `https://map.kakao.com/link/to/${encodeURIComponent(lot.name.replaceAll(",", " "))},${lot.lat},${lot.lng}`;

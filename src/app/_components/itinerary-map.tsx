@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { KakaoMap, type MapPin } from "./kakao-map";
-import { fetchParking, parkingRouteUrl } from "./parking-client";
+import { fetchParking } from "./parking-client";
+import type { Destination } from "./navigation";
+import { useRouteChooser } from "./route-sheet";
 import { ParkingMark } from "./parking-sheet";
 
 export type MapDay = {
@@ -33,7 +35,7 @@ const TAB_BG: Record<MapPin["tone"], string> = {
 type DayParking = "loading" | "failed" | MapPin[];
 
 /** 그날 장소마다 근처 주차장을 모아 P 핀으로 — 같은 주차장은 한 번만 */
-async function parkingPinsOf(day: MapDay): Promise<MapPin[]> {
+async function parkingPinsOf(day: MapDay, route: (d: Destination) => void): Promise<MapPin[]> {
   const lots = (await Promise.all(day.stops.map((s) => fetchParking(s.lat, s.lng)))).flat();
   const pins = new Map<string, MapPin>();
   for (const lot of lots) {
@@ -46,7 +48,7 @@ async function parkingPinsOf(day: MapDay): Promise<MapPin[]> {
       label: `${lot.name} (걸어서 ${lot.walkMinutes}분)`,
       tone: day.tone,
       parking: true,
-      link: { href: parkingRouteUrl(lot), text: "길찾기" },
+      link: { text: "길찾기", onClick: () => route({ name: lot.name, lat: lot.lat, lng: lot.lng }) },
     });
   }
   return [...pins.values()];
@@ -63,12 +65,13 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
   const [showParking, setShowParking] = useState(false);
   const [parking, setParking] = useState<Record<number, DayParking>>({});
   const dayParking = showParking ? parking[day.dayNumber] : undefined;
+  const route = useRouteChooser();
 
   const loadParking = (target: MapDay) => {
     const current = parking[target.dayNumber];
     if (current === "loading" || Array.isArray(current)) return;
     setParking((p) => ({ ...p, [target.dayNumber]: "loading" }));
-    parkingPinsOf(target).then(
+    parkingPinsOf(target, route.open).then(
       (pins) => setParking((p) => ({ ...p, [target.dayNumber]: pins })),
       () => setParking((p) => ({ ...p, [target.dayNumber]: "failed" })),
     );
@@ -92,6 +95,8 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
   const routes = useMemo(() => [{ tone: day.tone, points: day.stops.map(({ lat, lng }) => ({ lat, lng })) }], [day]);
 
   return (
+    <>
+      {route.sheet}
     <section aria-labelledby="map-title">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 id="map-title" className="font-display text-[26px]">
@@ -168,5 +173,6 @@ export function ItineraryMap({ days, regionName }: { days: MapDay[]; regionName:
         </ol>
       </div>
     </section>
+    </>
   );
 }
