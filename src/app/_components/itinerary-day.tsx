@@ -4,6 +4,7 @@ import type { DayView, PlaceView, SlotView, WeatherView } from "@/contexts/itine
 import type { MapPin } from "./kakao-map";
 import { ClampText } from "./clamp-text";
 import { CONTACT_EMAIL } from "./contact";
+import { foodEmojiOf } from "./food-emoji";
 import { AddressBar } from "./place-address";
 import { ZoomableImage } from "./zoomable-image";
 
@@ -137,12 +138,14 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
       <div className="flex gap-3 p-3 sm:gap-4 sm:p-4">
         <span className="hidden w-12 shrink-0 pt-0.5 font-display text-[17px] sm:block">{slot.timeLabel}</span>
 
-        {place?.imageUrl && (
+        {place?.imageUrl ? (
           <ZoomableImage
             src={place.imageUrl}
             title={place.title}
             className="size-20 rounded-xl border border-ink/15 object-cover sm:size-32"
           />
+        ) : (
+          place && foodKindOf(slot, place) && <FoodTile category={place.category} kind={foodKindOf(slot, place)!} />
         )}
 
         <div className="min-w-0 flex-1">
@@ -274,6 +277,25 @@ const KIND_TONE: Record<NonNullable<PlaceView["kind"]>, string> = {
  * 종류 뱃지 — 모든 장소가 같은 모양, 색으로 종류를 가른다.
  * 식당·카페는 카카오가 「돈까스,우동」「제과,베이커리」처럼 쉼표로 붙여 주니 나눠서 여러 개로.
  */
+/** 식당·카페 칸이면 그 종류 — 사진이 없을 때 메뉴 그림 타일을 둔다 */
+function foodKindOf(slot: SlotView, place: PlaceView): "restaurant" | "cafe" | undefined {
+  if (place.kind === "restaurant" || place.kind === "cafe") return place.kind;
+  if (place.kind) return undefined;
+  return slot.time === "cafe" ? "cafe" : isMeal(slot) ? "restaurant" : undefined;
+}
+
+/** 사진 없는 식당·카페 자리 — 메뉴 그림을 연한 사각형에 담아 카드 모양을 맞춘다 */
+function FoodTile({ category, kind }: { category?: string; kind: "restaurant" | "cafe" }) {
+  return (
+    <span
+      aria-hidden
+      className={`flex size-20 shrink-0 items-center justify-center rounded-xl text-[34px] sm:size-32 sm:text-[52px] ${kind === "cafe" ? "bg-peach/25" : "bg-coral/15"}`}
+    >
+      {foodEmojiOf(category, kind)}
+    </span>
+  );
+}
+
 function KindBadges({ slot, place }: { slot: SlotView; place: PlaceView }) {
   const kind = place.kind ?? (isMeal(slot) ? "restaurant" : slot.time === "night" ? "lodging" : isOldFestival(place) ? "festival" : "sight");
   const labels =

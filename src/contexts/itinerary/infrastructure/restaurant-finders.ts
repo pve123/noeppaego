@@ -4,6 +4,7 @@ import { Coordinate } from "@/shared/kernel/coordinate";
 import { kakaoGet } from "@/shared/kakao/kakao-rest";
 import { ContentType, fetchNearbyItems } from "@/shared/tour-api/tour-api";
 import { CafeFinder, Place, RestaurantFinder } from "../domain/place";
+import { isSamePlace } from "./place-match";
 import { foodTagsOf } from "./place-tags";
 import { cafeCategoryOf, isChainBranch, isMeal } from "./restaurant-filters";
 import { toPlaces } from "./tour-place-catalog";
@@ -52,6 +53,33 @@ export class TourCafeFinder implements CafeFinder {
     const result = await fetchNearbyItems(at.lat, at.lng, RADIUS_M, ContentType.restaurant, limit * 3);
     if (!result.ok) return []; // 카페가 없어도 일정은 보여 준다 — 실패는 tour-api 가 warn 으로 남겼다
     return toPlaces(result.value.filter((item) => item.lclsSystm3?.startsWith("FD05")), "cafe", "카페").slice(0, limit).map(withMapSearch);
+  }
+}
+
+// ── 관광공사 사진 붙이기 ─────────────────────────────────
+
+/** 사진을 찾을 관광공사 가게 수 — 식사 칸 주변(RADIUS_M)을 넉넉히 */
+const PHOTO_ROWS = 100;
+
+/**
+ * 카카오 가게에 관광공사 사진을 붙인다 — 같은 가게(place-match: 이름이 같거나 품고, 300m 안)가 관광공사에 사진과 함께 있을 때만.
+ * 카카오 API 는 사진을 주지 않고, 이미지 검색 사진은 저작권이 사진 주인에게 있어 쓰지 않는다. 관광공사 사진은 출처를 밝히고 쓸 수 있다.
+ * 사진이 없으면 화면이 메뉴 그림 타일로 채운다.
+ */
+export class WithTourPhotos implements RestaurantFinder, CafeFinder {
+  constructor(private readonly inner: RestaurantFinder | CafeFinder) {}
+
+  async near(at: Coordinate, limit: number): Promise<Place[]> {
+    const places = await this.inner.near(at, limit);
+    if (places.every((p) => p.imageUrl)) return places;
+    const result = await fetchNearbyItems(at.lat, at.lng, RADIUS_M, ContentType.restaurant, PHOTO_ROWS);
+    if (!result.ok) return places; // 사진이 없어도 일정은 보여 준다
+    const withPhotos = toPlaces(result.value.filter((item) => item.firstimage), "restaurant", "");
+    return places.map((place) => {
+      if (place.imageUrl) return place;
+      const same = withPhotos.find((t) => isSamePlace(t.title, place.title, t.location.distanceKm(place.location) * 1000));
+      return same ? { ...place, imageUrl: same.imageUrl } : place;
+    });
   }
 }
 
