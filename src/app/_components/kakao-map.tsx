@@ -46,6 +46,10 @@ export type MapLegendItem = {
 
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
 
+/** 넘기지 않았을 때의 빈 목록 — 렌더마다 새 배열(`= []`)을 만들면 지도 그리기가 끝없이 다시 돈다 */
+const NO_ROUTES: MapRoute[] = [];
+const NO_LEGEND: MapLegendItem[] = [];
+
 /** 화면에서 이보다 가까운 번호 핀은 겹친 것으로 본다(px) — 배지 지름보다 조금 크게 */
 const MIN_GAP = 38;
 
@@ -56,11 +60,11 @@ const MIN_GAP = 38;
  */
 export function KakaoMap({
   pins,
-  routes = [],
+  routes = NO_ROUTES,
   label,
   title,
   caption,
-  legend = [],
+  legend = NO_LEGEND,
   tall = false,
 }: {
   pins: MapPin[];
