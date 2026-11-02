@@ -3,6 +3,7 @@ import { CalendarDate } from "../domain/calendar-date";
 import { HolidayCalendar } from "../domain/holiday-calendar";
 import { HolidayCalendarRepository } from "../domain/holiday-calendar-repository";
 import { BreakOption, LongBreak } from "../domain/long-break";
+import { bestLeavePlan } from "../domain/leave-budget";
 import { planLongBreaks } from "../domain/long-break-planner";
 
 // ── 쿼리 ─────────────────────────────────────────────
@@ -11,6 +12,8 @@ export type FindLongBreaks = {
   /** 비우면 올해 */
   year?: number;
   today: CalendarDate;
+  /** 남은 연차 — 주면 앞으로 올 연휴에 가장 오래 쉬게 나눈 계획(leavePlan)을 함께 준다 */
+  leave?: number;
 };
 
 // ── 읽기 모델(화면이 그대로 쓰는 직렬화 가능한 값) ─────────────
@@ -50,6 +53,15 @@ export type LongBreakView = {
   extensions: BreakOptionView[];
 };
 
+/** 남은 연차로 가장 오래 쉬는 계획 — 연휴마다 고른 방법, 쓴 연차, 쉬는 날 합 */
+export type LeavePlanView = {
+  leave: number;
+  used: number;
+  totalDays: number;
+  /** name 은 대표 이름 하나(「설날과 대체공휴일(설날)」 → 「설날」) — 여러 연휴를 한 줄에 늘어놓을 때 */
+  picks: { key: string; title: string; name: string; option: BreakOptionView; extraDays: number }[];
+};
+
 type LongBreaksView = {
   year: number;
   /** 고를 수 있는 해 — 올해와 내년 */
@@ -60,6 +72,7 @@ type LongBreaksView = {
   freeBreakCount: number;
   next?: LongBreakView;
   breaks: LongBreakView[];
+  leavePlan?: LeavePlanView;
 };
 
 // ── 핸들러 ────────────────────────────────────────────
@@ -72,7 +85,8 @@ export async function findLongBreaks(
   const year = query.year && years.includes(query.year) ? query.year : query.today.year;
 
   const calendar = await repository.findByYear(year);
-  const breaks = planLongBreaks(calendar).map((b) => toView(b, calendar, query.today));
+  const planned = planLongBreaks(calendar);
+  const breaks = planned.map((b) => toView(b, calendar, query.today));
 
   return {
     year,
@@ -82,6 +96,25 @@ export async function findLongBreaks(
     freeBreakCount: breaks.filter((b) => b.base.leaveCount === 0).length,
     next: breaks.find((b) => b.status.kind !== "past"),
     breaks,
+    leavePlan: query.leave === undefined || calendar.isEmpty ? undefined : leavePlanView(planned, calendar, query.today, query.leave),
+  };
+}
+
+/** 앞으로 올 연휴만 — 이미 시작했거나 지난 연휴는 연차를 더 붙일 수 없다 */
+function leavePlanView(planned: readonly LongBreak[], calendar: HolidayCalendar, today: CalendarDate, leave: number): LeavePlanView {
+  const upcoming = planned.filter((b) => b.base.start.isAfter(today));
+  const picks = bestLeavePlan(upcoming, leave);
+  return {
+    leave,
+    used: picks.reduce((n, p) => n + p.option.leaveCount, 0),
+    totalDays: picks.reduce((n, p) => n + p.option.length, 0),
+    picks: picks.map(({ longBreak, option }) => ({
+      key: longBreak.base.start.iso,
+      title: joinWithAnd(longBreak.holidayNames),
+      name: longBreak.holidayNames.find((n) => !n.startsWith("대체공휴일")) ?? longBreak.holidayNames[0],
+      option: optionView(option, calendar),
+      extraDays: option.length - longBreak.base.length,
+    })),
   };
 }
 

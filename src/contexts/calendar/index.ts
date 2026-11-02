@@ -22,5 +22,6 @@ export type {
   BreakStatus,
   DayKind,
   DayView,
+  LeavePlanView,
   LongBreakView,
 } from "./application/find-long-breaks";
