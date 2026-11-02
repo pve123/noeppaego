@@ -61,7 +61,7 @@ const VISIT_ALTERNATIVES = 3;
  * 하루짜리는 오전부터 저녁까지 돌고 돌아간다.
  * - 여유롭게: 오전이 있는 날은 오후 관광을 뺀다(첫날은 오후가 유일한 관광이라 둔다)
  * - 꽉 차게: 저녁이 있는 날은 저녁 뒤 밤 산책을 더한다
- * - 디저트(카페)는 기본 점심 뒤. 저녁이 없는 날(마지막 날)에 저녁 전·후를 골랐으면 점심 뒤로.
+ * - 디저트(카페)는 기본 점심 뒤. 저녁 뒤를 골랐어도 저녁이 없는 날(마지막 날)은 점심 뒤로.
  */
 export function layoutOf(dayIndex: number, totalDays: number, pace: Pace = "normal", dessert: DessertTime = "afterLunch"): SlotTime[] {
   let times: SlotTime[];
@@ -77,9 +77,8 @@ export function layoutOf(dayIndex: number, totalDays: number, pace: Pace = "norm
 
 function withCafe(times: SlotTime[], dessert: DessertTime): SlotTime[] {
   if (dessert === "none") return times;
-  const at = dessert === "beforeDinner" || dessert === "afterDinner" ? "dinner" : "lunch";
-  if (!times.includes(at)) return insert(times, "cafe", "after", "lunch");
-  return insert(times, "cafe", dessert.startsWith("before") ? "before" : "after", at);
+  const at = dessert === "afterDinner" && times.includes("dinner") ? "dinner" : "lunch";
+  return insert(times, "cafe", "after", at);
 }
 
 function insert(times: SlotTime[], time: SlotTime, where: "before" | "after", anchor: SlotTime): SlotTime[] {
@@ -145,7 +144,7 @@ export function draftTrip(
   };
 
   const days = dates.map((date, dayIndex) => {
-    const times = layoutOf(dayIndex, dates.length, prefs.pace, prefs.days?.[date]?.dessert);
+    const times = layoutOf(dayIndex, dates.length, prefs.pace, prefs.dessert);
     const visits = new Map<SlotTime, Visit>();
     for (const time of times) {
       if (isVisitTime(time)) {

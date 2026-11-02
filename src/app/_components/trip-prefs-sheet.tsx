@@ -17,30 +17,18 @@ import {
   type Option,
 } from "./trip-prefs";
 
-type PrefsDay = { date: string; dayNumber: number; dateLabel: string; hasDinner: boolean; toneClass: string };
-
 /**
  * 여행 취향 카드 + 시트 — 카드는 고른 취향을 칩으로 보여 주고, 누르면 시트가 열린다(휴대폰은 아래에서, 넓은 화면은 가운데).
  * 고르고 「이대로 다시 짜기」를 누르면 주소(?with=…)를 바꿔 서버가 일정을 다시 짠다 — 저장·공유도 그 주소 그대로.
  * 취향을 바꾸면 직접 바꾼 칸(pick)은 처음으로 돌아간다(고른 곳이 새 일정과 안 맞을 수 있어서).
  */
-export function TripPrefsSheet({
-  base,
-  prefs,
-  days,
-  hasPicks,
-}: {
-  base: string;
-  prefs: TripPrefs;
-  days: PrefsDay[];
-  hasPicks: boolean;
-}) {
+export function TripPrefsSheet({ base, prefs, hasPicks }: { base: string; prefs: TripPrefs; hasPicks: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [count, setCount] = useState(() => prefsEntries(prefs).length);
-  const summary = prefsSummary(prefs, days);
+  const summary = prefsSummary(prefs);
   const chosen = summary.length > 0;
 
   const read = (): TripPrefs => {
@@ -50,8 +38,8 @@ export function TripPrefsSheet({
       with: one("with"),
       pace: one("pace"),
       like: data.getAll("like").map(String),
-      avoid: days.flatMap((d) => data.getAll(`avoid-${d.date}`).map((v) => `${d.date}~${v}`)),
-      dessert: days.flatMap((d) => (one(`dessert-${d.date}`) ? [`${d.date}~${one(`dessert-${d.date}`)}`] : [])),
+      avoid: data.getAll("avoid").map(String),
+      dessert: one("dessert"),
     });
   };
 
@@ -176,51 +164,17 @@ export function TripPrefsSheet({
               ))}
             </Group>
 
-            <section aria-labelledby="prefs-days" className="space-y-4">
-              <h3 id="prefs-days" className="font-display text-[19px]">
-                날마다 고르기
-              </h3>
-              {days.map((day) => {
-                const p = prefs.days?.[day.date];
-                return (
-                  <div key={day.date} className="rounded-2xl border border-ink/15 bg-surface p-4">
-                    <p className="flex items-baseline gap-2">
-                      <span className={`rounded-xl border border-ink/15 px-2.5 font-display text-[17px] ${day.toneClass}`}>
-                        {day.dayNumber}일차
-                      </span>
-                      <span className="font-display text-[15px] text-muted">{day.dateLabel}</span>
-                    </p>
+            <Group title="못 먹는 음식" hint="모든 식사에서 빼요">
+              {AVOIDS.map((o) => (
+                <OptionChip key={o.value} type="checkbox" name="avoid" option={o} tone="coral" defaultChecked={prefs.avoid?.includes(o.value)} />
+              ))}
+            </Group>
 
-                    <Group title="못 먹는 음식" small scroll hint="이날 식당에서 빼요">
-                      {AVOIDS.map((o) => (
-                        <OptionChip
-                          key={o.value}
-                          type="checkbox"
-                          name={`avoid-${day.date}`}
-                          option={o}
-                          tone="coral"
-                          defaultChecked={p?.avoid?.includes(o.value)}
-                        />
-                      ))}
-                    </Group>
-
-                    <Group title="디저트" small scroll hint={day.hasDinner ? undefined : "이날은 저녁 전에 출발해요"}>
-                      {DESSERTS.map((o) => (
-                        <OptionChip
-                          key={o.value}
-                          type="radio"
-                          name={`dessert-${day.date}`}
-                          option={o}
-                          tone="peach"
-                          disabled={o.needsDinner && !day.hasDinner}
-                          defaultChecked={(p?.dessert ?? DEFAULT_DESSERT) === o.value}
-                        />
-                      ))}
-                    </Group>
-                  </div>
-                );
-              })}
-            </section>
+            <Group title="카페는 언제 들를까요?" hint="저녁 뒤를 골라도 마지막 날은 점심 뒤에 들러요">
+              {DESSERTS.map((o) => (
+                <OptionChip key={o.value} type="radio" name="dessert" option={o} tone="peach" defaultChecked={(prefs.dessert ?? DEFAULT_DESSERT) === o.value} />
+              ))}
+            </Group>
           </div>
 
           <footer className="shrink-0 border-t border-ink/10 bg-cream/95 px-5 pb-[max(14px,env(safe-area-inset-bottom))] pt-3 backdrop-blur">

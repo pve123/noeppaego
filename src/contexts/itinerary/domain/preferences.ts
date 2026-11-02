@@ -8,22 +8,21 @@ export type Pace = "relaxed" | "normal" | "packed";
 export type Interest = "nature" | "history" | "activity" | "shopping";
 /** 못 먹는 음식 */
 export type FoodAvoid = "seafood" | "meat" | "spicy";
-/** 그날 디저트(카페) — 없음 또는 언제 들를지 */
-export type DessertTime = "none" | "beforeLunch" | "afterLunch" | "beforeDinner" | "afterDinner";
-
-/** 그날 취향 — 못 먹는 음식(그날 점심·저녁에서 뺀다)과 디저트 */
-export type DayPrefs = { readonly avoid?: readonly FoodAvoid[]; readonly dessert?: DessertTime };
+/** 디저트(카페) — 안 들르거나, 점심 뒤·저녁 뒤 */
+export type DessertTime = "none" | "afterLunch" | "afterDinner";
 
 /**
  * 여행 취향 — 고른 것만 반영한다. 아무것도 안 골랐으면 예전과 같은 일정이 나온다.
- * 누구와·속도·좋아하는 것은 여행 전체로, 못 먹는 음식과 디저트는 날마다 받는다.
+ * 모두 여행 전체에 한 번 고른다 — 못 먹는 음식은 사람의 특성이라 날마다 바뀌지 않는다.
  */
 export type TripPrefs = {
   readonly companion?: Companion;
   readonly pace?: Pace;
   readonly interests?: readonly Interest[];
-  /** 날짜(YYYY-MM-DD) → 그날 취향 */
-  readonly days?: Readonly<Record<string, DayPrefs>>;
+  /** 못 먹는 음식 — 모든 점심·저녁에서 뺀다 */
+  readonly avoid?: readonly FoodAvoid[];
+  /** 디저트 — 없으면 점심 뒤 */
+  readonly dessert?: DessertTime;
 };
 
 /** 하나라도 골랐는지 */
@@ -32,7 +31,8 @@ export const hasPrefs = (prefs: TripPrefs): boolean =>
     prefs.companion ||
       (prefs.pace && prefs.pace !== "normal") ||
       prefs.interests?.length ||
-      Object.values(prefs.days ?? {}).some((d) => d.avoid?.length || (d.dessert && d.dessert !== "afterLunch")),
+      prefs.avoid?.length ||
+      (prefs.dessert && prefs.dessert !== "afterLunch"),
   );
 
 // ── 볼거리 ─────────────────────────────────────────────
@@ -92,11 +92,11 @@ export const allowedSights = (places: readonly Place[], prefs: TripPrefs): Place
 const AVOID_TAG: Record<FoodAvoid, PlaceTag> = { seafood: "seafood", meat: "meat", spicy: "spicy" };
 
 /**
- * 식사 칸 후보에서 그날 못 먹는 음식을 꼭 뺀다(다 빠지면 그 칸은 빈다). 카페 칸은 그대로.
+ * 식사 칸 후보에서 못 먹는 음식을 꼭 뺀다(다 빠지면 그 칸은 빈다). 카페 칸은 그대로.
  */
-export function fittingMeals(places: readonly Place[], time: "lunch" | "cafe" | "dinner", prefs: TripPrefs, date: string): Place[] {
+export function fittingMeals(places: readonly Place[], time: "lunch" | "cafe" | "dinner", prefs: TripPrefs): Place[] {
   if (time === "cafe") return [...places];
-  const avoid = (prefs.days?.[date]?.avoid ?? []).map((a) => AVOID_TAG[a]);
+  const avoid = (prefs.avoid ?? []).map((a) => AVOID_TAG[a]);
   return places.filter((p) => !has(p, avoid));
 }
 
