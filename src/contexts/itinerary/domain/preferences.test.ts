@@ -29,14 +29,13 @@ describe("layoutOf — 속도와 디저트", () => {
     expect(layoutOf(2, 3, "packed")).toEqual(["morning", "lunch", "cafe", "home"]);
   });
 
-  it("디저트는 고른 때에 넣고, 안 먹으면 뺀다", () => {
-    expect(layoutOf(1, 3, "normal", "beforeLunch")).toEqual(["morning", "cafe", "lunch", "afternoon", "dinner", "night"]);
-    expect(layoutOf(1, 3, "normal", "beforeDinner")).toEqual(["morning", "lunch", "afternoon", "cafe", "dinner", "night"]);
+  it("디저트는 고른 때(점심 뒤·저녁 뒤)에 넣고, 안 들르면 뺀다", () => {
+    expect(layoutOf(1, 3, "normal", "afterLunch")).toEqual(["morning", "lunch", "cafe", "afternoon", "dinner", "night"]);
     expect(layoutOf(1, 3, "packed", "afterDinner")).toEqual(["morning", "lunch", "afternoon", "dinner", "cafe", "evening", "night"]);
     expect(layoutOf(1, 3, "normal", "none")).toEqual(["morning", "lunch", "afternoon", "dinner", "night"]);
   });
 
-  it("저녁이 없는 마지막 날에 저녁 전·후를 골랐으면 점심 뒤로", () => {
+  it("저녁이 없는 마지막 날에 저녁 뒤를 골랐으면 점심 뒤로", () => {
     expect(layoutOf(2, 3, "normal", "afterDinner")).toEqual(["morning", "lunch", "cafe", "home"]);
   });
 });
@@ -96,38 +95,29 @@ describe("draftTrip — 취향", () => {
     expect(evening?.kind === "visit" && evening.place.id).toBe("야경");
   });
 
-  it("날마다 디저트 시점을 따로 받는다", () => {
+  it("디저트는 여행 전체에 한 번 — 저녁 뒤면 저녁이 있는 날은 저녁 뒤, 마지막 날은 점심 뒤", () => {
     const sights = ["A", "B", "C", "D"].map((id, i) => place(id, i));
-    const days = draftTrip(dates, sights, [], () => false, new Map(), {
-      days: { "2026-12-26": { dessert: "beforeDinner" }, "2026-12-27": { dessert: "none" } },
-    });
-    expect(times(days[0])).toEqual(["lunch", "cafe", "afternoon", "dinner", "night"]);
-    expect(times(days[1])).toEqual(["morning", "lunch", "afternoon", "cafe", "dinner", "night"]);
-    expect(times(days[2])).toEqual(["morning", "lunch", "home"]);
+    const days = draftTrip(dates, sights, [], () => false, new Map(), { dessert: "afterDinner" });
+    expect(times(days[0])).toEqual(["lunch", "afternoon", "dinner", "cafe", "night"]);
+    expect(times(days[1])).toEqual(["morning", "lunch", "afternoon", "dinner", "cafe", "night"]);
+    expect(times(days[2])).toEqual(["morning", "lunch", "cafe", "home"]);
   });
 });
 
-describe("fittingMeals — 그날 못 먹는 음식", () => {
-  const date = "2026-12-25";
+describe("fittingMeals — 못 먹는 음식", () => {
   const soup = place("국밥", 0, ["meat"], { kind: "restaurant" });
   const sushi = place("초밥", 0, ["seafood"], { kind: "restaurant" });
   const mara = place("마라탕", 0, ["spicy"], { kind: "restaurant" });
   const noodle = place("칼국수", 0, [], { kind: "restaurant" });
 
-  it("그날 고른 것만 꼭 뺀다 — 다 빠지면 빈 목록", () => {
-    const prefs = { days: { [date]: { avoid: ["seafood", "spicy"] as const } } };
-    expect(ids(fittingMeals([soup, sushi, mara, noodle], "lunch", prefs, date))).toEqual(["국밥", "칼국수"]);
-    expect(ids(fittingMeals([sushi], "dinner", { days: { [date]: { avoid: ["seafood"] } } }, date))).toEqual([]);
-  });
-
-  it("다른 날 고른 것은 이날에 적용하지 않는다", () => {
-    const prefs = { days: { "2026-12-26": { avoid: ["meat"] as const } } };
-    expect(ids(fittingMeals([soup, noodle], "lunch", prefs, date))).toEqual(["국밥", "칼국수"]);
+  it("고른 것만 꼭 뺀다 — 다 빠지면 빈 목록", () => {
+    expect(ids(fittingMeals([soup, sushi, mara, noodle], "lunch", { avoid: ["seafood", "spicy"] }))).toEqual(["국밥", "칼국수"]);
+    expect(ids(fittingMeals([sushi], "dinner", { avoid: ["seafood"] }))).toEqual([]);
   });
 
   it("카페 칸은 그대로", () => {
     const cafe = place("디저트", 0, [], { kind: "cafe" });
-    expect(ids(fittingMeals([cafe], "cafe", { days: { [date]: { avoid: ["meat"] } } }, date))).toEqual(["디저트"]);
+    expect(ids(fittingMeals([cafe], "cafe", { avoid: ["meat"] }))).toEqual(["디저트"]);
   });
 });
 
@@ -161,11 +151,11 @@ describe("fillMeals — 관광지와 겹치기", () => {
 });
 
 describe("hasPrefs", () => {
-  it("기본값(보통·점심 후 디저트)만 있으면 고른 게 없다", () => {
+  it("기본값(보통·점심 뒤 디저트)만 있으면 고른 게 없다", () => {
     expect(hasPrefs({})).toBe(false);
-    expect(hasPrefs({ pace: "normal", days: { "2026-12-25": { dessert: "afterLunch" } } })).toBe(false);
+    expect(hasPrefs({ pace: "normal", dessert: "afterLunch" })).toBe(false);
     expect(hasPrefs({ pace: "relaxed" })).toBe(true);
-    expect(hasPrefs({ days: { "2026-12-25": { dessert: "none" } } })).toBe(true);
-    expect(hasPrefs({ days: { "2026-12-25": { avoid: ["meat"] } } })).toBe(true);
+    expect(hasPrefs({ dessert: "none" })).toBe(true);
+    expect(hasPrefs({ avoid: ["meat"] })).toBe(true);
   });
 });

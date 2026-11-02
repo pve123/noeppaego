@@ -49,8 +49,6 @@ function hrefWith(base: string, prefsQuery: [string, string][], picks: Record<st
   return query.size > 0 ? `${base}?${query}` : base;
 }
 
-/** 일차 색 — 일정 카드의 일차 배지와 같은 순서(DAY_TONES) */
-const TONE_BG = { yellow: "bg-yellow", mint: "bg-mint", coral: "bg-coral", lavender: "bg-lavender", ink: "bg-ink" } as const;
 
 export default function ItineraryPage({ params, searchParams }: PageProps<"/breaks/[start]/[region]">) {
   return (
@@ -141,20 +139,6 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
             base={base}
             prefs={prefs}
             hasPicks={Object.keys(picks).length > 0}
-            days={plan.days.flatMap((day, i) =>
-              day.date
-                ? [
-                    {
-                      date: day.date,
-                      dayNumber: day.dayNumber,
-                      dateLabel: day.dateLabel,
-                      // 마지막 날은 점심 먹고 돌아간다(당일치기는 저녁까지)
-                      hasDinner: plan!.days.length === 1 || i < plan!.days.length - 1,
-                      toneClass: TONE_BG[DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length]],
-                    },
-                  ]
-                : [],
-            )}
           />
           <SaveCard loggedIn={loggedIn} target={saveTarget} />
         </div>

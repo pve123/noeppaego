@@ -1,9 +1,9 @@
 /**
- * 여행 취향 — 선택지(이모지·이름·설명)와 주소 값(`?with=kids&pace=relaxed&avoid=2026-12-25~seafood`) 읽고 쓰기.
- * 누구와·속도·좋아하는 것은 여행 전체, 못 먹는 음식·디저트는 날마다(값 앞에 날짜를 붙인다).
+ * 여행 취향 — 선택지(이모지·이름·설명)와 주소 값(`?with=kids&pace=relaxed&avoid=seafood&dessert=afterDinner`) 읽고 쓰기.
+ * 모두 여행 전체에 한 번. 예전 주소의 날짜 붙은 값(`avoid=2026-12-25~seafood`, `dessert=…~beforeDinner`)도 읽는다.
  * 일정 화면(서버)과 취향 시트(클라이언트)가 같이 쓴다. 기본값은 주소에 남기지 않는다.
  */
-import type { Companion, DayPrefs, DessertTime, FoodAvoid, Interest, Pace, TripPrefs } from "@/contexts/itinerary";
+import type { Companion, DessertTime, FoodAvoid, Interest, Pace, TripPrefs } from "@/contexts/itinerary";
 
 export type Option<T extends string> = { readonly value: T; readonly emoji: string; readonly label: string; readonly hint?: string };
 
@@ -34,14 +34,14 @@ export const AVOIDS: readonly Option<FoodAvoid>[] = [
   { value: "spicy", emoji: "🌶️", label: "매운 음식" },
 ];
 
-/** 디저트 — 저녁 전·후는 저녁이 있는 날에만 */
-export const DESSERTS: readonly (Option<DessertTime> & { readonly needsDinner?: boolean })[] = [
-  { value: "none", emoji: "🙅", label: "안 먹어요" },
-  { value: "beforeLunch", emoji: "☕", label: "점심 전" },
-  { value: "afterLunch", emoji: "🍰", label: "점심 후" },
-  { value: "beforeDinner", emoji: "🧁", label: "저녁 전", needsDinner: true },
-  { value: "afterDinner", emoji: "🍨", label: "저녁 후", needsDinner: true },
+/** 디저트(카페) — 저녁 뒤를 골라도 저녁이 없는 마지막 날은 점심 뒤에 들른다 */
+export const DESSERTS: readonly Option<DessertTime>[] = [
+  { value: "afterLunch", emoji: "🍰", label: "점심 뒤" },
+  { value: "afterDinner", emoji: "🍨", label: "저녁 뒤" },
+  { value: "none", emoji: "🙅", label: "안 들러요" },
 ];
+/** 예전 주소의 디저트 값 — 전·후를 뒤로 모은다 */
+const LEGACY_DESSERT: Record<string, DessertTime> = { beforeLunch: "afterLunch", beforeDinner: "afterDinner" };
 
 export const DEFAULT_DESSERT: DessertTime = "afterLunch";
 
@@ -52,69 +52,50 @@ const oneOf = <T extends string>(options: readonly Option<T>[], value: string | 
 type Query = Record<string, string | string[] | undefined>;
 const all = (query: Query, key: string): string[] => [query[key] ?? []].flat();
 
-/** 날짜를 붙인 값(`2026-12-25~seafood`) → [날짜, 값]. 날짜 형식이 아니면 undefined */
-const dated = (raw: string): [string, string] | undefined => {
+/** 예전 주소는 값 앞에 날짜를 붙였다(`2026-12-25~seafood`) — 날짜를 떼고 값만 */
+const undated = (raw: string) => {
   const [date, value] = raw.split("~");
-  return ISO_DATE.test(date) && value ? [date, value] : undefined;
+  return value !== undefined && ISO_DATE.test(date) ? value : raw;
 };
-/** 날짜를 붙인 값만 — flatMap 은 [날짜, 값] 쌍까지 펼쳐 버려서 한 겹 싸서 넘긴다 */
-const datedAll = (query: Query, key: string): [string, string][] => all(query, key).flatMap((raw) => {
-  const pair = dated(raw);
-  return pair ? [pair] : [];
-});
 
 /** 주소 값 → 취향. 모르는 값은 버린다 */
 export function parsePrefs(query: Query): TripPrefs {
-  const days: Record<string, { avoid?: FoodAvoid[]; dessert?: DessertTime }> = {};
-  const day = (date: string) => (days[date] ??= {});
-  for (const [date, value] of datedAll(query, "avoid")) {
-    const avoid = oneOf(AVOIDS, value);
-    if (avoid && !day(date).avoid?.includes(avoid)) day(date).avoid = [...(day(date).avoid ?? []), avoid];
-  }
-  for (const [date, value] of datedAll(query, "dessert")) {
-    const dessert = oneOf(DESSERTS, value);
-    if (dessert) day(date).dessert = dessert;
-  }
-  for (const [date, d] of Object.entries(days)) if (!d.avoid && !d.dessert) delete days[date];
   const pace = oneOf(PACES, all(query, "pace")[0]);
   const interests = [...new Set(all(query, "like"))].flatMap((v) => oneOf(INTERESTS, v) ?? []);
+  const avoid = [...new Set(all(query, "avoid").map(undated))].flatMap((v) => oneOf(AVOIDS, v) ?? []);
+  const rawDessert = all(query, "dessert").map(undated)[0];
+  const dessert = rawDessert ? (oneOf(DESSERTS, rawDessert) ?? LEGACY_DESSERT[rawDessert]) : undefined;
   return {
     companion: oneOf(COMPANIONS, all(query, "with")[0]),
     pace: pace === "normal" ? undefined : pace,
     interests: interests.length > 0 ? interests : undefined,
-    days: Object.keys(days).length > 0 ? days : undefined,
+    avoid: avoid.length > 0 ? avoid : undefined,
+    dessert: dessert === DEFAULT_DESSERT ? undefined : dessert,
   };
 }
 
-/** 취향 → 주소 값 쌍. 기본값(보통·점심 후 디저트)은 넣지 않는다 */
+/** 취향 → 주소 값 쌍. 기본값(보통·점심 뒤 디저트)은 넣지 않는다 */
 export function prefsEntries(prefs: TripPrefs): [string, string][] {
   const out: [string, string][] = [];
   if (prefs.companion) out.push(["with", prefs.companion]);
   if (prefs.pace && prefs.pace !== "normal") out.push(["pace", prefs.pace]);
   for (const v of prefs.interests ?? []) out.push(["like", v]);
-  const days = Object.entries(prefs.days ?? {}).sort(([a], [b]) => a.localeCompare(b));
-  for (const [date, day] of days) for (const v of day.avoid ?? []) out.push(["avoid", `${date}~${v}`]);
-  for (const [date, day] of days) if (day.dessert && day.dessert !== DEFAULT_DESSERT) out.push(["dessert", `${date}~${day.dessert}`]);
+  for (const v of prefs.avoid ?? []) out.push(["avoid", v]);
+  if (prefs.dessert && prefs.dessert !== DEFAULT_DESSERT) out.push(["dessert", prefs.dessert]);
   return out;
 }
 
 const find = <T extends string>(options: readonly Option<T>[], value: T) => options.find((o) => o.value === value);
 const chip = (o: Option<string> | undefined, prefix = "") => (o ? [`${prefix}${o.emoji} ${o.label}`] : []);
 
-/** 고른 취향 요약 칩 — 「🧒 아이와」「🐢 여유롭게」「1일차 🚫 🐟 해산물·회」「2일차 🧁 디저트 저녁 전」 */
-export function prefsSummary(prefs: TripPrefs, days: readonly { date?: string; dayNumber: number }[]): string[] {
-  const out = [
+/** 고른 취향 요약 칩 — 「🧒 아이와」「🐢 여유롭게」「🚫 🐟 해산물·회」「🍨 디저트 저녁 뒤」 */
+export function prefsSummary(prefs: TripPrefs): string[] {
+  const dessert = prefs.dessert && prefs.dessert !== DEFAULT_DESSERT ? find(DESSERTS, prefs.dessert) : undefined;
+  return [
     ...chip(prefs.companion && find(COMPANIONS, prefs.companion)),
     ...chip(prefs.pace && prefs.pace !== "normal" ? find(PACES, prefs.pace) : undefined),
     ...(prefs.interests ?? []).flatMap((v) => chip(find(INTERESTS, v))),
+    ...(prefs.avoid ?? []).flatMap((v) => chip(find(AVOIDS, v), "🚫 ")),
+    ...(dessert ? [`${dessert.emoji} 디저트 ${dessert.label}`] : []),
   ];
-  for (const day of days) {
-    const p: DayPrefs | undefined = day.date ? prefs.days?.[day.date] : undefined;
-    for (const v of p?.avoid ?? []) out.push(...chip(find(AVOIDS, v), `${day.dayNumber}일차 🚫 `));
-    if (p?.dessert && p.dessert !== DEFAULT_DESSERT) {
-      const d = find(DESSERTS, p.dessert);
-      if (d) out.push(`${day.dayNumber}일차 ${d.emoji} 디저트 ${d.label}`);
-    }
-  }
-  return out;
 }
