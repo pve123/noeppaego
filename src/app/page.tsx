@@ -4,6 +4,7 @@ import { PublicDataError } from "@/shared/public-data/public-data";
 import { BreakList } from "./_components/break-list";
 import { BreaksSkeleton } from "./_components/skeletons";
 import { Hero } from "./_components/hero";
+import { LeavePlan, leaveOf } from "./_components/leave-plan";
 import { RevealSuspense } from "./_components/reveal";
 import { NextBreak } from "./_components/next-break";
 import { SiteFooter, SiteHeader, SiteNotice } from "./_components/site-header";
@@ -28,13 +29,13 @@ export default function Home({ searchParams }: PageProps<"/">) {
 }
 
 async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
-  const { year } = await searchParams;
+  const { year, leave } = await searchParams;
   await connection(); // 「오늘」은 요청 시각 기준
   const today = CalendarDate.todayIn("Asia/Seoul", new Date());
 
   let view;
   try {
-    view = await findLongBreaks({ year: Number(year) || undefined, today });
+    view = await findLongBreaks({ year: Number(year) || undefined, today, leave: leaveOf(leave) });
   } catch (e) {
     if (e instanceof PublicDataError) return <SourceError subject="공휴일 정보" failure={e.failure} code={e.code} />;
     throw e;
@@ -69,7 +70,10 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
             {view.year}년 공휴일은 아직 발표되지 않았어요. 보통 전년도 여름에 나와요.
           </p>
         ) : (
-          <BreakList breaks={view.breaks} nextYear={view.years.at(-1)!} />
+          <>
+            <LeavePlan year={view.year} plan={view.leavePlan} />
+            <BreakList breaks={view.breaks} nextYear={view.years.at(-1)!} />
+          </>
         )}
       </section>
     </>
