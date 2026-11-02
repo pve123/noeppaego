@@ -9,8 +9,9 @@ import { rangeText } from "@/shared/kernel/korean";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { currentUser } from "@/shared/auth/session";
 import { SaveBar, SaveCard } from "../../../_components/save-cta";
-import { DAY_TONES, DaySummary, DaySummarySkeleton, ItineraryDay } from "../../../_components/itinerary-day";
-import { ItineraryMap, type MapDay } from "../../../_components/itinerary-map";
+import { DaySummary, DaySummarySkeleton, ItineraryDay } from "../../../_components/itinerary-day";
+import { ItineraryMap } from "../../../_components/itinerary-map";
+import { mapDaysOf } from "../../../_components/map-days";
 import { Notice } from "../../../_components/notice";
 import { PageBand } from "../../../_components/page-band";
 import { RevealSuspense } from "../../../_components/reveal";
@@ -107,16 +108,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
   const summaries = !ai || plan.customized || plan.tailored ? Promise.resolve(undefined) : describeItinerary(plan);
   const noWeather = plan.days.every((d) => !d.weather);
 
-  const mapDays: MapDay[] = plan.days.map((day) => ({
-    dayNumber: day.dayNumber,
-    dateLabel: day.dateLabel,
-    tone: DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length],
-    stops: day.slots.flatMap((slot) =>
-      slot.place
-        ? [{ id: `${slot.key}-${slot.place.id}`, lat: slot.place.lat, lng: slot.place.lng, title: slot.place.title, timeLabel: slot.timeLabel }]
-        : [],
-    ),
-  }));
+  const mapDays = mapDaysOf(plan.days);
 
   return (
     <>

@@ -5,8 +5,9 @@ import { findSavedItinerary, type SavedItineraryView } from "@/contexts/itinerar
 import { currentUserId } from "@/shared/auth/session";
 import { rangeText } from "@/shared/kernel/korean";
 import { toggleFavoriteAction } from "../../actions";
-import { AiSummary, DAY_TONES, ItineraryDay } from "../../_components/itinerary-day";
-import { ItineraryMap, type MapDay } from "../../_components/itinerary-map";
+import { AiSummary, ItineraryDay } from "../../_components/itinerary-day";
+import { ItineraryMap } from "../../_components/itinerary-map";
+import { mapDaysOf } from "../../_components/map-days";
 import { BAND_BUTTON, BAND_LINE, BAND_OUTLINE, BAND_ROW } from "../../_components/band-button";
 import { PageBand } from "../../_components/page-band";
 import { ShareButtons } from "../../_components/share-buttons";
@@ -74,16 +75,7 @@ async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
     ...Object.entries(view.picks).map(([k, v]): [string, string] => ["pick", `${k}~${v}`]),
   ]);
   const replan = `/breaks/${view.breakStart}/${view.regionCode}${replanQuery.size > 0 ? `?${replanQuery}` : ""}`;
-  const mapDays: MapDay[] = plan.days.map((day) => ({
-    dayNumber: day.dayNumber,
-    dateLabel: day.dateLabel,
-    tone: DAY_TONES[(day.dayNumber - 1) % DAY_TONES.length],
-    stops: day.slots.flatMap((slot) =>
-      slot.place
-        ? [{ id: `${slot.key}-${slot.place.id}`, lat: slot.place.lat, lng: slot.place.lng, title: slot.place.title, timeLabel: slot.timeLabel }]
-        : [],
-    ),
-  }));
+  const mapDays = mapDaysOf(plan.days);
 
   return (
     <>
