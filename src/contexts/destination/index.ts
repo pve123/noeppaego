@@ -14,5 +14,5 @@ const roadTables = new StaticRoadTables();
 
 export const findDestinations = (query: FindDestinations) => handle(query, repository, areas, roadTables);
 
-export type { DestinationView, DestinationsView, FestivalView, LatLng } from "./application/find-destinations";
+export type { DestinationView, FestivalView } from "./application/find-destinations";
 export { reachPreferenceOf, type ReachPreference } from "./domain/destination-recommender";

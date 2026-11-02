@@ -1,6 +1,6 @@
 import { CalendarDate } from "./calendar-date";
 
-export type Holiday = {
+type Holiday = {
   readonly date: CalendarDate;
   readonly name: string;
 };

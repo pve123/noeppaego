@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheLife } from "next/cache";
+import { cacheFor } from "@/shared/cache";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { kakaoGet } from "@/shared/kakao/kakao-rest";
 import { ContentType, fetchNearbyItems } from "@/shared/tour-api/tour-api";
@@ -130,8 +130,7 @@ async function searchKakaoPlaces(
       size: 15,
     },
   );
-  if (result.ok) cacheLife("hours");
-  else cacheLife("seconds");
+  cacheFor(result.ok, "hours");
   return result.ok ? { ok: true, places: result.data.documents } : { ok: false };
 }
 

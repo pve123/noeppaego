@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheLife } from "next/cache";
+import { cacheFor } from "@/shared/cache";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { kakaoGet } from "@/shared/kakao/kakao-rest";
 import { ParkingFinder, ParkingLot } from "../domain/place";
@@ -25,8 +25,7 @@ async function searchKakaoParking(lat: number, lng: number): Promise<CachedLot[]
     sort: "distance",
     size: 15, // 대행 업체를 거르고도 세 곳이 남게
   });
-  if (result.ok) cacheLife("hours");
-  else cacheLife("seconds");
+  cacheFor(result.ok, "hours");
   if (!result.ok) return [];
   return result.data.documents.map((d) => ({
     name: d.place_name,

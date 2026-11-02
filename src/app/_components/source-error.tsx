@@ -1,4 +1,5 @@
 import type { PublicDataFailure } from "@/shared/public-data/public-data";
+import { EMPTY_BOX } from "./empty-box";
 
 /** 보는 사람에게 하는 말만 — 키 설정 같은 운영자용 안내는 서버 로그(public-data.ts)에 남긴다 */
 const MESSAGE: Record<PublicDataFailure, string> = {
@@ -20,7 +21,7 @@ export function SourceError({
 }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <div role="alert" className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
+      <div role="alert" className={EMPTY_BOX}>
         <p className="font-display text-[26px]">{subject}를 불러오지 못했어요</p>
         <p className="mx-auto mt-2 max-w-xl text-[15px] leading-relaxed">{MESSAGE[failure]}</p>
         {code && <p className="mt-3 text-sm text-muted">결과 코드 {code}</p>}

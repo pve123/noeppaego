@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheLife } from "next/cache";
+import { cacheFor } from "@/shared/cache";
 import { requestItems, type PublicDataResult } from "@/shared/public-data/public-data";
 import type { MidLandItem, ShortItem } from "./kma-forecast";
 
@@ -26,8 +26,7 @@ export async function fetchShortTerm(
     nx: String(nx),
     ny: String(ny),
   });
-  if (result.ok) cacheLife("hours");
-  else cacheLife("seconds");
+  cacheFor(result.ok, "hours");
   return result;
 }
 
@@ -40,7 +39,6 @@ export async function fetchMidLand(regId: string, tmFc: string): Promise<PublicD
     regId,
     tmFc,
   });
-  if (result.ok) cacheLife("hours");
-  else cacheLife("seconds");
+  cacheFor(result.ok, "hours");
   return result;
 }

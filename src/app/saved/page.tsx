@@ -8,6 +8,7 @@ import { PageBand } from "../_components/page-band";
 import { RevealSuspense } from "../_components/reveal";
 import { FavoritesSkeleton } from "../_components/skeletons";
 import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
+import { EMPTY_BOX } from "../_components/empty-box";
 
 export const metadata: Metadata = {
   title: "찜한 일정 | 계획은 J가",
@@ -35,7 +36,7 @@ async function Favorites() {
   const user = await currentUser();
   if (!user) {
     return (
-      <div className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
+      <div className={EMPTY_BOX}>
         <p className="font-display text-[22px] text-balance">로그인하면 찜한 일정을 볼 수 있어요.</p>
         <p className="mt-2 text-muted">일정을 저장하고 찜해 두면 여기에 모여요.</p>
         <div className="mt-5">
@@ -51,7 +52,7 @@ async function Favorites() {
     return (
       <>
         {account}
-        <div className="rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
+        <div className={EMPTY_BOX}>
           <p className="font-display text-[22px] text-balance">아직 찜한 일정이 없어요.</p>
           <p className="mt-2 text-muted">일정 화면에서 「일정 저장하고 공유하기」를 눌러 보세요.</p>
           <Link href="/#breaks" className="mt-4 inline-flex h-12 items-center rounded-full border border-ink/10 bg-yellow px-6 font-display text-lg">

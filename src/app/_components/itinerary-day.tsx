@@ -45,7 +45,7 @@ function TravelLeg({ label, tone }: { label: string; tone: MapPin["tone"] }) {
 }
 
 /** 칸 하나를 바꾸는(placeId 가 없으면 되돌리는) 주소 */
-export type HrefFor = (slotKey: string, placeId?: string) => string;
+type HrefFor = (slotKey: string, placeId?: string) => string;
 
 export function ItineraryDay({
   day,

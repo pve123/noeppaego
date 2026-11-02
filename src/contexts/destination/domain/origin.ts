@@ -1,7 +1,7 @@
 import { Coordinate } from "@/shared/kernel/coordinate";
 
 /** 출발지 — 특별·광역시와 세종, 그리고 도마다 큰 도시 하나(시청 근처). 제주는 바다를 건너 직선 거리가 맞지 않아 뺐다 */
-export type Origin = {
+type Origin = {
   readonly id: string;
   readonly name: string;
   readonly at: Coordinate;

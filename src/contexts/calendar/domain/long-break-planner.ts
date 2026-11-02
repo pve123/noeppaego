@@ -2,7 +2,7 @@ import { CalendarDate } from "./calendar-date";
 import { HolidayCalendar } from "./holiday-calendar";
 import { BreakOption, LongBreak } from "./long-break";
 
-export type PlanRule = {
+type PlanRule = {
   /** 연휴 하나에 쓸 수 있는 연차 */
   readonly maxLeave: number;
   readonly minLength: number;

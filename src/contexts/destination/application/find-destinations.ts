@@ -44,7 +44,7 @@ export type DestinationView = {
   festivals: FestivalView[];
 };
 
-export type DestinationsView = {
+type DestinationsView = {
   originId: string;
   originName: string;
   origin: LatLng;

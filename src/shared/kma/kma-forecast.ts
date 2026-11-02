@@ -3,7 +3,7 @@
  */
 export type ShortItem = { category: string; fcstDate: string; fcstTime: string; fcstValue: string };
 export type MidLandItem = Record<string, string | number>;
-export type HalfDayForecast = { rainChance: number; sky: string };
+type HalfDayForecast = { rainChance: number; sky: string };
 
 const PTY: Record<string, string> = { "1": "비", "2": "비나 눈", "3": "눈", "4": "소나기" };
 const SKY: Record<string, string> = { "1": "맑음", "3": "구름많음", "4": "흐림" };

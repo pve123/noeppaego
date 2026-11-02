@@ -16,6 +16,7 @@ import { BandSkeleton, DestinationsSkeleton } from "../../_components/skeletons"
 import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-header";
 import { SourceError } from "../../_components/source-error";
 import { Steps } from "../../_components/steps";
+import { EMPTY_BOX } from "../../_components/empty-box";
 
 export const metadata: Metadata = {
   title: "갈 곳 고르기 | 계획은 J가",
@@ -188,7 +189,7 @@ function EmptyDestinations({
   // 이미 거리 제한이 없으면(4일 이상 등) 넓혀도 같다 — 버튼을 주지 않는다
   const wider = reachText ? widerThan(reach) : undefined;
   return (
-    <div className="mt-6 rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center">
+    <div className={`mt-6 ${EMPTY_BOX}`}>
       <p className="font-display text-[22px] text-balance">
         {wider && reachText ? `${reachText}에는 이 기간 축제가 없어요.` : "이 기간에 등록된 축제가 아직 없어요."}
       </p>

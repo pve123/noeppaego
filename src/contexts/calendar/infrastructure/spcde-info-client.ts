@@ -1,12 +1,12 @@
 import "server-only";
-import { cacheLife } from "next/cache";
+import { cacheFor } from "@/shared/cache";
 import { requestItems, type PublicDataResult } from "@/shared/public-data/public-data";
 
 /** 한국천문연구원 특일 정보 — 공휴일(getRestDeInfo). https://www.data.go.kr/data/15012690/openapi.do */
 const ENDPOINT =
   "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo";
 
-export type RestDay = { date: string; name: string };
+type RestDay = { date: string; name: string };
 
 type SpcdeItem = { locdate: number; dateName: string; isHoliday: "Y" | "N" };
 
@@ -21,11 +21,8 @@ export async function fetchRestDays(year: number): Promise<PublicDataResult<Rest
     solYear: String(year),
     numOfRows: "100",
   });
-  if (!result.ok) {
-    cacheLife("seconds");
-    return result;
-  }
-  cacheLife("days");
+  cacheFor(result.ok, "days");
+  if (!result.ok) return result;
   return { ok: true, value: result.value.filter((item) => item.isHoliday === "Y").map(toRestDay) };
 }
 

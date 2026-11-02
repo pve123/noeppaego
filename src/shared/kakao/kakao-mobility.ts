@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheLife } from "next/cache";
+import { cacheFor } from "@/shared/cache";
 import { Coordinate } from "@/shared/kernel/coordinate";
 import { kakaoGet } from "./kakao-rest";
 
@@ -18,12 +18,9 @@ async function fetchDriveMinutes(fromLat: number, fromLng: number, toLat: number
     priority: "RECOMMEND",
     summary: "true",
   });
-  if (!result.ok) {
-    cacheLife("minutes");
-    return { ok: false };
-  }
+  cacheFor(result.ok, "days", "minutes");
+  if (!result.ok) return { ok: false };
   const route = result.data.routes?.[0];
-  cacheLife("days");
   // 길이 없음(섬 등)·출발지와 도착지가 너무 가까움 — 실패가 아니라 「모름」이다.
   if (!route || route.result_code !== 0 || !route.summary) return { ok: false };
   return { ok: true, minutes: route.summary.duration / 60 };

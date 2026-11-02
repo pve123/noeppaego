@@ -1,5 +1,5 @@
 import "server-only";
-import { cacheLife } from "next/cache";
+import { cacheFor } from "@/shared/cache";
 import { kakaoGet } from "@/shared/kakao/kakao-rest";
 import { Place, PlacePages } from "../domain/place";
 import { isSamePlace, normalizeName } from "./place-match";
@@ -24,8 +24,7 @@ async function findKakaoPage(title: string, lat: number, lng: number): Promise<s
   });
   const match = result.ok ? result.data.documents.find((d) => isSamePlace(title, d.place_name, Number(d.distance))) : undefined;
   // 찾은 결과는 몇 시간, 못 찾음·실패는 몇 분만(장소 이름이 고쳐지면 다시 찾게)
-  if (match) cacheLife("hours");
-  else cacheLife("minutes");
+  cacheFor(match !== undefined, "hours", "minutes");
   return match?.place_url;
 }
 

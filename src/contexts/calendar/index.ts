@@ -23,5 +23,4 @@ export type {
   DayKind,
   DayView,
   LongBreakView,
-  LongBreaksView,
 } from "./application/find-long-breaks";

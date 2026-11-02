@@ -50,7 +50,7 @@ export type LongBreakView = {
   extensions: BreakOptionView[];
 };
 
-export type LongBreaksView = {
+type LongBreaksView = {
   year: number;
   /** 고를 수 있는 해 — 올해와 내년 */
   years: number[];

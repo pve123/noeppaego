@@ -15,7 +15,7 @@ const MIXED: [HalfDay, HalfDay][] = [
   [RAIN, CLOUDY],
 ];
 
-export type WeatherPreview = "rain" | "mixed";
+type WeatherPreview = "rain" | "mixed";
 
 export function weatherPreviewOf(value: string | undefined): WeatherPreview | undefined {
   return value === "rain" || value === "mixed" ? value : undefined;

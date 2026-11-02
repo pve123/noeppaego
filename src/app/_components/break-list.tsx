@@ -1,6 +1,7 @@
 import type { LongBreakView } from "@/contexts/calendar";
 import { BreakCard } from "./break-card";
 import { DayLegend } from "./day-strip";
+import { EMPTY_BOX } from "./empty-box";
 
 export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextYear: number }) {
   const past = breaks.filter((b) => b.status.kind === "past");
@@ -11,7 +12,7 @@ export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextY
       <DayLegend />
 
       {coming.length === 0 ? (
-        <p className="mt-6 rounded-3xl border-2 border-dashed border-ink/15 bg-surface px-6 py-10 text-center font-display text-[22px]">
+        <p className={`mt-6 ${EMPTY_BOX} font-display text-[22px]`}>
           올해 남은 연휴가 없어요. {nextYear}년을 눌러 보세요.
         </p>
       ) : (
