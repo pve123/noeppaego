@@ -20,6 +20,8 @@ const DESCRIPTION = "공휴일과 주말을 이어서 연차는 적게 쓰고 �
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://holiday-trip.vercel.app"),
+  // Google Search Console 소유권 확인 — 플레이 콘솔 「웹사이트」 확인에 쓴다. 공개돼도 되는 값이다
+  verification: { google: "9LvfIgoyJl-qx0eOSKw2vmSwSlGCtvp1_jA-vbit5SE" },
   title: "계획은 J가",
   description: DESCRIPTION,
   openGraph: {
