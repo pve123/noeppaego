@@ -4,7 +4,7 @@
 
 운영 주소는 https://holiday-trip.vercel.app 이다.
 
-제품 요구사항과 알려진 위험과 다음 단계는 [`docs/PRD.md`](docs/PRD.md)에 있다. 이 README 는 만드는 사람을 위해 동작과 실행 방법을 적는다.
+제품 요구사항과 알려진 위험과 다음 단계는 [`docs/PRD.md`](docs/PRD.md)에 있다. 전체 구조와 데이터 흐름과 바깥 서비스 사용 방식은 그림과 함께 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)에 정리했다. 이 README 는 만드는 사람을 위해 동작과 실행 방법을 적는다.
 
 ## 할 수 있는 것
 
