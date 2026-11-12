@@ -66,7 +66,8 @@ export function TripPrefsSheet({ base, prefs, hasPicks }: { base: string; prefs:
           {chosen ? "바꾸고 싶으면 언제든 다시 골라요." : "누구와 어떤 속도로 다니며 뭘 먹고 싶은지 고르면 일정을 다시 짜 드려요."}
         </p>
 
-        <ul aria-label={chosen ? "고른 취향" : "고를 수 있는 것 예시"} className="mt-4 flex flex-wrap gap-1.5">
+        {/* 고르기 전 예시 칩은 넓은 화면에서만 — 휴대폰에서는 1일차가 덜 밀리게 */}
+        <ul aria-label={chosen ? "고른 취향" : "고를 수 있는 것 예시"} className={`mt-4 flex-wrap gap-1.5 ${chosen ? "flex" : "hidden sm:flex"}`}>
           {(chosen ? summary : ["🧒 누구와", "🐢 속도", "🌿 좋아하는 것", "🚫 못 먹는 음식", "🍰 디저트"]).map((s) => (
             <li
               key={s}
@@ -79,7 +80,7 @@ export function TripPrefsSheet({ base, prefs, hasPicks }: { base: string; prefs:
           ))}
         </ul>
 
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className={`flex flex-wrap items-center gap-3 ${chosen ? "mt-5" : "mt-4 sm:mt-5"}`}>
           <button
             type="button"
             onClick={() => dialog.current?.showModal()}

@@ -11,9 +11,10 @@ export function KakaoLoginButton({
 }: {
   next: string;
   label?: string;
-  size?: "sm" | "md" | "lg";
+  /** bar: 휴대폰 아래 고정 저장 바 — 화면을 덜 가리게 lg 보다 낮다 */
+  size?: "sm" | "md" | "lg" | "bar";
 }) {
-  const sizing = { sm: "h-10 px-4 text-[15px] gap-1.5", md: "h-12 px-5 text-[17px] gap-2", lg: "h-14 w-full px-6 text-lg gap-2" }[size];
+  const sizing = { sm: "h-10 px-4 text-[15px] gap-1.5", md: "h-12 px-5 text-[17px] gap-2", lg: "h-14 w-full px-6 text-lg gap-2", bar: "h-12 w-full px-6 text-[17px] gap-2" }[size];
   return (
     <Link
       href={`/api/auth/kakao?next=${encodeURIComponent(next)}`}

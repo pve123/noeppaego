@@ -152,9 +152,12 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
               {ai ? "직접 바꾼 칸이 있어요. 바꾼 일정에는 AI 소개가 붙지 않아요." : "직접 바꾼 칸이 있어요."}
             </Notice>
           )}
-          {noWeather && <Notice>날씨는 출발 10일 전부터 일정에 반영해요.</Notice>}
-          {/* 카카오 장소 정보에는 영업시간이 없다 — 연휴엔 쉬는 곳이 많아 가기 전에 확인하게 한 번 알린다 */}
-          <Notice>연휴엔 쉬는 가게가 많아요. 가기 전에 영업시간을 꼭 확인해 주세요.</Notice>
+          {/* 카카오 장소 정보에는 영업시간이 없다 — 연휴엔 쉬는 곳이 많아 가기 전에 확인하게 한 번 알린다.
+              날씨 안내와 한 상자에 둬 1일차가 덜 밀리게 한다 */}
+          <Notice>
+            <span className="block">연휴엔 쉬는 가게가 많아요. 가기 전에 영업시간을 꼭 확인해 주세요.</span>
+            {noWeather && <span className="mt-1 block font-medium text-muted">날씨는 출발 10일 전부터 일정에 반영해요.</span>}
+          </Notice>
         </div>
 
         <div className="space-y-12">

@@ -9,13 +9,14 @@ const BENEFITS = ["저장한 일정은 언제든 다시 볼 수 있어요", "링
 /**
  * 일정 저장 카드 — 로그인 전에는 저장하면 좋은 점과 카카오 로그인, 로그인 뒤에는 저장 버튼.
  * 로그인하고 돌아오면 이 카드(#save)로 온다. 자동으로 저장하지는 않는다 — 한 번 더 눌러야 저장된다.
+ * 휴대폰에서는 숨긴다 — 아래 고정 저장 바가 같은 일을 하고, 카드가 있으면 1일차가 화면 두 번 아래로 밀린다.
  */
 export function SaveCard({ loggedIn, target }: { loggedIn: boolean; target: SaveTarget }) {
   return (
     <section
       id="save"
       aria-labelledby="save-title"
-      className="scroll-mt-6 rounded-3xl border border-ink/10 bg-surface p-5 shadow-pop sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6"
+      className="hidden scroll-mt-6 rounded-3xl border border-ink/10 bg-surface p-5 shadow-pop sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6"
     >
       <div>
         <h2 id="save-title" className="font-display text-[24px] leading-tight">
@@ -51,11 +52,11 @@ export function SaveCard({ loggedIn, target }: { loggedIn: boolean; target: Save
 /** 휴대폰 아래 고정 바 — 긴 일정을 내려도 저장(또는 로그인)이 손 닿는 곳에 있다. 아래 탭 바로 위에 얹힌다 */
 export function SaveBar({ loggedIn, target }: { loggedIn: boolean; target: SaveTarget }) {
   return (
-    <div data-save-bar className="fixed inset-x-0 bottom-[calc(var(--tab-bar-h)_+_env(safe-area-inset-bottom))] z-40 border-t border-ink/10 bg-cream/95 px-4 py-3 backdrop-blur sm:hidden">
+    <div data-save-bar className="fixed inset-x-0 bottom-[calc(var(--tab-bar-h)_+_env(safe-area-inset-bottom))] z-40 border-t border-ink/10 bg-cream/95 px-4 py-2 backdrop-blur sm:hidden">
       {loggedIn ? (
         <SaveButton target={target} full />
       ) : (
-        <KakaoLoginButton next={`${target.here}#save`} label="카카오로 시작하고 일정 저장하기" size="lg" />
+        <KakaoLoginButton next={`${target.here}#save`} label="카카오로 시작하고 일정 저장하기" size="bar" />
       )}
     </div>
   );
@@ -71,8 +72,8 @@ function SaveButton({ target, full = false }: { target: SaveTarget; full?: boole
       <input type="hidden" name="back" value={target.here} />
       <button
         type="submit"
-        className={`inline-flex h-14 items-center justify-center gap-2 rounded-[18px] border border-ink/10 bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5 ${
-          full ? "w-full" : ""
+        className={`inline-flex items-center justify-center gap-2 rounded-[18px] border border-ink/10 bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5 ${
+          full ? "h-12 w-full" : "h-14"
         }`}
       >
         이 일정 저장하고 공유하기
