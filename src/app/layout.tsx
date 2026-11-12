@@ -22,11 +22,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://holiday-trip.vercel.app"),
   // Google Search Console 소유권 확인 — 플레이 콘솔 「웹사이트」 확인에 쓴다. 공개돼도 되는 값이다
   verification: { google: "9LvfIgoyJl-qx0eOSKw2vmSwSlGCtvp1_jA-vbit5SE" },
-  title: "계획은 J가",
+  title: "뇌빼고",
   description: DESCRIPTION,
   openGraph: {
-    title: "계획은 J가",
-    siteName: "계획은 J가",
+    title: "뇌빼고",
+    siteName: "뇌빼고",
     description: DESCRIPTION,
     locale: "ko_KR",
     type: "website",

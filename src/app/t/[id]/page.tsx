@@ -26,14 +26,14 @@ import { prefsEntries } from "../../_components/trip-prefs";
 export async function generateMetadata({ params }: PageProps<"/t/[id]">): Promise<Metadata> {
   const { id } = await params;
   const view = await findSavedItinerary({ id });
-  if (!view) return { title: "공유받은 일정 | 계획은 J가", robots: { index: false } };
+  if (!view) return { title: "공유받은 일정 | 뇌빼고", robots: { index: false } };
 
   const { title, description } = shareTextOf(view);
   return {
-    title: `${title} | 계획은 J가`,
+    title: `${title} | 뇌빼고`,
     description,
     robots: { index: false },
-    openGraph: { title, description, locale: "ko_KR", type: "article", siteName: "계획은 J가" },
+    openGraph: { title, description, locale: "ko_KR", type: "article", siteName: "뇌빼고" },
     twitter: { card: "summary_large_image", title, description },
   };
 }

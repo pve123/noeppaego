@@ -325,7 +325,7 @@ export async function DaySummary({ summaries, index }: { summaries: Promise<stri
  * Play 「AI 생성 콘텐츠」 정책: AI가 만든 글을 보여 주면 사용자가 부적절한 내용을 알릴 방법이 있어야 한다.
  */
 export function AiSummary({ text }: { text: string }) {
-  const report = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("[계획은 J가] AI 소개 신고")}&body=${encodeURIComponent(`이상한 내용:\n${text}\n\n어떤 점이 문제인지 적어 주세요:\n`)}`;
+  const report = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("[뇌빼고] AI 소개 신고")}&body=${encodeURIComponent(`이상한 내용:\n${text}\n\n어떤 점이 문제인지 적어 주세요:\n`)}`;
   return (
     <p className="mt-3 max-w-3xl leading-relaxed">
       <span className="mr-2 inline-block rounded-full bg-lavender px-2 py-0.5 align-[2px] text-xs font-bold">AI 소개</span>

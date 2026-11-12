@@ -11,7 +11,7 @@ import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
 import { EMPTY_BOX } from "../_components/empty-box";
 
 export const metadata: Metadata = {
-  title: "내 계정 | 계획은 J가",
+  title: "내 계정 | 뇌빼고",
   robots: { index: false },
 };
 
@@ -96,7 +96,7 @@ async function Account() {
         </ul>
 
         <p className="mt-4 rounded-2xl bg-cream px-4 py-3 text-[14px] leading-relaxed text-muted">
-          카카오 쪽 연결까지 끊으려면 카카오계정 설정의 <b className="text-ink">연결된 서비스 관리</b>에서 「계획은 J가」를 지워 주세요.
+          카카오 쪽 연결까지 끊으려면 카카오계정 설정의 <b className="text-ink">연결된 서비스 관리</b>에서 「뇌빼고」를 지워 주세요.
           자세한 내용은{" "}
           <Link href="/privacy" className="font-bold text-ink underline underline-offset-4">
             개인정보처리방침

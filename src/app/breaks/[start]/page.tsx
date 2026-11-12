@@ -19,7 +19,7 @@ import { Steps } from "../../_components/steps";
 import { EMPTY_BOX } from "../../_components/empty-box";
 
 export const metadata: Metadata = {
-  title: "갈 곳 고르기 | 계획은 J가",
+  title: "갈 곳 고르기 | 뇌빼고",
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;

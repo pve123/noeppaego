@@ -23,10 +23,10 @@ export function holidayCalendar(breaks: readonly LongBreakView[], origin: string
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    `PRODID:-//계획은 J가//연휴//KO`,
+    `PRODID:-//뇌빼고//연휴//KO`,
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    `X-WR-CALNAME:${text("계획은 J가 연휴")}`,
+    `X-WR-CALNAME:${text("뇌빼고 연휴")}`,
     "X-WR-TIMEZONE:Asia/Seoul",
     // 구독한 앱이 하루에 한 번 새로 받아 가게(대체공휴일 발표 등)
     "REFRESH-INTERVAL;VALUE=DURATION:P1D",

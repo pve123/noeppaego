@@ -23,7 +23,7 @@ import { parsePrefs, prefsEntries } from "../../../_components/trip-prefs";
 import { TripPrefsSheet } from "../../../_components/trip-prefs-sheet";
 
 export const metadata: Metadata = {
-  title: "여행 일정 | 계획은 J가",
+  title: "여행 일정 | 뇌빼고",
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;

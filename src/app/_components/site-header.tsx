@@ -10,7 +10,7 @@ import { Toast } from "./toast";
 function BrandName() {
   return (
     <span className="font-brand">
-      계획은 <span className="rounded-lg bg-yellow px-1.5">J</span>가
+      <span className="rounded-lg bg-yellow px-1.5">뇌</span>빼고
     </span>
   );
 }
@@ -76,7 +76,7 @@ export function SiteFooter() {
               <BrandName />
             </p>
             {/* 슬로건은 말풍선 장식 없이 한 줄 */}
-            <p className="mt-1.5 text-[15px] text-muted">너 P야? 계획은 J가 다 짤게</p>
+            <p className="mt-1.5 text-[15px] text-muted">다 짜 놨어. 뇌 빼고 와.</p>
           </div>
         </div>
         <div className="w-full sm:w-auto">

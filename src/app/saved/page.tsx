@@ -11,7 +11,7 @@ import { SiteFooter, SiteHeader, SiteNotice } from "../_components/site-header";
 import { EMPTY_BOX } from "../_components/empty-box";
 
 export const metadata: Metadata = {
-  title: "찜한 일정 | 계획은 J가",
+  title: "찜한 일정 | 뇌빼고",
 };
 
 export default function SavedPage() {
