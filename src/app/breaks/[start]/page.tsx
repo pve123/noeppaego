@@ -17,6 +17,7 @@ import { SiteFooter, SiteHeader, SiteNotice } from "../../_components/site-heade
 import { SourceError } from "../../_components/source-error";
 import { Steps } from "../../_components/steps";
 import { EMPTY_BOX } from "../../_components/empty-box";
+import { BrainMascot } from "../../_components/brain-mascot";
 
 export const metadata: Metadata = {
   title: "갈 곳 고르기 | 뇌빼고",
@@ -190,6 +191,7 @@ function EmptyDestinations({
   const wider = reachText ? widerThan(reach) : undefined;
   return (
     <div className={`mt-6 ${EMPTY_BOX}`}>
+      <BrainMascot mood="puzzled" className="mx-auto mb-2 size-28" />
       <p className="font-display text-[22px] text-balance">
         {wider && reachText ? `${reachText}에는 이 기간 축제가 없어요.` : "이 기간에 등록된 축제가 아직 없어요."}
       </p>

@@ -12,6 +12,8 @@
   --mint: #3ccfb4;
   --lavender: #b8b5ff;
   --peach: #ffb38a;
+  /* 앱 아이콘 배경 — 쉬는 느낌의 포인트(첫 화면 그림, 캐릭터 자리)에만 */
+  --sky: #7fd3f5;
   --soft-ink: #e6e4f5;
 }
 
@@ -25,6 +27,7 @@
   --color-mint: var(--mint);
   --color-lavender: var(--lavender);
   --color-peach: var(--peach);
+  --color-sky: var(--sky);
   --color-soft-ink: var(--soft-ink);
   --font-sans: var(--font-noto), system-ui, sans-serif;
   /* 제목·버튼은 굵은 본문 글꼴, 둥근 손글씨(Jua)는 로고·첫 화면 제목·큰 숫자에만(font-brand) */
@@ -159,11 +162,11 @@ html {
     padding-bottom: calc(var(--tab-bar-h) + env(safe-area-inset-bottom));
   }
   body:has([data-save-bar]) {
-    padding-bottom: calc(var(--tab-bar-h) + 80px + env(safe-area-inset-bottom));
+    padding-bottom: calc(var(--tab-bar-h) + 72px + env(safe-area-inset-bottom));
   }
   /* 알림은 저장 바와 겹치지 않게 그 위로 */
   body:has([data-save-bar]) .toast {
-    bottom: calc(var(--tab-bar-h) + 96px + env(safe-area-inset-bottom));
+    bottom: calc(var(--tab-bar-h) + 80px + env(safe-area-inset-bottom));
   }
 }
 
