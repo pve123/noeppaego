@@ -1,10 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="30" fill="#ffd54d"/>
-  <path d="M62 110s-32-31-32-56a32 32 0 0 1 64 0c0 25-32 56-32 56z" fill="#ff6b6b" stroke="#e55757" stroke-width="3" stroke-linejoin="round"/>
-  <ellipse cx="44" cy="62" rx="6" ry="3.6" fill="#ff9fb0"/>
-  <ellipse cx="80" cy="62" rx="6" ry="3.6" fill="#ff9fb0"/>
-  <circle cx="51" cy="52" r="4.2" fill="#2b2b3a"/>
-  <circle cx="73" cy="52" r="4.2" fill="#2b2b3a"/>
-  <path d="M55 62q7 7 14 0" fill="none" stroke="#2b2b3a" stroke-width="3.6" stroke-linecap="round"/>
-  <path d="M100 13q2 11 13 13q-11 2-13 13q-2-11-13-13q11-2 13-13z" fill="#ffffff"/>
+  <!-- 뇌빼고 — 선글라스 낀 뇌가 튜브 타고 휴양 중 -->
+  <rect width="128" height="128" rx="30" fill="#7FD3F5"/>
+<g id="art">
+  <circle cx="100" cy="28" r="12" fill="#ffd54d" stroke="#22223B" stroke-width="3"/>
+  <ellipse cx="64" cy="92" rx="44" ry="15" fill="#ff6b6b" stroke="#22223B" stroke-width="4"/>
+  <ellipse cx="64" cy="90" rx="26" ry="6" fill="#7FD3F5" stroke="#22223B" stroke-width="3"/>
+  <g transform="translate(34 46)">
+    <path d="M8 30c-9-3-9-16 0-19c0-9 11-13 17-8c5-6 15-6 19 0c7-4 16 1 15 9c8 3 8 15 0 18c1 8-8 13-15 9c-5 6-14 6-19 0c-7 5-17 1-17-9z" fill="#ff9fb0" stroke="#22223B" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M8 13q5 3 3 8M51 12q-5 3-3 8M22 4q2 4 0 7M38 4q-2 4 0 7" fill="none" stroke="#22223B" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="11" y="15" width="16" height="9" rx="4" fill="#22223B"/><rect x="31" y="15" width="16" height="9" rx="4" fill="#22223B"/>
+    <path d="M27 18h4" stroke="#22223B" stroke-width="3"/>
+    <path d="M24 31q5 4 10 0" fill="none" stroke="#22223B" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</g>
 </svg>
