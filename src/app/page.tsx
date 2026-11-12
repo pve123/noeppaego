@@ -4,6 +4,7 @@ import { PublicDataError } from "@/shared/public-data/public-data";
 import { BreakList } from "./_components/break-list";
 import { BreaksSkeleton } from "./_components/skeletons";
 import { Hero } from "./_components/hero";
+import { HolidaySubscribe } from "./_components/holiday-subscribe";
 import { LeavePlan, leaveOf } from "./_components/leave-plan";
 import { RevealSuspense } from "./_components/reveal";
 import { NextBreak } from "./_components/next-break";
@@ -73,6 +74,7 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
           <>
             <LeavePlan year={view.year} plan={view.leavePlan} />
             <BreakList breaks={view.breaks} nextYear={view.years.at(-1)!} />
+            <HolidaySubscribe />
           </>
         )}
       </section>

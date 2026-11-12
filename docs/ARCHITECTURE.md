@@ -71,6 +71,7 @@ domain 은 포트라는 인터페이스만 정하고 바깥 서비스를 모른�
 | 일정 | `/breaks/[start]/[region]` | `findLongBreak`, `planItinerary`, `describeItinerary` |
 | 공유 | `/t/[id]` | `findSavedItinerary` |
 | 찜 | `/saved` | `listFavorites` |
+| 연휴 구독 캘린더 | `/holidays.ics` | `findLongBreaks` (올해와 내년) |
 
 ```mermaid
 sequenceDiagram
@@ -190,7 +191,7 @@ REST 호출은 `src/shared/kakao/kakao-rest.ts` 의 `kakaoGet` 을 거친다. 5�
 | 지도 SDK | `dapi.kakao.com/v2/maps/sdk.js` | 지도 그리기. 브라우저에서 | 없음 |
 | 공유 SDK 2.8.3 | `t1.kakaocdn.net/kakao_js_sdk` | 「카톡 보내기」. 브라우저에서 | 없음 |
 
-카카오 길찾기와 로컬 결과는 캐시와 보관이 금지될 수 있다. 그래서 갈 곳 화면의 차 시간은 카카오가 아니라 오픈스트리트맵으로 미리 계산하고 새 기능에서는 카카오 결과를 저장하지 않는다. 길찾기와 동네 이름은 캐시하지 않고 부를 때마다 새로 받는다. 맛집과 카페와 주차장과 숙소 링크 검색은 몇 시간만 캐시한다. 저장 일정에는 카카오 가게 정보를 남기지 않는다. 바꾼 칸 `picks` 에는 `kakao:<id>` 같은 장소 id 가 남는데, id 만 두어도 되는지는 카카오에 묻고 있다.
+카카오 길찾기와 로컬 결과는 캐시와 보관이 금지될 수 있다. 그래서 갈 곳 화면의 차 시간은 카카오가 아니라 오픈스트리트맵으로 미리 계산하고 새 기능에서는 카카오 결과를 저장하지 않는다. 길찾기와 동네 이름은 캐시하지 않고 부를 때마다 새로 받는다. 맛집과 카페와 주차장과 숙소 링크 검색은 몇 시간만 캐시한다. 저장 일정에는 카카오 가게 정보를 남기지 않는다. 바꾼 칸 `picks` 에는 `kakao:<id>` 같은 장소 id 가 남는데, id 는 보관해도 된다는 답을 카카오에서 받았다.
 
 ### 5.4 오픈스트리트맵과 OSRM
 
