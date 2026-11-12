@@ -1,7 +1,7 @@
 # 뇌빼고 제품 요구사항
 
 - 문서 기준일: 2026년 11월 4일
-- 운영 주소: https://holiday-trip.vercel.app
+- 운영 주소: https://noeppaego.vercel.app
 - 안드로이드 앱 `com.hosunglee.holidaytrip` 은 플레이 스토어 비공개 테스트 중이다.
 - 이 문서는 지금 만들어진 기능을 기준으로 쓴다. 아직 만들지 않은 것은 「다음 단계」에 따로 둔다.
 

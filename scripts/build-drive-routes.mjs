@@ -27,7 +27,7 @@ const OSRM = process.env.OSRM_URL ?? "http://127.0.0.1:5001";
 /** OSM 지명 검색 사용 정책 — 1초에 한 번, 누가 부르는지 밝힌다 */
 const NOMINATIM = "https://nominatim.openstreetmap.org/search";
 const NOMINATIM_PAUSE_MS = 1100;
-const USER_AGENT = "holiday-trip-route-builder (https://holiday-trip.vercel.app)";
+const USER_AGENT = "noeppaego-route-builder (https://noeppaego.vercel.app)";
 /** 이보다 가까운 곳은 추천에서 빠지므로(MIN_DISTANCE_KM) 계산하지 않는다 */
 const SKIP_KM = 20;
 /** 배·비행기로 가는 곳 — 차 경로가 없다 */
