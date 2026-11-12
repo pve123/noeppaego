@@ -1,6 +1,6 @@
 {
   "packageId": "com.hosunglee.holidaytrip",
-  "host": "holiday-trip.vercel.app",
+  "host": "noeppaego.vercel.app",
   "name": "뇌빼고",
   "launcherName": "뇌빼고",
   "display": "standalone",
@@ -13,18 +13,18 @@
   "backgroundColor": "#FFFBEA",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://holiday-trip.vercel.app/icons/maskable-512.png",
-  "maskableIconUrl": "https://holiday-trip.vercel.app/icons/maskable-512.png",
+  "iconUrl": "https://noeppaego.vercel.app/icons/maskable-512.png",
+  "maskableIconUrl": "https://noeppaego.vercel.app/icons/maskable-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "/Users/dshare/keys/holiday-trip.keystore",
-    "alias": "holiday-trip"
+    "path": "/Users/dshare/keys/noeppaego-upload.keystore",
+    "alias": "upload"
   },
-  "appVersionName": "1",
-  "appVersionCode": 1,
+  "appVersionName": 2,
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://holiday-trip.vercel.app/manifest.webmanifest",
+  "webManifestUrl": "https://noeppaego.vercel.app/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -33,7 +33,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://holiday-trip.vercel.app/",
+  "fullScopeUrl": "https://noeppaego.vercel.app/",
   "minSdkVersion": 24,
   "orientation": "portrait",
   "fingerprints": [],
@@ -43,5 +43,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "1"
+  "appVersion": 2
 }
