@@ -251,7 +251,7 @@ Postgres 테이블은 `src/shared/db/schema.ts` 에 있는 세 개다.
 | 테이블 | 담는 것 |
 |---|---|
 | `users` | 카카오 회원 번호와 닉네임 |
-| `saved_itineraries` | 연휴와 지역과 바꾼 칸, 그리고 `snapshot` 의 연휴 끝날과 취향과 제목. 예전에 저장한 행의 `snapshot` 에는 일정 전체가 들어 있다 |
+| `saved_itineraries` | 연휴와 지역과 바꾼 칸, 그리고 `snapshot` 의 연휴 끝날과 취향과 제목. |
 | `favorites` | 사용자와 저장 일정의 찜 관계 |
 
 위치는 저장하지 않는다. 「내 위치로」를 누르면 좌표를 약 1km 단위로 줄여 주소 `?from=here:위도,경도` 에만 남긴다. 로그인 세션은 `AUTH_SECRET` 으로 서명한 쿠키에 둔다.

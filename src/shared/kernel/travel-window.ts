@@ -11,11 +11,6 @@ export function dotDate(iso: string): string {
   return iso.replaceAll("-", ".");
 }
 
-/** n 일 뒤 날짜(YYYY-MM-DD) — n 이 음수면 앞 */
-export function addDays(iso: string, n: number): string {
-  return isoOfEpochDay(epochDay(iso) + n);
-}
-
 /** 화면용 `2026.12.25(금)` */
 export function dateLabel(iso: string): string {
   const weekday = WEEKDAY_LABELS[new Date(epochDay(iso) * DAY_MS).getUTCDay()];

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FavoriteEntry, MAX_SNAPSHOT_BYTES, SavedItinerary, SavedItineraryRepository } from "../domain/saved-itinerary";
-import { findSavedItinerary, forgetItinerariesOf, ItinerarySnapshot, listFavorites, saveItinerary, snapshotOf, toggleFavorite } from "./saved-itineraries";
+import { findSavedItinerary, forgetItinerariesOf, ItinerarySnapshot, listFavorites, saveItinerary, toggleFavorite } from "./saved-itineraries";
 
 class MemoryRepository implements SavedItineraryRepository {
   items = new Map<string, SavedItinerary>();
@@ -99,31 +99,6 @@ describe("저장한 일정 보기(Query)", () => {
     expect(Object.keys(repo.items.get(id)!.snapshot).sort()).toEqual(
       ["breakEnd", "breakTitle", "endLabel", "lengthLabel", "regionName", "startLabel"].sort(),
     );
-  });
-
-  it("예전에 일정을 통째로 저장한 것은 제목만 꺼내고 끝날은 일정 날수로 어림한다", () => {
-    const legacy = {
-      breakTitle: "설날",
-      plan: {
-        regionName: "강원특별자치도 강릉시",
-        customized: false,
-        lengthLabel: "2박 3일",
-        startLabel: "2027.02.06(토)",
-        endLabel: "2027.02.08(월)",
-        days: [{ dayNumber: 1 }, { dayNumber: 2 }, { dayNumber: 3 }],
-      },
-      summaries: ["카카오 가게 이름이 들어간 소개"],
-      prefs: { pace: "relaxed" },
-    };
-    expect(snapshotOf(legacy, "2027-02-06")).toEqual({
-      breakTitle: "설날",
-      breakEnd: "2027-02-08",
-      regionName: "강원특별자치도 강릉시",
-      lengthLabel: "2박 3일",
-      startLabel: "2027.02.06(토)",
-      endLabel: "2027.02.08(월)",
-      prefs: { pace: "relaxed" },
-    });
   });
 
   it("형식이 틀린 id 는 찾지도 않는다", async () => {

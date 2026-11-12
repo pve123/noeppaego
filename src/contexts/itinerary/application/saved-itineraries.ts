@@ -1,8 +1,7 @@
 import { rangeText } from "@/shared/kernel/korean";
-import { addDays, dotDate } from "@/shared/kernel/travel-window";
+import { dotDate } from "@/shared/kernel/travel-window";
 import { assertSnapshotSize, SAVED_ID, SavedItineraryRepository } from "../domain/saved-itinerary";
 import type { TripPrefs } from "../domain/preferences";
-import { ItineraryView } from "./plan-itinerary";
 
 /**
  * 저장하는 내용 — 일정을 다시 짤 재료(연휴 끝날·여행 취향)와 목록·미리보기에 쓰는 제목뿐이다.
@@ -22,23 +21,8 @@ export type ItinerarySnapshot = {
   prefs?: TripPrefs;
 };
 
-/** 예전 저장 방식 — 일정 읽기 모델을 통째로 담았다. 읽을 때 제목만 꺼내고 장소는 쓰지 않는다 */
-type LegacySnapshot = { breakTitle: string; plan: ItineraryView; prefs?: TripPrefs };
-
-/** 저장한 snapshot → 지금 모양. 예전 모양이면 일정 날수로 끝날을 어림한다(최대 MAX_TRIP_DAYS 만 짜므로 같은 날들이 나온다) */
-export function snapshotOf(raw: Readonly<Record<string, unknown>>, breakStart: string): ItinerarySnapshot {
-  if (!("plan" in raw)) return raw as unknown as ItinerarySnapshot;
-  const { breakTitle, plan, prefs } = raw as unknown as LegacySnapshot;
-  return {
-    breakTitle,
-    breakEnd: addDays(breakStart, Math.max(plan.days.length, 1) - 1),
-    regionName: plan.regionName,
-    lengthLabel: plan.lengthLabel,
-    startLabel: plan.startLabel,
-    endLabel: plan.endLabel,
-    prefs,
-  };
-}
+/** DB 의 snapshot 칸 → 읽기 모델. 예전 저장 방식(일정 통째)은 2026-11-12 에 모두 지금 모양으로 바꿨다 */
+const snapshotOf = (raw: Readonly<Record<string, unknown>>): ItinerarySnapshot => raw as unknown as ItinerarySnapshot;
 
 // ── Command ──────────────────────────────────────────
 
@@ -111,7 +95,7 @@ export async function findSavedItinerary(
   const saved = await repository.find(query.id);
   if (!saved) return undefined;
   return {
-    ...snapshotOf(saved.snapshot, saved.breakStart),
+    ...snapshotOf(saved.snapshot),
     id: saved.id,
     savedOn: kstDate(saved.createdAt),
     breakStart: saved.breakStart,
@@ -136,7 +120,7 @@ type FavoriteView = {
 
 export async function listFavorites(userId: string, repository: SavedItineraryRepository): Promise<FavoriteView[]> {
   return (await repository.listFavorites(userId)).map(({ itinerary }) => {
-    const { breakTitle, regionName, lengthLabel, startLabel, endLabel } = snapshotOf(itinerary.snapshot, itinerary.breakStart);
+    const { breakTitle, regionName, lengthLabel, startLabel, endLabel } = snapshotOf(itinerary.snapshot);
     return {
       id: itinerary.id,
       breakTitle,
