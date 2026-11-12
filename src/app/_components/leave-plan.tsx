@@ -96,7 +96,8 @@ export function LeavePlan({ year, plan }: { year: number; plan?: LeavePlanView }
 /** 연차 없이 쉬는 연휴 — 이름만 한 줄로 */
 function FreeBreaks({ picks }: { picks: LeavePlanView["picks"] }) {
   if (picks.length === 0) return null;
-  const days = picks.reduce((n, p) => n + p.option.length, 0);
+  // 이웃한 연휴가 날짜를 나눠 가질 수 있어 날짜로 세어 한 번만 센다
+  const days = new Set(picks.flatMap((p) => p.option.days.map((d) => d.iso))).size;
   return (
     <div className="mt-4 rounded-2xl bg-mint/15 px-4 py-3 text-[14px]">
       <p className="font-bold">연차 없이 쉬는 연휴 {picks.length}번에서 {days}일을 쉬어요.</p>

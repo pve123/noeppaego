@@ -3,7 +3,7 @@ import { CalendarDate } from "../domain/calendar-date";
 import { HolidayCalendar } from "../domain/holiday-calendar";
 import { HolidayCalendarRepository } from "../domain/holiday-calendar-repository";
 import { BreakOption, LongBreak } from "../domain/long-break";
-import { bestLeavePlan } from "../domain/leave-budget";
+import { bestLeavePlan, leavePlanTotals } from "../domain/leave-budget";
 import { planLongBreaks } from "../domain/long-break-planner";
 
 // ── 쿼리 ─────────────────────────────────────────────
@@ -104,10 +104,11 @@ export async function findLongBreaks(
 function leavePlanView(planned: readonly LongBreak[], calendar: HolidayCalendar, today: CalendarDate, leave: number): LeavePlanView {
   const upcoming = planned.filter((b) => b.base.start.isAfter(today));
   const picks = bestLeavePlan(upcoming, leave);
+  const totals = leavePlanTotals(picks);
   return {
     leave,
-    used: picks.reduce((n, p) => n + p.option.leaveCount, 0),
-    totalDays: picks.reduce((n, p) => n + p.option.length, 0),
+    used: totals.leave,
+    totalDays: totals.days,
     picks: picks.map(({ longBreak, option }) => ({
       key: longBreak.base.start.iso,
       title: joinWithAnd(longBreak.holidayNames),
