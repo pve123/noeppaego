@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { findSavedItinerary, type SavedItineraryView } from "@/contexts/itinerary";
+import { CalendarDate } from "@/contexts/calendar";
+import { aiSummariesOn, describeItinerary, findSavedItinerary, planSavedItinerary, type SavedItineraryView } from "@/contexts/itinerary";
 import { currentUserId } from "@/shared/auth/session";
 import { rangeText } from "@/shared/kernel/korean";
 import { toggleFavoriteAction } from "../../actions";
-import { AiSummary, ItineraryDay } from "../../_components/itinerary-day";
+import { DaySummary, DaySummarySkeleton, ItineraryDay } from "../../_components/itinerary-day";
 import { ItineraryMap } from "../../_components/itinerary-map";
 import { mapDaysOf } from "../../_components/map-days";
 import { BAND_BUTTON, BAND_LINE, BAND_OUTLINE, BAND_ROW } from "../../_components/band-button";
@@ -36,13 +38,11 @@ export async function generateMetadata({ params }: PageProps<"/t/[id]">): Promis
   };
 }
 
-/** 미리보기·카톡 카드에 같이 쓰는 제목과 설명 */
+/** 미리보기·카톡 카드에 같이 쓰는 제목과 설명 — 저장한 제목만 쓴다(장소는 열 때 다시 짜므로 여기서는 짜지 않는다) */
 function shareTextOf(view: SavedItineraryView): { title: string; description: string } {
-  const { plan } = view;
-  const places = plan.days.flatMap((d) => d.slots).filter((s) => s.place).length;
   return {
-    title: `${view.breakTitle} 연휴 ${plan.regionName} ${plan.lengthLabel}`,
-    description: `${rangeText(plan.startLabel, plan.endLabel)} 일정이에요. 갈 곳과 맛집 ${places}곳을 날마다 정리했어요.`,
+    title: `${view.breakTitle} 연휴 ${view.regionName} ${view.lengthLabel}`,
+    description: `${rangeText(view.startLabel, view.endLabel)} 일정이에요. 갈 곳과 맛집을 날마다 정리했어요.`,
   };
 }
 
@@ -67,7 +67,12 @@ async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
   const view = await findSavedItinerary({ id, viewerId });
   if (!view) notFound();
 
-  const { plan } = view;
+  // 장소는 저장하지 않는다 — 열 때마다 지금 정보로 다시 짠다
+  const today = CalendarDate.todayIn("Asia/Seoul", new Date());
+  const plan = await planSavedItinerary(view, today.iso);
+  if (!plan) notFound();
+  const ai = aiSummariesOn();
+  const summaries = !ai || plan.customized || plan.tailored ? Promise.resolve(undefined) : describeItinerary(plan);
   const share = shareTextOf(view);
   // 다시 짜기 — 저장할 때의 여행 취향과 바꾼 칸을 그대로 이어 간다
   const replanQuery = new URLSearchParams([
@@ -87,7 +92,7 @@ async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
             <span className="block">{rangeText(plan.startLabel, plan.endLabel)} 일정이에요.</span>
             {/* 문장마다 줄을 나눈다 — 한 덩어리로 두면 「그 뒤 / 바뀐」처럼 문장 중간에서 끊긴다 */}
             <span className="mt-1 block text-[14px]">{view.savedOn}에 저장했어요.</span>
-            <span className="block text-[14px]">그 뒤 바뀐 관광 정보는 들어 있지 않아요.</span>
+            <span className="block text-[14px]">열 때마다 지금 정보로 다시 짜서 저장할 때와 다를 수 있어요.</span>
           </>
         }
       >
@@ -141,9 +146,14 @@ async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
             <ItineraryDay
               key={day.dayNumber}
               dayCount={plan.days.length}
-              // 저장한 때의 예보라 지금과 다를 수 있어 날씨는 보여 주지 않는다
-              day={{ ...day, weather: undefined }}
-              summary={view.summaries?.[i] ? <AiSummary text={view.summaries[i]} /> : undefined}
+              day={day}
+              summary={
+                ai && (
+                  <Suspense fallback={<DaySummarySkeleton />}>
+                    <DaySummary summaries={summaries} index={i} />
+                  </Suspense>
+                )
+              }
             />
           ))}
         </div>

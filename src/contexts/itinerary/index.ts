@@ -19,6 +19,7 @@ import {
   toggleFavorite as toggle,
   type ItinerarySnapshot,
   type SaveItinerary,
+  type SavedItineraryView,
 } from "./application/saved-itineraries";
 import { OpenAiTripWriter } from "./infrastructure/openai-trip-writer";
 import { DrizzleSavedItineraryRepository } from "./infrastructure/drizzle-saved-itinerary-repository";
@@ -64,8 +65,8 @@ export const findFacilityParking = (placeId: string, kind: PlaceKind) => findFac
 const saved = new DrizzleSavedItineraryRepository();
 
 /**
- * 일정 저장(Command) — 화면이 보낸 일정이 아니라 서버가 주소 값으로 다시 짠 일정을 저장한다(아무 내용이나 넣지 못하게).
- * 처음 일정이면 AI 소개도 같이 저장한다.
+ * 일정 저장(Command) — 화면이 보낸 일정이 아니라 서버가 주소 값으로 다시 짜 본 뒤 저장한다(짤 수 없는 지역은 받지 않는다).
+ * 장소는 남기지 않고 다시 짤 재료와 제목만 남긴다. 열 때마다 planSavedItinerary 로 다시 짠다.
  */
 export async function saveItinerary(
   command: Omit<SaveItinerary, "snapshot"> & { breakTitle: string; breakEnd: string; today: string; prefs: TripPrefs },
@@ -79,10 +80,28 @@ export async function saveItinerary(
     prefs: command.prefs,
   });
   if (!plan) return undefined;
-  const summaries = plan.customized || plan.tailored ? undefined : await describeItinerary(plan);
-  const snapshot: ItinerarySnapshot = { breakTitle: command.breakTitle, plan, summaries, prefs: plan.tailored ? command.prefs : undefined };
+  const snapshot: ItinerarySnapshot = {
+    breakTitle: command.breakTitle,
+    breakEnd: command.breakEnd,
+    regionName: plan.regionName,
+    lengthLabel: plan.lengthLabel,
+    startLabel: plan.startLabel,
+    endLabel: plan.endLabel,
+    prefs: plan.tailored ? command.prefs : undefined,
+  };
   return save({ ...command, snapshot }, saved, () => randomId(10));
 }
+
+/** 저장한 일정을 지금 정보로 다시 짠다 — 저장할 때와 같은 연휴·지역·취향·바꾼 칸. 짤 수 없게 됐으면 undefined */
+export const planSavedItinerary = (view: SavedItineraryView, today: string) =>
+  planItinerary({
+    start: view.breakStart,
+    end: view.breakEnd,
+    regionCode: view.regionCode,
+    today,
+    picks: view.picks,
+    prefs: view.prefs,
+  });
 
 export const findSavedItinerary = (query: { id: string; viewerId?: string }) => findSaved(query, saved);
 export const listFavorites = (userId: string) => listFavs(userId, saved);

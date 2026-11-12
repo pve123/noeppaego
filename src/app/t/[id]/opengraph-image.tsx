@@ -1,7 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
-import { findSavedItinerary } from "@/contexts/itinerary";
+import { CalendarDate } from "@/contexts/calendar";
+import { findSavedItinerary, planSavedItinerary } from "@/contexts/itinerary";
 import { rangeText } from "@/shared/kernel/korean";
 
 /**
@@ -14,15 +15,16 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const INK = "#22223B";
-/** 저장한 일정은 고치지 않는다(지우기만) — 미리보기도 하루 동안 그대로 써도 된다 */
+/** 저장한 일정은 열 때마다 다시 짜지만 미리보기 그림은 하루쯤 묵어도 된다(카카오 장소 이름이 들어가 하루보다 오래 두지 않는다) */
 const CACHE = "public, max-age=86400";
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const view = await findSavedItinerary({ id }).catch(() => undefined);
   if (!view) return fallback();
+  const plan = await planSavedItinerary(view, CalendarDate.todayIn("Asia/Seoul", new Date()).iso).catch(() => undefined);
+  if (!plan) return fallback();
 
-  const { plan } = view;
   const places = plan.days
     .flatMap((d) => d.slots)
     .flatMap((s) => (s.place ? [s.place.title] : []))

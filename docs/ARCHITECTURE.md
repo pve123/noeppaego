@@ -101,7 +101,7 @@ sequenceDiagram
   I->>X: OpenAI 하루 소개 글
 ```
 
-저장은 이 흐름의 끝에 붙는다. 「저장」을 누르면 서버 액션이 화면이 보낸 일정을 믿지 않고 주소 값으로 일정을 다시 짠 뒤 그 결과를 `saved_itineraries` 에 그대로 남긴다. 그래서 공유 페이지 `/t/{id}` 는 바깥 서비스를 다시 부르지 않고 저장한 일정을 보여 준다.
+저장은 이 흐름의 끝에 붙는다. 「저장」을 누르면 서버 액션이 주소 값으로 일정을 한 번 짜 보고, 짤 수 있으면 연휴와 지역과 취향과 바꾼 칸과 제목만 `saved_itineraries` 에 남긴다. 장소는 남기지 않는다. 공유 페이지 `/t/{id}` 는 열 때마다 이 값으로 일정을 다시 짜서 보여 주므로 저장할 때와 내용이 다를 수 있다.
 
 ## 4. 비즈니스 규칙
 
@@ -181,16 +181,16 @@ REST 호출은 `src/shared/kakao/kakao-rest.ts` 의 `kakaoGet` 을 거친다. 5�
 
 | API | 주소 | 쓰는 곳 | 캐시 |
 |---|---|---|---|
-| 로컬 좌표로 행정구역 | `/v2/local/geo/coord2regioncode.json` | 「내 위치로」의 「종로구 근처」 | `days` |
+| 로컬 좌표로 행정구역 | `/v2/local/geo/coord2regioncode.json` | 「내 위치로」의 「종로구 근처」 | 캐시 안 함 |
 | 로컬 키워드와 분류 검색 | `/v2/local/search/keyword.json`, `category.json` | 맛집 `FD6`, 카페 `CE7` | `hours` |
 | 로컬 분류 검색 | `/v2/local/search/category.json` | 500m 안의 주차장 `PK6` | `hours` |
 | 로컬 키워드 검색 | `/v2/local/search/keyword.json` | 숙소의 카카오맵 「별점과 리뷰」 링크 `AD5` | `hours`, 못 찾으면 `minutes` |
-| 모빌리티 길찾기 | `apis-navi.kakaomobility.com/v1/directions` | 일정 안 칸 사이 차 시간 | `days`, 실패는 `minutes` |
+| 모빌리티 길찾기 | `apis-navi.kakaomobility.com/v1/directions` | 일정 안 칸 사이 차 시간 | 캐시 안 함 |
 | 로그인 | `kauth.kakao.com/oauth/*`, `kapi.kakao.com/v2/user/me` | 회원 번호와 닉네임 | 없음 |
 | 지도 SDK | `dapi.kakao.com/v2/maps/sdk.js` | 지도 그리기. 브라우저에서 | 없음 |
 | 공유 SDK 2.8.3 | `t1.kakaocdn.net/kakao_js_sdk` | 「카톡 보내기」. 브라우저에서 | 없음 |
 
-카카오 길찾기와 로컬 결과는 캐시와 보관이 금지될 수 있다. 그래서 갈 곳 화면의 차 시간은 카카오가 아니라 오픈스트리트맵으로 미리 계산하고 새 기능에서는 카카오 결과를 저장하지 않는다. 일정 화면의 기존 캐시와 저장 일정에 들어가는 카카오 가게 정보는 아직 정리하지 않았고 PRD 7장에 위험으로 올라 있다.
+카카오 길찾기와 로컬 결과는 캐시와 보관이 금지될 수 있다. 그래서 갈 곳 화면의 차 시간은 카카오가 아니라 오픈스트리트맵으로 미리 계산하고 새 기능에서는 카카오 결과를 저장하지 않는다. 길찾기와 동네 이름은 캐시하지 않고 부를 때마다 새로 받는다. 맛집과 카페와 주차장과 숙소 링크 검색은 몇 시간만 캐시한다. 저장 일정에는 카카오 가게 정보를 남기지 않는다. 바꾼 칸 `picks` 에는 `kakao:<id>` 같은 장소 id 가 남는데, id 만 두어도 되는지는 카카오에 묻고 있다.
 
 ### 5.4 오픈스트리트맵과 OSRM
 
@@ -250,7 +250,7 @@ Postgres 테이블은 `src/shared/db/schema.ts` 에 있는 세 개다.
 | 테이블 | 담는 것 |
 |---|---|
 | `users` | 카카오 회원 번호와 닉네임 |
-| `saved_itineraries` | 저장한 순간의 일정 전체와 AI 소개 글 |
+| `saved_itineraries` | 연휴와 지역과 바꾼 칸, 그리고 `snapshot` 의 연휴 끝날과 취향과 제목. 예전에 저장한 행의 `snapshot` 에는 일정 전체가 들어 있다 |
 | `favorites` | 사용자와 저장 일정의 찜 관계 |
 
 위치는 저장하지 않는다. 「내 위치로」를 누르면 좌표를 약 1km 단위로 줄여 주소 `?from=here:위도,경도` 에만 남긴다. 로그인 세션은 `AUTH_SECRET` 으로 서명한 쿠키에 둔다.

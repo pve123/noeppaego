@@ -12,7 +12,10 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-/** 저장한 일정 — 그 순간의 일정을 통째로(snapshot) 둔다. 관광 정보가 바뀌어도 공유한 그대로 보인다. */
+/**
+ * 저장한 일정 — 장소는 두지 않고 다시 짤 재료(연휴·지역·바꾼 칸, snapshot 의 끝날·취향)와 제목만 둔다. 열 때마다 다시 짠다.
+ * 예전 행의 snapshot 에는 일정이 통째로 들어 있다(읽을 때 제목만 꺼낸다).
+ */
 export const savedItineraries = pgTable("saved_itineraries", {
   id: varchar("id", { length: 12 }).primaryKey(),
   ownerId: varchar("owner_id", { length: 16 })
