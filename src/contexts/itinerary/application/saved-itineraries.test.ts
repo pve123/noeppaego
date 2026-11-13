@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FavoriteEntry, MAX_SNAPSHOT_BYTES, SavedItinerary, SavedItineraryRepository } from "../domain/saved-itinerary";
-import { findSavedItinerary, forgetItinerariesOf, ItinerarySnapshot, listFavorites, saveItinerary, toggleFavorite } from "./saved-itineraries";
+import { FavoriteEntry, MAX_RECIPE_BYTES, SavedItinerary, SavedItineraryRepository } from "../domain/saved-itinerary";
+import { findSavedItinerary, forgetItinerariesOf, ItineraryRecipe, listFavorites, saveItinerary, toggleFavorite } from "./saved-itineraries";
 
 class MemoryRepository implements SavedItineraryRepository {
   items = new Map<string, SavedItinerary>();
@@ -34,7 +34,7 @@ class MemoryRepository implements SavedItineraryRepository {
   }
 }
 
-const snapshot = (regionName = "경기도 파주시"): ItinerarySnapshot => ({
+const recipe = (regionName = "경기도 파주시"): ItineraryRecipe => ({
   breakTitle: "성탄절",
   breakEnd: "2026-12-27",
   regionName,
@@ -46,7 +46,7 @@ const snapshot = (regionName = "경기도 파주시"): ItinerarySnapshot => ({
 let seq = 0;
 const ids = () => `ID${String(++seq).padStart(8, "0")}`;
 const save = (repo: MemoryRepository, ownerId = "u1", regionName?: string) =>
-  saveItinerary({ ownerId, breakStart: "2026-12-25", regionCode: "41-480", picks: {}, snapshot: snapshot(regionName) }, repo, ids);
+  saveItinerary({ ownerId, breakStart: "2026-12-25", regionCode: "41-480", picks: {}, recipe: recipe(regionName) }, repo, ids);
 
 describe("일정 저장(Command)", () => {
   it("저장하면 저장한 사람의 찜에 들어간다", async () => {
@@ -57,9 +57,9 @@ describe("일정 저장(Command)", () => {
 
   it("너무 큰 일정은 저장하지 않는다", async () => {
     const repo = new MemoryRepository();
-    const huge = { ...snapshot(), breakTitle: "가".repeat(MAX_SNAPSHOT_BYTES) };
+    const huge = { ...recipe(), breakTitle: "가".repeat(MAX_RECIPE_BYTES) };
     await expect(
-      saveItinerary({ ownerId: "u1", breakStart: "2026-12-25", regionCode: "41-480", picks: {}, snapshot: huge }, repo, ids),
+      saveItinerary({ ownerId: "u1", breakStart: "2026-12-25", regionCode: "41-480", picks: {}, recipe: huge }, repo, ids),
     ).rejects.toThrow();
     expect(repo.items.size).toBe(0);
   });
@@ -96,7 +96,7 @@ describe("저장한 일정 보기(Query)", () => {
   it("저장한 것은 다시 짤 재료와 제목뿐이다 — 장소를 담지 않는다", async () => {
     const repo = new MemoryRepository();
     const id = await save(repo, "u1");
-    expect(Object.keys(repo.items.get(id)!.snapshot).sort()).toEqual(
+    expect(Object.keys(repo.items.get(id)!.recipe).sort()).toEqual(
       ["breakEnd", "breakTitle", "endLabel", "lengthLabel", "regionName", "startLabel"].sort(),
     );
   });

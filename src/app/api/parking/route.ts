@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { findParking } from "@/contexts/itinerary";
-import { RateLimiter, clientIp } from "@/shared/rate-limit";
+import { RateLimiter, tooManyRequests } from "@/shared/rate-limit";
 
 /**
  * IP 하나가 1분에 부를 수 있는 수 — 주차 시트는 장소마다 한 번 열어서 사람이 쓰면 이만큼 닿지 않는다.
@@ -13,10 +13,8 @@ const inKorea = (lat: number, lng: number) => lat >= 33 && lat <= 39 && lng >= 1
 
 /** 장소 근처 주차장 — 일정 카드의 「주차」 시트를 열 때 부른다 */
 export async function GET(request: NextRequest) {
-  const allowed = limiter.take(clientIp(request.headers), Date.now());
-  if (!allowed.ok) {
-    return NextResponse.json({ error: "too-many-requests" }, { status: 429, headers: { "Retry-After": String(allowed.retryAfterSec) } });
-  }
+  const blocked = tooManyRequests(limiter, request);
+  if (blocked) return blocked;
   const lat = Number(request.nextUrl.searchParams.get("lat"));
   const lng = Number(request.nextUrl.searchParams.get("lng"));
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || !inKorea(lat, lng)) {

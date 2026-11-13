@@ -40,6 +40,16 @@ export class RateLimiter {
 }
 
 /**
+ * 라우트 맨 앞에서 부른다 — 한도를 넘었으면 돌려줄 429 응답, 아니면 undefined.
+ * 사용: `const blocked = tooManyRequests(limiter, request); if (blocked) return blocked;`
+ */
+export function tooManyRequests(limiter: RateLimiter, request: Request): Response | undefined {
+  const allowed = limiter.take(clientIp(request.headers), Date.now());
+  if (allowed.ok) return undefined;
+  return Response.json({ error: "too-many-requests" }, { status: 429, headers: { "Retry-After": String(allowed.retryAfterSec) } });
+}
+
+/**
  * 요청한 쪽 IP — Vercel 은 `x-forwarded-for` 를 자기가 본 주소로 덮어써서 사용자가 꾸밀 수 없다.
  * 로컬처럼 헤더가 없으면 모두 한 묶음으로 센다.
  */

@@ -6,7 +6,7 @@ import { periodText } from "./leave-text";
 /** 처음 고르는 남은 연차 — 많이들 남기는 수 */
 const QUICK = [3, 5, 10, 15];
 /** 고를 수 있는 남은 연차 — 한 해 연차(최대 25일)를 넉넉히 */
-export const MAX_LEAVE = 30;
+const MAX_LEAVE = 30;
 
 /** 남은 연차 주소 값 → 0~MAX_LEAVE. 없거나 숫자가 아니면 undefined */
 export function leaveOf(value: string | string[] | undefined): number | undefined {
