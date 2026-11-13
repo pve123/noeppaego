@@ -1,6 +1,6 @@
 {
   "packageId": "com.hosunglee.holidaytrip",
-  "host": "noeppaego.vercel.app",
+  "host": "noeppaego.com",
   "name": "뇌빼고",
   "launcherName": "뇌빼고",
   "display": "standalone",
@@ -13,8 +13,8 @@
   "backgroundColor": "#FFFBEA",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://noeppaego.vercel.app/icons/maskable-512.png",
-  "maskableIconUrl": "https://noeppaego.vercel.app/icons/maskable-512.png",
+  "iconUrl": "https://noeppaego.com/icons/maskable-512.png",
+  "maskableIconUrl": "https://noeppaego.com/icons/maskable-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "/Users/dshare/keys/noeppaego-upload.keystore",
@@ -24,7 +24,7 @@
   "appVersionCode": 3,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://noeppaego.vercel.app/manifest.webmanifest",
+  "webManifestUrl": "https://noeppaego.com/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -33,7 +33,7 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://noeppaego.vercel.app/",
+  "fullScopeUrl": "https://noeppaego.com/",
   "minSdkVersion": 24,
   "orientation": "portrait",
   "fingerprints": [],
