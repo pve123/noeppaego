@@ -12,7 +12,8 @@ const toDomain = (row: Row): SavedItinerary => ({
   breakStart: row.breakStart,
   regionCode: row.regionCode,
   picks: row.picks,
-  snapshot: row.snapshot,
+  // DB 칸 이름은 예전 그대로 snapshot 이다(이름만 바꾸려고 마이그레이션하지 않는다)
+  recipe: row.snapshot,
   createdAt: row.createdAt,
 });
 
@@ -24,7 +25,7 @@ export class DrizzleSavedItineraryRepository implements SavedItineraryRepository
       breakStart: it.breakStart,
       regionCode: it.regionCode,
       picks: { ...it.picks },
-      snapshot: { ...it.snapshot },
+      snapshot: { ...it.recipe },
     });
   }
 

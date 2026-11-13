@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { CalendarDate } from "@/contexts/calendar";
-import { aiSummariesOn, describeItinerary, findSavedItinerary, planSavedItinerary, type SavedItineraryView } from "@/contexts/itinerary";
+import { aiSummariesOn, daySummariesOf, findSavedItinerary, planSavedItinerary, type SavedItineraryView } from "@/contexts/itinerary";
 import { currentUserId } from "@/shared/auth/session";
 import { rangeText } from "@/shared/kernel/korean";
 import { toggleFavoriteAction } from "../../actions";
@@ -72,7 +72,7 @@ async function Shared({ params }: Pick<PageProps<"/t/[id]">, "params">) {
   const plan = await planSavedItinerary(view, today.iso);
   if (!plan) notFound();
   const ai = aiSummariesOn();
-  const summaries = !ai || plan.customized || plan.tailored ? Promise.resolve(undefined) : describeItinerary(plan);
+  const summaries = daySummariesOf(plan);
   const share = shareTextOf(view);
   // 다시 짜기 — 저장할 때의 여행 취향과 바꾼 칸을 그대로 이어 간다
   const replanQuery = new URLSearchParams([

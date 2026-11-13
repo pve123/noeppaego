@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/calendar";
-import { aiSummariesOn, describeItinerary, planItinerary, type ItineraryView } from "@/contexts/itinerary";
+import { aiSummariesOn, daySummariesOf, planItinerary, type ItineraryView } from "@/contexts/itinerary";
 import { rangeText } from "@/shared/kernel/korean";
 import { PublicDataError } from "@/shared/public-data/public-data";
 import { currentUser } from "@/shared/auth/session";
@@ -105,7 +105,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
   // 사용자가 바꾸거나 취향을 고른 일정에는 붙이지 않는다 — 바꿀 때마다 부르면 조합 수만큼 비용이 는다.
   // 키를 빼 AI 를 꺼 두었으면 자리(「AI가 소개를 쓰는 중」)와 안내도 그리지 않는다
   const ai = aiSummariesOn();
-  const summaries = !ai || plan.customized || plan.tailored ? Promise.resolve(undefined) : describeItinerary(plan);
+  const summaries = daySummariesOf(plan);
   const noWeather = plan.days.every((d) => !d.weather);
 
   const mapDays = mapDaysOf(plan.days);

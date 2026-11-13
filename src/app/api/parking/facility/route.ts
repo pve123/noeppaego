@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { findFacilityParking } from "@/contexts/itinerary";
-import { RateLimiter, clientIp } from "@/shared/rate-limit";
+import { RateLimiter, tooManyRequests } from "@/shared/rate-limit";
 
 /**
  * IP 하나가 1분에 부를 수 있는 수 — 주차 시트는 장소마다 한 번 열어서 사람이 쓰면 이만큼 닿지 않는다.
@@ -14,10 +14,8 @@ type Kind = (typeof KINDS)[number];
 
 /** 장소 자체 주차 안내(관광공사) — 일정 카드의 「주차」 시트를 열 때 부른다. 관광공사 장소만 받는다 */
 export async function GET(request: NextRequest) {
-  const allowed = limiter.take(clientIp(request.headers), Date.now());
-  if (!allowed.ok) {
-    return NextResponse.json({ error: "too-many-requests" }, { status: 429, headers: { "Retry-After": String(allowed.retryAfterSec) } });
-  }
+  const blocked = tooManyRequests(limiter, request);
+  if (blocked) return blocked;
   const id = request.nextUrl.searchParams.get("id") ?? "";
   const kind = request.nextUrl.searchParams.get("kind") ?? "";
   if (!PLACE_ID.test(id) || !KINDS.includes(kind as Kind)) {

@@ -45,7 +45,7 @@ type MapLegendItem = {
 };
 
 /** 핀 말풍선의 버튼 — href 면 새 창 링크, onClick 이면 앱 안에서 할 일(길찾기 앱 고르기 등) */
-export type PinAction = { text: string; href?: string; onClick?: () => void };
+type PinAction = { text: string; href?: string; onClick?: () => void };
 
 const APP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
 

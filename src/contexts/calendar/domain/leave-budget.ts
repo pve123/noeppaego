@@ -1,6 +1,6 @@
 import { BreakOption, LongBreak } from "./long-break";
 
-export type LeavePick = { readonly longBreak: LongBreak; readonly option: BreakOption };
+type LeavePick = { readonly longBreak: LongBreak; readonly option: BreakOption };
 
 /** 고른 방법들을 날짜로 펼친 합 — 연휴끼리 겹치는 날(2027.05.05 처럼 두 연휴에 걸친 공휴일)은 한 번만 센다 */
 type Plan = {

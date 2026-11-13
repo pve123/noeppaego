@@ -42,7 +42,7 @@ type Stay = {
   readonly alternatives?: readonly Place[];
 };
 type Home = { readonly time: "home"; readonly kind: "home" };
-export type Slot = Visit | Meal | Stay | Home;
+type Slot = Visit | Meal | Stay | Home;
 export type SlotTime = Slot["time"];
 
 export type TripDay = { readonly date: string; readonly slots: readonly Slot[] };

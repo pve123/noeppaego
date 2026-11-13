@@ -17,7 +17,7 @@ import {
   listFavorites as listFavs,
   saveItinerary as save,
   toggleFavorite as toggle,
-  type ItinerarySnapshot,
+  type ItineraryRecipe,
   type SaveItinerary,
   type SavedItineraryView,
 } from "./application/saved-itineraries";
@@ -50,10 +50,14 @@ const preview = process.env.VERCEL ? undefined : weatherPreviewOf(process.env.WE
 const outlook = preview ? new PreviewWeatherOutlook(preview) : new KmaWeatherOutlook();
 
 export const planItinerary = (query: PlanItinerary) => handle(query, catalog, restaurants, cafes, driveTimes, outlook, pages, intros);
-/** 하루마다 AI 소개 글 — 못 쓰면 undefined */
-export const describeItinerary = (plan: ItineraryView) => describe(plan, writer);
 /** AI 소개를 쓰는가 — 키(OPENAI_API_KEY)가 없으면 꺼 둔 것. 화면은 이때 AI 자리·안내를 아예 그리지 않는다 */
 export const aiSummariesOn = () => Boolean(process.env.OPENAI_API_KEY);
+/**
+ * 하루마다 AI 소개 글 — 못 쓰거나 붙이지 않으면 undefined.
+ * 칸을 직접 바꿨거나 취향을 고른 일정에는 붙이지 않는다. 조합마다 AI 를 부르면 비용이 늘기 때문이다.
+ */
+export const daySummariesOf = (plan: ItineraryView): Promise<string[] | undefined> =>
+  !aiSummariesOn() || plan.customized || plan.tailored ? Promise.resolve(undefined) : describe(plan, writer);
 
 const parking = new KakaoParkingFinder();
 /** 장소 근처 주차장 — 일정 카드의 「주차」를 눌렀을 때만 부른다 */
@@ -69,7 +73,7 @@ const saved = new DrizzleSavedItineraryRepository();
  * 장소는 남기지 않고 다시 짤 재료와 제목만 남긴다. 열 때마다 planSavedItinerary 로 다시 짠다.
  */
 export async function saveItinerary(
-  command: Omit<SaveItinerary, "snapshot"> & { breakTitle: string; breakEnd: string; today: string; prefs: TripPrefs },
+  command: Omit<SaveItinerary, "recipe"> & { breakTitle: string; breakEnd: string; today: string; prefs: TripPrefs },
 ): Promise<string | undefined> {
   const plan = await planItinerary({
     start: command.breakStart,
@@ -80,7 +84,7 @@ export async function saveItinerary(
     prefs: command.prefs,
   });
   if (!plan) return undefined;
-  const snapshot: ItinerarySnapshot = {
+  const recipe: ItineraryRecipe = {
     breakTitle: command.breakTitle,
     breakEnd: command.breakEnd,
     regionName: plan.regionName,
@@ -89,7 +93,7 @@ export async function saveItinerary(
     endLabel: plan.endLabel,
     prefs: plan.tailored ? command.prefs : undefined,
   };
-  return save({ ...command, snapshot }, saved, () => randomId(10));
+  return save({ ...command, recipe }, saved, () => randomId(10));
 }
 
 /** 저장한 일정을 지금 정보로 다시 짠다 — 저장할 때와 같은 연휴·지역·취향·바꾼 칸. 짤 수 없게 됐으면 undefined */

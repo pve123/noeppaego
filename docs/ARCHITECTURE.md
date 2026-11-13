@@ -68,8 +68,8 @@ domain 은 포트라는 인터페이스만 정하고 바깥 서비스를 모른�
 |---|---|---|
 | 연휴 목록 | `/` | `findLongBreaks` |
 | 갈 곳 | `/breaks/[start]` | `findLongBreak`, `findDestinations` |
-| 일정 | `/breaks/[start]/[region]` | `findLongBreak`, `planItinerary`, `describeItinerary` |
-| 공유 | `/t/[id]` | `findSavedItinerary` |
+| 일정 | `/breaks/[start]/[region]` | `findLongBreak`, `planItinerary`, `daySummariesOf` |
+| 공유 | `/t/[id]` | `findSavedItinerary`, `planSavedItinerary`, `daySummariesOf` |
 | 찜 | `/saved` | `listFavorites` |
 | 연휴 구독 캘린더 | `/holidays.ics` | `findLongBreaks` (올해와 내년) |
 
@@ -98,7 +98,7 @@ sequenceDiagram
   I->>X: 관광공사 장소, 카카오 맛집과 카페, 기상청 예보
   I->>X: 카카오 모빌리티로 칸 사이 이동 시간
   I-->>A: 날마다 칸이 채워진 일정
-  A->>I: describeItinerary
+  A->>I: daySummariesOf
   I->>X: OpenAI 하루 소개 글
 ```
 

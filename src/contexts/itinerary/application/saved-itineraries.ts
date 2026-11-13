@@ -1,6 +1,6 @@
 import { rangeText } from "@/shared/kernel/korean";
 import { dotDate } from "@/shared/kernel/travel-window";
-import { assertSnapshotSize, SAVED_ID, SavedItineraryRepository } from "../domain/saved-itinerary";
+import { assertRecipeSize, SAVED_ID, SavedItineraryRepository } from "../domain/saved-itinerary";
 import type { TripPrefs } from "../domain/preferences";
 
 /**
@@ -8,7 +8,7 @@ import type { TripPrefs } from "../domain/preferences";
  * 장소는 저장하지 않고 열 때마다 다시 짠다. 카카오 장소 정보는 임시 캐시 말고는 보관하면 안 되기 때문이다.
  * 제목(지역 이름·기간)은 관광공사 지역 이름과 우리가 계산한 날짜라 남겨도 된다.
  */
-export type ItinerarySnapshot = {
+export type ItineraryRecipe = {
   breakTitle: string;
   /** 연휴 끝날(YYYY-MM-DD) — 일정을 다시 짤 때 쓴다 */
   breakEnd: string;
@@ -21,8 +21,8 @@ export type ItinerarySnapshot = {
   prefs?: TripPrefs;
 };
 
-/** DB 의 snapshot 칸 → 읽기 모델. 예전 저장 방식(일정 통째)은 2026-11-12 에 모두 지금 모양으로 바꿨다 */
-const snapshotOf = (raw: Readonly<Record<string, unknown>>): ItinerarySnapshot => raw as unknown as ItinerarySnapshot;
+/** DB 에 저장한 재료 → 읽기 모델 */
+const recipeOf = (raw: Readonly<Record<string, unknown>>): ItineraryRecipe => raw as unknown as ItineraryRecipe;
 
 // ── Command ──────────────────────────────────────────
 
@@ -31,7 +31,7 @@ export type SaveItinerary = {
   breakStart: string;
   regionCode: string;
   picks: Record<string, string>;
-  snapshot: ItinerarySnapshot;
+  recipe: ItineraryRecipe;
 };
 
 /** 일정 저장 — 저장한 사람의 찜에도 넣는다. 새 id 를 돌려준다. */
@@ -40,10 +40,10 @@ export async function saveItinerary(
   repository: SavedItineraryRepository,
   newId: () => string,
 ): Promise<string> {
-  const snapshot = command.snapshot as unknown as Record<string, unknown>;
-  assertSnapshotSize(snapshot);
+  const recipe = command.recipe as unknown as Record<string, unknown>;
+  assertRecipeSize(recipe);
   const id = newId();
-  await repository.save({ id, ownerId: command.ownerId, breakStart: command.breakStart, regionCode: command.regionCode, picks: command.picks, snapshot });
+  await repository.save({ id, ownerId: command.ownerId, breakStart: command.breakStart, regionCode: command.regionCode, picks: command.picks, recipe });
   await repository.addFavorite(command.ownerId, id);
   return id;
 }
@@ -73,7 +73,7 @@ export async function forgetItinerariesOf(userId: string, repository: SavedItine
 
 // ── Query ────────────────────────────────────────────
 
-export type SavedItineraryView = ItinerarySnapshot & {
+export type SavedItineraryView = ItineraryRecipe & {
   id: string;
   /** 「2026.10.26」 — 저장한 날(한국) */
   savedOn: string;
@@ -95,7 +95,7 @@ export async function findSavedItinerary(
   const saved = await repository.find(query.id);
   if (!saved) return undefined;
   return {
-    ...snapshotOf(saved.snapshot),
+    ...recipeOf(saved.recipe),
     id: saved.id,
     savedOn: kstDate(saved.createdAt),
     breakStart: saved.breakStart,
@@ -120,7 +120,7 @@ type FavoriteView = {
 
 export async function listFavorites(userId: string, repository: SavedItineraryRepository): Promise<FavoriteView[]> {
   return (await repository.listFavorites(userId)).map(({ itinerary }) => {
-    const { breakTitle, regionName, lengthLabel, startLabel, endLabel } = snapshotOf(itinerary.snapshot);
+    const { breakTitle, regionName, lengthLabel, startLabel, endLabel } = recipeOf(itinerary.recipe);
     return {
       id: itinerary.id,
       breakTitle,
