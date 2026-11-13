@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 /** 구독 주소는 늘 운영 주소 — 캘린더 앱이 밖에서 받아 가야 해서 로컬 주소로는 구독할 수 없다 */
-const FEED = "https://noeppaego.vercel.app/holidays.ics";
+const FEED = "https://noeppaego.com/holidays.ics";
 const WEBCAL = FEED.replace(/^https:/, "webcal:");
 const GOOGLE = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(WEBCAL)}`;
 

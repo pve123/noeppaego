@@ -19,7 +19,7 @@ const noto = Noto_Sans_KR({
 const DESCRIPTION = "공휴일과 주말을 이어서 연차는 적게 쓰고 오래 쉬는 날을 찾아 드려요. 갈 곳과 하루 일정도 짜 드려요.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://noeppaego.vercel.app"),
+  metadataBase: new URL("https://noeppaego.com"),
   // Google Search Console 소유권 확인 — 플레이 콘솔 「웹사이트」 확인에 쓴다. 공개돼도 되는 값이다
   verification: { google: "9LvfIgoyJl-qx0eOSKw2vmSwSlGCtvp1_jA-vbit5SE" },
   title: "뇌빼고",
