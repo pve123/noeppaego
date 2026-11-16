@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#fffbea" />
+<meta name="theme-color" content="#faf5ec" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1b1916" media="(prefers-color-scheme: dark)" />
 <title>연결이 끊겼어요 · 뇌빼고</title>
 <!--
   인터넷이 끊겼을 때 서비스 워커(public/sw.js)가 미리 저장해 둔 이 화면을 보여 준다.
@@ -11,15 +12,24 @@
 -->
 <style>
   :root {
-    color-scheme: only light;
-    --cream: #fffbea;
-    --surface: #ffffff;
-    --ink: #22223b;
-    --muted: #4a4a68;
-    --coral: #ff6b6b;
-    --yellow: #ffd84d;
+    color-scheme: light dark;
+    --cream: #faf5ec;
+    --surface: #fffdf9;
+    --ink: #2a2622;
+    --muted: #6b6257;
+    --coral: #ff7a6b;
+    --yellow: #ffd34f;
     --mint: #3ccfb4;
     --lavender: #b8b5ff;
+  }
+  /* 어두운 화면 — globals.css 의 「따뜻한 밤」과 같다. 그림은 선이 진해서 그대로 둔다 */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --cream: #1b1916;
+      --surface: #26231f;
+      --ink: #fff3dc;
+      --muted: #c2b9a8;
+    }
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -68,7 +78,7 @@
     margin-top: 22px; height: 56px; padding: 0 28px;
     display: inline-flex; align-items: center; gap: 8px;
     border: 3px solid var(--ink); border-radius: 18px;
-    background: var(--coral); color: var(--ink);
+    background: var(--coral); color: #2a2622; /* 코랄 위 글자는 어두운 화면에서도 진하게 */
     font: inherit; font-size: 19px; font-weight: 800;
     box-shadow: 3px 3px 0 var(--ink);
     cursor: pointer;

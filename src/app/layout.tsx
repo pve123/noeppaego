@@ -36,9 +36,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fffbea",
-  // 밝은 화면 전용 — 「only」가 있어야 휴대폰 다크 모드가 색을 멋대로 뒤집지 않는다(크롬·앱의 자동 어둡게)
-  colorScheme: "only light",
+  // 주소창·상태바 색 — 화면 바탕(globals.css 의 --cream)과 같게, 어두운 화면이면 먹색
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf5ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#1b1916" },
+  ],
+  // 밝은·어두운 화면을 둘 다 직접 그린다고 알린다 — 브라우저가 화면을 멋대로 어둡게 칠하지 않게
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
