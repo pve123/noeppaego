@@ -15,6 +15,7 @@
   "startUrl": "/",
   "iconUrl": "https://noeppaego.com/icons/maskable-512.png",
   "maskableIconUrl": "https://noeppaego.com/icons/maskable-512.png",
+  "monochromeIconUrl": "https://noeppaego.com/art/icon-monochrome.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "/Users/dshare/keys/noeppaego-upload.keystore",
@@ -22,7 +23,26 @@
   },
   "appVersionName": "4",
   "appVersionCode": 4,
-  "shortcuts": [],
+  "shortcuts": [
+    {
+      "name": "다음 연휴 보기",
+      "shortName": "다음 연휴",
+      "url": "https://noeppaego.com/#next",
+      "chosenIconUrl": "https://noeppaego.com/art/shortcuts/next.png"
+    },
+    {
+      "name": "연휴 목록",
+      "shortName": "연휴 목록",
+      "url": "https://noeppaego.com/#breaks",
+      "chosenIconUrl": "https://noeppaego.com/art/shortcuts/breaks.png"
+    },
+    {
+      "name": "찜한 일정",
+      "shortName": "찜한 일정",
+      "url": "https://noeppaego.com/saved",
+      "chosenIconUrl": "https://noeppaego.com/art/shortcuts/saved.png"
+    }
+  ],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://noeppaego.com/manifest.webmanifest",
   "fallbackType": "customtabs",
