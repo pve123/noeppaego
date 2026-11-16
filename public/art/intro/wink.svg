@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 시작 애니메이션 부품 3: 윙크하는 눈(선글라스를 올렸을 때) -->
+  <circle cx="53" cy="65" r="3" fill="#22223B"/>
+  <path d="M70 65q3-3 6 0" fill="none" stroke="#22223B" stroke-width="2.6" stroke-linecap="round"/>
+</svg>
