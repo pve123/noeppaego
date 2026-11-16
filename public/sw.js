@@ -3,7 +3,7 @@
  * 연휴·일정 같은 데이터는 저장하지 않는다(지난 화면이 남아 헷갈리지 않게). 페이지 이동만 가로채고 나머지 요청은 건드리지 않는다.
  * offline.html 을 고치면 CACHE 숫자를 올린다 — 그래야 새 화면을 다시 받아 둔다.
  */
-const CACHE = "offline-v2";
+const CACHE = "offline-v3";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {

@@ -27,11 +27,11 @@ def twaManifest = [
     name: '뇌빼고', // The application name.
     launcherName: '뇌빼고', // The name shown on the Android Launcher.
     themeColor: '#FAF5EC', // The color used for the status bar.
-    themeColorDark: '#1B1916', // The color used for the dark status bar.
+    themeColorDark: '#1F3340', // The color used for the dark status bar.
     navigationColor: '#FAF5EC', // The color used for the navigation bar.
-    navigationColorDark: '#1B1916', // The color used for the dark navbar.
+    navigationColorDark: '#1F3340', // The color used for the dark navbar.
     navigationDividerColor: '#FAF5EC', // The navbar divider color.
-    navigationDividerColorDark: '#1B1916', // The dark navbar divider color.
+    navigationDividerColorDark: '#1F3340', // The dark navbar divider color.
     backgroundColor: '#FAF5EC', // The color used for the splash screen background.
     enableNotifications: false, // Set to true to enable notification delegation.
     // Every shortcut must include the following fields:
