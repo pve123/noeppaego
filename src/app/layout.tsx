@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Jua, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
+import { AppIntro, AppIntroScript } from "./_components/app-intro";
 import { ServiceWorker } from "./_components/service-worker";
 import { InstallPrompt } from "./_components/install-prompt";
 import { ScrollToTop } from "./_components/scroll-to-top";
@@ -47,8 +48,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko" className={`${jua.variable} ${noto.variable} h-full antialiased`}>
+    // suppressHydrationWarning — 시작 애니메이션 스크립트가 그리기 전에 <html data-intro> 를 붙인다
+    <html lang="ko" className={`${jua.variable} ${noto.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <AppIntroScript />
+      </head>
       <body className="min-h-full overflow-x-hidden">
+        <AppIntro />
         {children}
         <ServiceWorker />
         {/* 주소(usePathname)를 읽어서 — 감싸지 않으면 페이지를 미리 만들어 두지 못한다 */}
