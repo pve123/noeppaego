@@ -107,7 +107,7 @@ async function Destinations({ start, end, originId, reach }: { start: string; en
   try {
     view = await findDestinations({ start, end, originId, reach });
   } catch (e) {
-    if (e instanceof PublicDataError) return <SourceError subject="축제 정보" failure={e.failure} code={e.code} />;
+    if (e instanceof PublicDataError) return <SourceError subject="축제 정보" failure={e.failure} code={e.code} back={{ href: "/#breaks", label: "연휴 목록 보기" }} />;
     throw e;
   }
   const basePath = `/breaks/${start}`;

@@ -92,7 +92,7 @@ async function Itinerary({ params, searchParams }: PageProps<"/breaks/[start]/[r
       prefs,
     });
   } catch (e) {
-    if (e instanceof PublicDataError) return <SourceError subject="여행 정보" failure={e.failure} code={e.code} />;
+    if (e instanceof PublicDataError) return <SourceError subject="여행 정보" failure={e.failure} code={e.code} back={{ href: "/#breaks", label: "연휴 목록 보기" }} />;
     throw e;
   }
   if (!plan) notFound();
