@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { listFavorites } from "@/contexts/itinerary";
 import { currentUser } from "@/shared/auth/session";
-import { DeleteAccountForm, DeleteDetails } from "../_components/delete-account-form";
+import { DeleteAccountForm, DeleteAccountSection } from "../_components/delete-account-form";
 import { KakaoLoginButton } from "../_components/kakao-login-button";
 import { PageBand } from "../_components/page-band";
 import { RevealSuspense, Shimmer } from "../_components/reveal";
@@ -89,13 +89,13 @@ async function Account() {
         </span>
       </Link>
 
-      <DeleteDetails>
+      <DeleteAccountSection>
         <p className="text-[15px] text-muted">탈퇴하면 아래 정보가 바로 지워지고 되돌릴 수 없어요.</p>
 
         <ul className="mt-4 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border border-ink/15 text-[15px]">
-          <Consequence label="내가 저장한 일정" value={`${mine}개`} note={mine > 0 ? "공유한 링크도 더 이상 열리지 않아요" : undefined} />
-          <Consequence label="공유받아 찜한 일정" value={`${others}개`} note={others > 0 ? "원래 일정은 남고 내 찜만 지워져요" : undefined} />
-          <Consequence label="카카오 회원 번호" value="삭제" note="다시 로그인하면 새 계정으로 시작해요" />
+          <DeletedItem label="내가 저장한 일정" value={`${mine}개`} note={mine > 0 ? "공유한 링크도 더 이상 열리지 않아요" : undefined} />
+          <DeletedItem label="공유받아 찜한 일정" value={`${others}개`} note={others > 0 ? "원래 일정은 남고 내 찜만 지워져요" : undefined} />
+          <DeletedItem label="카카오 회원 번호" value="삭제" note="다시 로그인하면 새 계정으로 시작해요" />
         </ul>
 
         <p className="mt-4 rounded-2xl bg-cream px-4 py-3 text-[14px] leading-relaxed text-muted">
@@ -110,12 +110,12 @@ async function Account() {
         <Suspense>
           <DeleteAccountForm />
         </Suspense>
-      </DeleteDetails>
+      </DeleteAccountSection>
     </div>
   );
 }
 
-function Consequence({ label, value, note }: { label: string; value: string; note?: string }) {
+function DeletedItem({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <li className="flex items-start justify-between gap-3 px-4 py-3">
       <div className="min-w-0">

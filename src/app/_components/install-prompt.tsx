@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { inApp, PLAY_STORE_URL } from "./play-store";
+import { inApp, isAndroid, isIOS } from "./device";
+import { PLAY_STORE_URL } from "./play-store";
 
 /**
  * 앱 설치 권유 — 쓸모를 느낀 순간에만, 화면을 막지 않는 아래쪽 카드로 한 번.
@@ -43,13 +44,10 @@ function write(m: Memory) {
   }
 }
 
-const android = () => /Android/i.test(navigator.userAgent);
-
 /** 아이폰·아이패드의 진짜 사파리 — 크롬·파이어폭스·카톡·인스타·네이버 앱 안 브라우저는 홈 화면 추가 메뉴가 없거나 다르다 */
 function iosSafari(): boolean {
   const ua = navigator.userAgent;
-  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-  return ios && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|KAKAOTALK|Instagram|FBAN|FBAV|NAVER|Line\//i.test(ua);
+  return isIOS() && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|KAKAOTALK|Instagram|FBAN|FBAV|NAVER|Line\//i.test(ua);
 }
 
 /** 개발 서버에서만 모양 미리보기: ?install-preview=play|ios|desktop */
@@ -70,7 +68,7 @@ export function InstallPrompt() {
   const pathname = usePathname();
   // 카드는 닫힌 채 시작해 서버와 첫 화면이 같다 — 기기 판별은 브라우저에서 처음 한 번
   const [mode, setMode] = useState<Mode | undefined>(() =>
-    typeof window === "undefined" ? undefined : (previewMode() ?? (iosSafari() ? "ios" : android() ? "play" : undefined)),
+    typeof window === "undefined" ? undefined : (previewMode() ?? (iosSafari() ? "ios" : isAndroid() ? "play" : undefined)),
   );
   const [open, setOpen] = useState(false);
   const deferred = useRef<InstallEvent | undefined>(undefined);
@@ -82,7 +80,7 @@ export function InstallPrompt() {
     const onPrompt = (e: Event) => {
       e.preventDefault();
       deferred.current = e as InstallEvent;
-      if (!previewMode() && !android()) setMode("desktop");
+      if (!previewMode() && !isAndroid()) setMode("desktop");
     };
     const onInstalled = () => {
       write({ ...read(), installed: true });

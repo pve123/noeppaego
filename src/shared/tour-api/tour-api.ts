@@ -7,7 +7,7 @@ import { requestItems, type PublicDataResult } from "@/shared/public-data/public
  * 여러 컨텍스트(destination·itinerary)가 같이 쓰는 바깥 서버 클라이언트.
  */
 const BASE = "https://apis.data.go.kr/B551011/KorService2";
-const COMMON = { MobileOS: "ETC", MobileApp: "holidayTrip" };
+const COMMON = { MobileOS: "ETC", MobileApp: "noeppaego" };
 
 /** 관광 타입(contentTypeId) */
 export const ContentType = {

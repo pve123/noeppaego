@@ -6,11 +6,13 @@ import { ItineraryView } from "./plan-itinerary";
 const plan: ItineraryView = {
   regionName: "경기도 파주시",
   customized: false,
+  tailored: false,
   lengthLabel: "1박 2일",
   startLabel: "12.26(토)",
   endLabel: "12.27(일)",
   days: [1, 2].map((dayNumber) => ({
     dayNumber,
+    date: `2026-12-2${5 + dayNumber}`,
     dateLabel: `12.2${5 + dayNumber}`,
     slots: [
       {
@@ -18,7 +20,7 @@ const plan: ItineraryView = {
         time: "lunch",
         timeLabel: "점심",
         alternatives: [],
-        place: { id: `p${dayNumber}`, title: `식당${dayNumber}`, address: "", lat: 0, lng: 0, indoor: true },
+        place: { id: `p${dayNumber}`, title: `식당${dayNumber}`, address: "", lat: 0, lng: 0, kind: "restaurant", indoor: true },
       },
       { key: `h${dayNumber}`, time: "home", timeLabel: "귀가", alternatives: [], note: "집으로 출발" },
     ],

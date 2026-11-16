@@ -35,15 +35,15 @@ export type PlanItinerary = {
 
 export type PlaceView = {
   id: string;
-  /** 관광지·문화시설·축제·식당·카페·숙소 — 뱃지 색. 예전에 저장한 일정에는 없다 */
-  kind?: PlaceKind;
+  /** 관광지·문화시설·축제·식당·카페·숙소 — 화면이 종류 태그 색을 고른다 */
+  kind: PlaceKind;
   title: string;
   address: string;
   lat: number;
   lng: number;
   imageUrl?: string;
   url?: string;
-  /** 「한식」「한옥」「문화시설」 같은 짧은 분류. 예전에 저장한 축제는 「…부터 …까지 축제」 */
+  /** 「한식」「한옥」「문화시설」 같은 짧은 분류 */
   category?: string;
   /** 축제 기간 — 「2026.10.31(토)부터 2026.12.31(목)까지」 */
   period?: string;
@@ -64,7 +64,7 @@ export type SlotView = {
   alternatives: PlaceView[];
   /** 장소가 없을 때 안내 */
   note?: string;
-  /** 같은 날 앞 장소에서 오는 길 — 「차로 약 12분」. 길찾기를 못 하면 직선 거리로 어림한 같은 모양(예전에 저장한 일정은 「직선 1.2km」일 수 있다) */
+  /** 같은 날 앞 장소에서 오는 길 — 「차로 약 12분」. 길찾기를 못 하면 직선 거리로 어림해 같은 모양으로 쓴다 */
   travelLabel?: string;
   /** 비 소식이 있어 실내 장소로 골랐다 */
   forRain?: boolean;
@@ -78,8 +78,8 @@ export type WeatherView = {
 
 export type DayView = {
   dayNumber: number;
-  /** YYYY-MM-DD — 날마다 취향을 받을 때 쓴다. 예전에 저장한 일정에는 없다 */
-  date?: string;
+  /** YYYY-MM-DD — 날마다 취향을 받을 때 쓴다 */
+  date: string;
   dateLabel: string;
   /** 예보가 없는 날(10일 넘게 남음)은 undefined */
   weather?: WeatherView;
@@ -90,8 +90,8 @@ export type ItineraryView = {
   regionName: string;
   /** 사용자가 바꾼 칸이 하나라도 있다 */
   customized: boolean;
-  /** 여행 취향을 하나라도 골랐다. 예전에 저장한 일정에는 없다 */
-  tailored?: boolean;
+  /** 여행 취향을 하나라도 골랐다 */
+  tailored: boolean;
   /** 「2박 3일」 */
   lengthLabel: string;
   startLabel: string;

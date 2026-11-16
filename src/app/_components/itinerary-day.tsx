@@ -14,30 +14,23 @@ const DAY_BG = { yellow: "bg-yellow", mint: "bg-mint", coral: "bg-coral", lavend
 
 /**
  * 앞 장소에서 오는 길 — 카드 사이를 점선으로 잇고 그 위에 「🚗 약 12분」 알약. 차 아이콘 바탕은 그날 색.
- * 지금은 늘 「차로 약 N분」이지만, 예전에 저장한 일정에는 「직선 1.2km」가 남아 있을 수 있어 그때는 거리 아이콘으로 그린다.
+ * 받는 글은 늘 「차로 약 N분」이다 — 「차로」는 아이콘이 대신하니 글자에서 뗀다.
  */
 function TravelLeg({ label, tone }: { label: string; tone: MapPin["tone"] }) {
-  const byCar = label.startsWith("차로 ");
-  const text = byCar ? label.slice(3) : label;
+  const text = label.replace(/^차로 /, "");
   return (
     <div className="mb-1.5 flex items-center gap-2.5 pl-7">
       <span aria-hidden className="h-9 border-l-[3px] border-dashed border-ink/25" />
       <p className="inline-flex items-center gap-1.5 rounded-full border-2 border-ink/15 bg-surface py-0.5 pl-0.5 pr-3 text-[13px] font-bold tabular-nums text-ink/80">
         <span aria-hidden className={`flex size-7 items-center justify-center rounded-full border border-ink/15 ${DAY_BG[tone]}`}>
-          {byCar ? (
-            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 16v-3.5l2-4.5h9l3.5 4.5H20a1 1 0 0 1 1 1V16" />
-              <path d="M5.5 12.5h12" />
-              <circle cx="7" cy="16.5" r="1.8" fill="currentColor" />
-              <circle cx="17" cy="16.5" r="1.8" fill="currentColor" />
-            </svg>
-          ) : (
-            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-              <path d="M5 19L19 5" strokeDasharray="3 3" />
-            </svg>
-          )}
+          <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 16v-3.5l2-4.5h9l3.5 4.5H20a1 1 0 0 1 1 1V16" />
+            <path d="M5.5 12.5h12" />
+            <circle cx="7" cy="16.5" r="1.8" fill="currentColor" />
+            <circle cx="17" cy="16.5" r="1.8" fill="currentColor" />
+          </svg>
         </span>
-        {byCar && <span className="sr-only">다음 장소까지 차로</span>}
+        <span className="sr-only">다음 장소까지 차로</span>
         {text}
       </p>
     </div>
@@ -145,7 +138,7 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
             className="size-20 rounded-xl border border-ink/15 object-cover sm:size-32"
           />
         ) : (
-          place && foodKindOf(slot, place) && <FoodTile category={place.category} kind={foodKindOf(slot, place)!} />
+          place && foodKindOf(place) && <FoodTile category={place.category} kind={foodKindOf(place)!} />
         )}
 
         <div className="min-w-0 flex-1">
@@ -161,10 +154,10 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
               ) : (
                 <p className="font-display text-lg text-muted">{slot.note}</p>
               )}
-              {place && <KindBadges slot={slot} place={place} />}
-              {place && periodOf(place) && (
+              {place && <KindBadges place={place} />}
+              {place?.period && (
                 <p className="mt-1.5 text-[13px] text-muted">
-                  <WordWrap text={periodOf(place)!} />
+                  <WordWrap text={place.period} />
                 </p>
               )}
               {place?.intro && <ClampText text={place.intro} className="mt-1.5 text-[14px] leading-relaxed text-ink/80" />}
@@ -257,14 +250,9 @@ function WordWrap({ text }: { text: string }) {
 
 const isMeal = (slot: SlotView) => slot.time === "lunch" || slot.time === "dinner";
 
-/** 예전에 저장한 축제는 분류 칸에 「…부터 …까지 축제」로 기간이 들어 있다 */
-const OLD_FESTIVAL = / 축제$/;
-const isOldFestival = (place: PlaceView) => !place.kind && !!place.category && OLD_FESTIVAL.test(place.category) && place.category.includes("까지");
-const periodOf = (place: PlaceView) => place.period ?? (isOldFestival(place) ? place.category!.replace(OLD_FESTIVAL, "") : undefined);
-
-const KIND_LABEL: Partial<Record<NonNullable<PlaceView["kind"]>, string>> = { sight: "관광지", culture: "문화시설", festival: "축제", lodging: "숙소" };
-/** 종류마다 뱃지 색 — 식당 코랄 · 카페 피치 · 관광지 민트 · 축제 노랑 · 숙소 라벤더 */
-const KIND_TONE: Record<NonNullable<PlaceView["kind"]>, string> = {
+const KIND_LABEL: Partial<Record<PlaceView["kind"], string>> = { sight: "관광지", culture: "문화시설", festival: "축제", lodging: "숙소" };
+/** 종류마다 태그 색 — 식당 코랄 · 카페 피치 · 관광지 민트 · 축제 노랑 · 숙소 라벤더 */
+const KIND_TONE: Record<PlaceView["kind"], string> = {
   restaurant: "bg-coral",
   cafe: "bg-peach",
   sight: "bg-mint",
@@ -273,15 +261,9 @@ const KIND_TONE: Record<NonNullable<PlaceView["kind"]>, string> = {
   lodging: "bg-lavender",
 };
 
-/**
- * 종류 뱃지 — 모든 장소가 같은 모양, 색으로 종류를 가른다.
- * 식당·카페는 카카오가 「돈까스,우동」「제과,베이커리」처럼 쉼표로 붙여 주니 나눠서 여러 개로.
- */
-/** 식당·카페 칸이면 그 종류 — 사진이 없을 때 메뉴 그림 타일을 둔다 */
-function foodKindOf(slot: SlotView, place: PlaceView): "restaurant" | "cafe" | undefined {
-  if (place.kind === "restaurant" || place.kind === "cafe") return place.kind;
-  if (place.kind) return undefined;
-  return slot.time === "cafe" ? "cafe" : isMeal(slot) ? "restaurant" : undefined;
+/** 식당·카페면 그 종류 — 사진이 없을 때 메뉴 그림 타일을 둔다 */
+function foodKindOf(place: PlaceView): "restaurant" | "cafe" | undefined {
+  return place.kind === "restaurant" || place.kind === "cafe" ? place.kind : undefined;
 }
 
 /** 사진 없는 식당·카페 자리 — 메뉴 그림을 연한 사각형에 담아 카드 모양을 맞춘다 */
@@ -296,12 +278,16 @@ function FoodTile({ category, kind }: { category?: string; kind: "restaurant" | 
   );
 }
 
-function KindBadges({ slot, place }: { slot: SlotView; place: PlaceView }) {
-  const kind = place.kind ?? (isMeal(slot) ? "restaurant" : slot.time === "night" ? "lodging" : isOldFestival(place) ? "festival" : "sight");
+/**
+ * 종류 태그 — 모든 장소가 같은 모양, 색으로 종류를 가른다.
+ * 식당·카페는 카카오가 「돈까스,우동」「제과,베이커리」처럼 쉼표로 붙여 주니 나눠서 여러 개로.
+ */
+function KindBadges({ place }: { place: PlaceView }) {
+  const { kind } = place;
   const labels =
     kind === "restaurant" || kind === "cafe"
       ? (place.category ?? "").split(/[,·]/).map((k) => k.trim()).filter(Boolean)
-      : [isOldFestival(place) ? "축제" : (place.category ?? KIND_LABEL[kind] ?? "")].filter(Boolean);
+      : [place.category ?? KIND_LABEL[kind] ?? ""].filter(Boolean);
   if (labels.length === 0) return null;
   return (
     <ul aria-label="종류" className="mt-1.5 flex flex-wrap gap-1.5">

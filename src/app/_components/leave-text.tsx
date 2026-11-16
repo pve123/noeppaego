@@ -25,8 +25,8 @@ export function PeriodLine({ option, className = "" }: { option: BreakOptionView
 }
 
 /**
- * 연차 줄 — 문장 대신 뱃지로 먼저 보여 준다: [연차 없이 쉬어요] 또는 [연차 1일] 01.02(금).
- * 뱃지 색은 날짜 띠(DayStrip)와 같다 — 연차는 노랑, 연차 없음은 민트.
+ * 연차 줄 — 문장 대신 태그로 먼저 보여 준다: [연차 없이 쉬어요] 또는 [연차 1일] 01.02(금).
+ * 태그 색은 날짜 칸(DayStrip)과 같다 — 연차는 노랑, 연차 없음은 민트.
  */
 export function LeaveLine({ option, className = "" }: { option: BreakOptionView; className?: string }) {
   // 버튼(알약)과 헷갈리지 않게 네모 태그 — 누를 수 없는 정보다
