@@ -37,6 +37,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#fffbea",
+  // 밝은 화면 전용 — 「only」가 있어야 휴대폰 다크 모드가 색을 멋대로 뒤집지 않는다(크롬·앱의 자동 어둡게)
+  colorScheme: "only light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

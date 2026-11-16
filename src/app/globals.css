@@ -2,7 +2,8 @@
 
 /* 디자인: 소프트 팝 — 노랑·코랄 브랜드 색은 살리고, 얇은 연한 테두리와 부드러운 그림자로 정돈한다. 라이트 전용 */
 :root {
-  color-scheme: light;
+  /* only: 휴대폰 다크 모드가 화면을 억지로 어둡게 칠하지 않게 */
+  color-scheme: only light;
   --cream: #fffbea;
   --surface: #ffffff;
   --ink: #22223b;
