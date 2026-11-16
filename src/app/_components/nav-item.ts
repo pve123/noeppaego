@@ -3,6 +3,6 @@
  * 서버 컴포넌트(site-header)와 클라이언트 컴포넌트(account-menu)가 같이 쓴다.
  */
 const NAV_ITEM_SHAPE =
-  "h-10 items-center whitespace-nowrap rounded-full px-2.5 font-display text-[17px] leading-none transition-colors hover:bg-yellow sm:px-3";
+  "h-10 items-center whitespace-nowrap rounded-full px-2.5 font-display text-[17px] leading-none transition-colors hover:bg-yellow sm:px-3 aria-[current=page]:underline aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8";
 /** 넓은 화면에서만 보이는 메뉴 — 휴대폰은 아래 탭(TabBar)이 대신한다 */
 export const NAV_ITEM_WIDE = `hidden sm:inline-flex ${NAV_ITEM_SHAPE}`;

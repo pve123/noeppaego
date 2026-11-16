@@ -1,4 +1,6 @@
 import { BrainMascot } from "./brain-mascot";
+import { PlayStoreLink } from "./play-store";
+import { BUTTON_LG, PRIMARY, SECONDARY } from "./button-styles";
 
 /**
  * 첫 화면 — 「지쳐서 떠나고 싶은데 알아볼 기운도 없는 사람」에게 다 짜 준다고 말한다.
@@ -12,7 +14,8 @@ export function Hero() {
         <div aria-hidden className="absolute -top-2 right-0 flex size-24 items-center justify-center rounded-full border border-ink/10 bg-sky md:hidden">
           <BrainMascot className="size-20" />
         </div>
-        <p className="pr-28 font-bold text-muted md:pr-0">연차 계산부터 일정까지 다 짜 놨어요</p>
+        {/* 아래 설명(무엇을 해 주나)과 겹치지 않게 — 누구를 위한 건지 */}
+        <p className="pr-28 font-bold text-muted md:pr-0">알아볼 기운이 없어도 괜찮아요</p>
         <h1 className="font-brand text-[clamp(40px,6vw,80px)] leading-[1.12]">
           지쳤으면
           <br />
@@ -23,19 +26,23 @@ export function Hero() {
           <span className="block">연차는 적게 쓰고 가장 길게 쉬는 날을 찾아 드려요.</span>
           <span className="block">갈 곳과 맛집과 숙소까지 다 짜 드려요.</span>
         </p>
-        <a
-          href="#next"
-          className="inline-flex h-14 items-center self-start rounded-[18px] border border-ink/10 bg-coral px-7 font-display text-xl shadow-pop-sm transition-transform hover:-translate-y-0.5"
-        >
-          가장 가까운 연휴 보기
-        </a>
+        {/* 휴대폰은 두 버튼을 같은 폭으로 쌓고, 넓은 화면은 한 줄로 */}
+        <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
+          <a href="#next" className={`${BUTTON_LG} ${PRIMARY}`}>
+            가장 가까운 연휴 보기
+          </a>
+          {/* 두 번째 선택 — 옆 버튼과 같은 높이·모서리에 흰 바탕 */}
+          {/* 글자는 짧게 — 옆 주인공 버튼보다 커 보이지 않게 */}
+          <PlayStoreLink className={`${BUTTON_LG} ${SECONDARY}`} label="안드로이드 앱 받기" />
+        </div>
       </div>
 
       {/* 넓은 화면: 하늘색 원 안에서 튜브 타고 쉬는 뇌 */}
       <div className="hidden min-w-0 flex-1 justify-center md:flex">
         <div className="relative aspect-square w-[min(100%,400px)]">
           <div className="absolute inset-[6%] rounded-full border border-ink/10 bg-sky" />
-          <BrainMascot className="absolute inset-[14%] size-[72%]" />
+          {/* 튜브 타고 둥실 — 움직임 줄이기 설정이면 globals.css 가 멈춘다 */}
+          <BrainMascot className="float absolute inset-[14%] size-[72%]" />
           <span aria-hidden className="absolute bottom-[12%] left-0 -rotate-[8deg] rounded-full border border-ink/10 bg-lavender px-3.5 py-1.5 font-display text-[17px]">#징검다리</span>
           <span aria-hidden className="absolute right-0 top-[42%] rotate-6 rounded-full border border-ink/10 bg-mint px-3.5 py-1.5 font-display text-[17px]">#황금연휴</span>
         </div>

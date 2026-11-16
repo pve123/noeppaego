@@ -11,7 +11,10 @@ const ORDER: ReachPreference[] = ["2h", "4h", "any"];
 /** 거리 주소 조각 — 연휴 길이에 맞는 값(recommended)은 주소에 남기지 않는다 */
 export const reachQuery = (reach: ReachPreference, recommended: ReachPreference) => (reach === recommended ? "" : `&reach=${reach}`);
 
-/** 얼마나 멀리 갈까요 — 처음엔 연휴 길이에 맞는 칩(「추천」)이 골라져 있다. 링크라 자바스크립트 없이도 된다 */
+/**
+ * 얼마나 멀리 갈까요 — 셋 중 하나를 고르는 붙은 탭(연도 탭과 같은 모양). 처음엔 연휴 길이에 맞는 것(「추천」)이 골라져 있다.
+ * 휴대폰은 세 칸을 같은 폭으로 꽉 채운다. 링크라 자바스크립트 없이도 된다.
+ */
 export function ReachChips({
   basePath,
   originId,
@@ -29,7 +32,7 @@ export function ReachChips({
       <span id="reach-label" className="w-full font-bold sm:w-40">
         얼마나 멀리 갈까요?
       </span>
-      <nav aria-labelledby="reach-label" className="flex flex-wrap gap-2">
+      <nav aria-labelledby="reach-label" className="grid w-full grid-cols-3 rounded-full bg-ink/5 p-1 sm:inline-flex sm:w-auto">
         {ORDER.map((reach) => {
           const active = reach === selected;
           return (
@@ -38,12 +41,12 @@ export function ReachChips({
               href={`${basePath}?from=${originId}${reachQuery(reach, recommended)}`}
               scroll={false}
               aria-current={active ? "true" : undefined}
-              className={`inline-flex h-10 items-center rounded-full border border-ink/15 px-4 font-display text-[16px] transition-transform ${
-                active ? "bg-yellow" : "bg-surface hover:-translate-y-0.5"
+              className={`inline-flex h-9 items-center justify-center whitespace-nowrap rounded-full px-2 font-display text-[15px] transition-colors sm:px-4 sm:text-[16px] ${
+                active ? "bg-yellow shadow-pop-sm" : "text-muted hover:text-ink"
               }`}
             >
               {LABELS[reach]}
-              {reach === recommended && <span className="ml-1.5 text-[13px] text-ink/60">추천</span>}
+              {reach === recommended && <span className="ml-1 text-[12px] text-ink/60 sm:ml-1.5 sm:text-[13px]">추천</span>}
             </Link>
           );
         })}
