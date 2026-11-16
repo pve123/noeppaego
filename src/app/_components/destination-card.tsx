@@ -70,7 +70,7 @@ function FestivalRow({ festival }: { festival: FestivalView }) {
       <span aria-hidden className="mt-1.5 size-2.5 shrink-0 self-start rounded-full bg-coral ring-1 ring-ink/20" />
       <div className="min-w-0">
         <p className="font-bold leading-snug">{festival.title}</p>
-        {/* 기간은 달력 아이콘과 굵은 글씨로, 연휴 내내 열리면 민트 뱃지를 붙인다 */}
+        {/* 기간은 달력 아이콘과 굵은 글씨로, 연휴 내내 열리면 민트 태그를 붙인다 */}
         <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px]">
           <span className="inline-flex items-center gap-1.5 font-bold text-ink/80">
             <CalendarIcon className="size-4 shrink-0" />

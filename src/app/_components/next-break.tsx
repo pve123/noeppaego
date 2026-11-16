@@ -6,7 +6,7 @@ import { BUTTON_LG, PRIMARY } from "./button-styles";
 
 /**
  * 첫 화면의 가장 가까운 연휴 — 할 일은 「갈 곳 찾기」 하나.
- * 강조는 날수(노랑)와 버튼 둘만 — 남은 날·기간·연차는 뱃지 없이 글자로, 날짜는 칸(DayStrip)이 보여 준다.
+ * 강조는 날수(노랑)와 버튼 둘만 — 남은 날·기간·연차는 글자로, 날짜는 칸(DayStrip)과 색 설명이 보여 준다.
  */
 export function NextBreak({ item, upcomingLabel = "다음 연휴까지" }: { item: LongBreakView; upcomingLabel?: string }) {
   const { base, status } = item;
