@@ -1,25 +1,59 @@
 @import "tailwindcss";
 
-/* 디자인: 소프트 팝 — 노랑·코랄 브랜드 색은 살리고, 얇은 연한 테두리와 부드러운 그림자로 정돈한다. 라이트 전용 */
+/*
+ * 디자인: 소프트 팝 — 노랑·코랄 브랜드 색은 살리고, 얇은 연한 테두리와 부드러운 그림자로 정돈한다.
+ * 밝은 화면은 「모래사장」(따뜻한 베이지 + 먹색 띠), 어두운 화면은 「따뜻한 밤」(먹색 + 크림 글자) — 띠 색이 어두운 화면 바탕과 이어진다.
+ * 밝은 화면과 어두운 화면(휴대폰 다크 모드) 둘 다 우리가 고른 색으로 그린다 — 아래 「어두운 화면」 참고.
+ * 우리 다크 모드가 있어야 삼성 인터넷 같은 브라우저가 화면을 멋대로 어둡게 칠하지 않는다.
+ */
 :root {
-  /* only: 휴대폰 다크 모드가 화면을 억지로 어둡게 칠하지 않게 */
-  color-scheme: only light;
-  --cream: #fffbea;
-  --surface: #ffffff;
-  --ink: #22223b;
-  --muted: #4a4a68;
-  --coral: #ff6b6b;
+  color-scheme: light dark;
+  /* 화면 바탕 — 이름은 크림이지만 어두운 화면에서는 먹색이 된다 */
+  --cream: #faf5ec;
+  --surface: #fffdf9;
+  /* 글자 색 — 어두운 화면에서는 크림이 된다 */
+  --ink: #2a2622;
+  --muted: #6b6257;
+  --coral: #ff7a6b;
   /* 주말 칸 — 공휴일(코랄)과 같은 「쉬는 날」 계열을 옅게 */
-  --coral-soft: #ffd6d6;
+  --coral-soft: #ffd9cf;
   /* 되돌릴 수 없는 버튼(탈퇴)에만 — 흰 글자와 대비 4.5:1 이상 */
   --danger: #d7263d;
-  --yellow: #ffd84d;
+  --yellow: #ffd34f;
   --mint: #3ccfb4;
   --lavender: #b8b5ff;
   --peach: #ffb38a;
   /* 앱 아이콘 배경 — 쉬는 느낌의 포인트(첫 화면 그림, 캐릭터 자리)에만 */
-  --sky: #7fd3f5;
-  --soft-ink: #e6e4f5;
+  --sky: #8fd6ef;
+  /* 옅은 바탕(불러오는 자리, 작은 동그라미) */
+  --soft-ink: #ece4d6;
+  /* 진한 띠(다음 연휴·상세 머리) 바탕 */
+  --band: #2f2b26;
+  /* 불러오는 자리가 반짝일 때 밝은 쪽 */
+  --shimmer-hi: #f7f1e6;
+  --band-shimmer: #3a352f;
+  --band-shimmer-hi: #4a443c;
+  /* 그림자 색(r g b) */
+  --shadow-rgb: 60 45 30;
+}
+
+/*
+ * 어두운 화면 — 「따뜻한 밤」: 먹색 바탕에 크림 글자. 노랑·코랄·민트는 그대로 둔다.
+ * 글자 색(ink)과 바탕(cream)을 뒤바꾸는 셈이라, 밝은 바탕(노랑·코랄 등)과 진한 띠 안은 아래 base 층에서 따로 맞춘다.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cream: #1b1916;
+    --surface: #26231f;
+    --ink: #fff3dc;
+    --muted: #c2b9a8;
+    --coral-soft: #5c3a33;
+    --sky: #2d5b70;
+    --soft-ink: #3a352f;
+    --band: #2f2b26;
+    --shimmer-hi: #4a443c;
+    --shadow-rgb: 0 0 0;
+  }
 }
 
 @theme inline {
@@ -36,13 +70,14 @@
   --color-peach: var(--peach);
   --color-sky: var(--sky);
   --color-soft-ink: var(--soft-ink);
+  --color-band: var(--band);
   --font-sans: var(--font-noto), system-ui, sans-serif;
   /* 제목·버튼은 굵은 본문 글꼴, 둥근 손글씨(Jua)는 로고·첫 화면 제목·큰 숫자에만(font-brand) */
   --font-display: var(--font-noto), system-ui, sans-serif;
   --font-brand: var(--font-jua), var(--font-noto), sans-serif;
   /* 퍼지는 그림자 — 비껴 찍은 스티커 그림자 대신 */
-  --shadow-pop: 0 1px 2px rgb(34 34 59 / 0.05), 0 10px 28px -8px rgb(34 34 59 / 0.16);
-  --shadow-pop-sm: 0 1px 2px rgb(34 34 59 / 0.05), 0 4px 14px -6px rgb(34 34 59 / 0.18);
+  --shadow-pop: 0 1px 2px rgb(var(--shadow-rgb) / 0.05), 0 10px 28px -8px rgb(var(--shadow-rgb) / 0.16);
+  --shadow-pop-sm: 0 1px 2px rgb(var(--shadow-rgb) / 0.05), 0 4px 14px -6px rgb(var(--shadow-rgb) / 0.18);
 }
 
 body {
@@ -70,6 +105,38 @@ body {
   h4 {
     text-wrap-style: balance;
   }
+
+  @media (prefers-color-scheme: dark) {
+    /*
+     * 밝은 바탕(노랑·코랄·민트·피치·라벤더) 위 글자는 어두운 화면에서도 진한 잉크 — 크림 글자는 노랑 위에서 안 읽힌다.
+     * 마우스를 올리거나 체크해서 노랑이 되는 칸도 같다. base 층이라 text-* 유틸리티가 있으면 그쪽이 이긴다.
+     * 감싸지 않은 선택자로 쓴다 — :is() 는 빌드가 :where()(우선순위 0)로 바꿔 링크 기본 색(a { color: inherit })에 진다.
+     * :has 를 모르는 옛 브라우저가 규칙째 버리지 않게 체크 칸은 따로 둔다.
+     */
+    .bg-yellow,
+    .bg-coral,
+    .bg-mint,
+    .bg-peach,
+    .bg-lavender,
+    [class~="hover:bg-yellow"]:hover {
+      --ink: #2a2622;
+      --muted: #6b6257;
+      color: var(--ink);
+    }
+    [class~="has-[:checked]:bg-yellow"]:has(:checked),
+    [class~="has-[:checked]:bg-peach"]:has(:checked),
+    [class~="has-[:checked]:bg-coral"]:has(:checked) {
+      --ink: #2a2622;
+      --muted: #6b6257;
+      color: var(--ink);
+    }
+  }
+
+  /* 진한 띠 안의 글자 — 크림·옅은 크림(바탕 cream 이 어두운 화면에서 먹색이 되어도 그대로) */
+  .bg-band {
+    --cream: #fff3dc;
+    --soft-ink: #d9cfbe;
+  }
 }
 
 /* 본문은 적어도 한 화면 — 불러오는 동안 푸터가 첫 화면에 올라왔다가 밀려 내려가지 않게 */
@@ -86,12 +153,12 @@ main {
 
 /* ── 불러오는 자리: 빛이 지나간다 ─────────────────────── */
 .shimmer {
-  background: linear-gradient(100deg, var(--soft-ink) 30%, #f4f2fb 50%, var(--soft-ink) 70%);
+  background: linear-gradient(100deg, var(--soft-ink) 30%, var(--shimmer-hi) 50%, var(--soft-ink) 70%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
 .shimmer-dark {
-  background: linear-gradient(100deg, #2c2c48 30%, #3a3a5c 50%, #2c2c48 70%);
+  background: linear-gradient(100deg, var(--band-shimmer) 30%, var(--band-shimmer-hi) 50%, var(--band-shimmer) 70%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }

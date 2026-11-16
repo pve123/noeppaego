@@ -11,7 +11,7 @@ import { BUTTON_LG, PRIMARY } from "./button-styles";
 export function NextBreak({ item, upcomingLabel = "다음 연휴까지" }: { item: LongBreakView; upcomingLabel?: string }) {
   const { base, status } = item;
   return (
-    <section id="next" aria-labelledby="next-title" className="scroll-mt-4 bg-ink text-cream">
+    <section id="next" aria-labelledby="next-title" className="scroll-mt-4 bg-band text-cream">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-4 py-16 text-center sm:px-6">
         <p className="font-bold text-yellow">
           {status.kind === "ongoing" && "지금 연휴 중이에요"}
