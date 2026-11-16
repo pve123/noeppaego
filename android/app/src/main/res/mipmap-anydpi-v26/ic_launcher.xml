@@ -30,4 +30,6 @@
         </layer-list>
     </background>
     <foreground android:drawable="@android:color/transparent" />
+    <!-- 테마 아이콘(안드로이드 13+): 사용자가 켜면 이 실루엣을 배경색에 맞춰 칠한다. 원본 public/art/icon-monochrome.svg -->
+    <monochrome android:drawable="@drawable/ic_monochrome" />
 </adaptive-icon>

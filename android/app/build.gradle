@@ -39,7 +39,11 @@ def twaManifest = [
     // - short_name: Shorter string used if |name| is too long.
     // - url: Absolute path of the URL to launch the app with (e.g '/create').
     // - icon: Name of the resource in the drawable folder to use as an icon.
-    shortcuts: [],
+    shortcuts: [
+        [name: '다음 연휴 보기', short_name: '다음 연휴', url: 'https://noeppaego.com/#next', icon: 'shortcut_next'],
+        [name: '연휴 목록', short_name: '연휴 목록', url: 'https://noeppaego.com/#breaks', icon: 'shortcut_breaks'],
+        [name: '찜한 일정', short_name: '찜한 일정', url: 'https://noeppaego.com/saved', icon: 'shortcut_saved'],
+    ],
     // The duration of fade out animation in milliseconds to be played when removing splash screen.
     splashScreenFadeOutDuration: 300,
     generatorApp: 'bubblewrap-cli', // Application that generated the Android Project
