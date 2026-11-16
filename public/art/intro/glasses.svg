@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 시작 애니메이션 부품 2: 선글라스 -->
+  <rect x="45" y="61" width="16" height="9" rx="4" fill="#22223B"/>
+  <rect x="65" y="61" width="16" height="9" rx="4" fill="#22223B"/>
+  <path d="M61 64h4" stroke="#22223B" stroke-width="3"/>
+</svg>

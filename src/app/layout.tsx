@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Jua, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
+import { AppIntro, AppIntroScript } from "./_components/app-intro";
 import { ServiceWorker } from "./_components/service-worker";
 import { InstallPrompt } from "./_components/install-prompt";
 import { ScrollToTop } from "./_components/scroll-to-top";
@@ -36,10 +37,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // 주소창·상태바 색 — 화면 바탕(globals.css 의 --cream)과 같게, 어두운 화면이면 먹색
+  // 주소창·상태바 색 — 화면 바탕(globals.css 의 --cream)과 같게, 어두운 화면이면 밤바다
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#faf5ec" },
-    { media: "(prefers-color-scheme: dark)", color: "#1b1916" },
+    { media: "(prefers-color-scheme: dark)", color: "#1f3340" },
   ],
   // 밝은·어두운 화면을 둘 다 직접 그린다고 알린다 — 브라우저가 화면을 멋대로 어둡게 칠하지 않게
   colorScheme: "light dark",
@@ -47,8 +48,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko" className={`${jua.variable} ${noto.variable} h-full antialiased`}>
+    // suppressHydrationWarning — 시작 애니메이션 스크립트가 그리기 전에 <html data-intro> 를 붙인다
+    <html lang="ko" className={`${jua.variable} ${noto.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <AppIntroScript />
+      </head>
       <body className="min-h-full overflow-x-hidden">
+        <AppIntro />
         {children}
         <ServiceWorker />
         {/* 주소(usePathname)를 읽어서 — 감싸지 않으면 페이지를 미리 만들어 두지 못한다 */}
