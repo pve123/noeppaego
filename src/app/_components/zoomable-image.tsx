@@ -37,7 +37,7 @@ export function ZoomableImage({ src, title, className }: { src: string; title: s
         aria-label={`${title} 사진`}
         // 사진 바깥(어두운 곳)을 누르면 닫는다
         onClick={(e) => e.target === dialog.current && dialog.current?.close()}
-        className="m-auto max-h-[90vh] w-[min(92vw,960px)] overflow-visible bg-transparent p-0 backdrop:bg-ink/80"
+        className="m-auto max-h-[90vh] w-[min(92vw,960px)] overflow-visible bg-transparent p-0 backdrop:bg-black/80"
       >
         <figure className="overflow-hidden rounded-3xl border border-cream bg-surface">
           {/* eslint-disable-next-line @next/next/no-img-element -- 원본 크기를 모르는 바깥 사진이라 img 로 맞춘다 */}

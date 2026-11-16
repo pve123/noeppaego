@@ -113,7 +113,7 @@ export function TripPrefsSheet({ base, prefs, hasPicks }: { base: string; prefs:
         aria-labelledby="prefs-sheet-title"
         onClick={(e) => e.target === e.currentTarget && dialog.current?.close()}
         // overflow-clip — 시트 자체는 스크롤되지 않는다(hidden 은 초점이 갈 때 브라우저가 밀어 올릴 수 있다). 스크롤은 안쪽 본문만.
-        className="fixed inset-x-0 bottom-0 top-auto m-0 max-h-[90dvh] w-full max-w-none overflow-clip rounded-t-3xl border border-b-0 border-ink/10 bg-cream p-0 text-ink shadow-pop backdrop:bg-ink/50 sm:inset-0 sm:m-auto sm:max-h-[85dvh] sm:max-w-xl sm:rounded-3xl sm:border-b-[3px]"
+        className="fixed inset-x-0 bottom-0 top-auto m-0 max-h-[90dvh] w-full max-w-none overflow-clip rounded-t-3xl border border-b-0 border-ink/10 bg-cream p-0 text-ink shadow-pop backdrop:bg-black/50 sm:inset-0 sm:m-auto sm:max-h-[85dvh] sm:max-w-xl sm:rounded-3xl sm:border-b-[3px]"
       >
         <form ref={form} onSubmit={submit} onChange={() => setCount(prefsEntries(read()).length)} className="flex max-h-[inherit] flex-col">
           <header className="shrink-0 px-5 pt-3">

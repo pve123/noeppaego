@@ -9,10 +9,10 @@ import { Steps } from "./steps";
 const Bar = ({ className = "" }: { className?: string }) => <div aria-hidden className={`shimmer rounded-lg ${className}`} />;
 const DarkBar = ({ className = "" }: { className?: string }) => <div aria-hidden className={`shimmer-dark rounded-lg ${className}`} />;
 
-/** 잉크색 띠(첫 화면 다음 연휴·상세 머리) */
+/** 진한 띠(첫 화면 다음 연휴·상세 머리) */
 export function BandSkeleton({ steps, tall = false }: { steps: string[]; tall?: boolean }) {
   return (
-    <div className="mt-4 bg-ink">
+    <div className="mt-4 bg-band">
       <div className={`mx-auto flex max-w-6xl flex-col gap-3 px-4 sm:px-6 ${tall ? "items-center py-16" : "py-8 sm:py-10"}`}>
         <LoadingStatus steps={steps} tone="dark" />
         <DarkBar className="h-5 w-40" />
