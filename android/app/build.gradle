@@ -26,13 +26,13 @@ def twaManifest = [
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: '뇌빼고', // The application name.
     launcherName: '뇌빼고', // The name shown on the Android Launcher.
-    themeColor: '#FFFBEA', // The color used for the status bar.
-    themeColorDark: '#000000', // The color used for the dark status bar.
-    navigationColor: '#FFFBEA', // The color used for the navigation bar.
-    navigationColorDark: '#FFFBEA', // The color used for the dark navbar.
-    navigationDividerColor: '#FFFBEA', // The navbar divider color.
-    navigationDividerColorDark: '#FFFBEA', // The dark navbar divider color.
-    backgroundColor: '#FFFBEA', // The color used for the splash screen background.
+    themeColor: '#FAF5EC', // The color used for the status bar.
+    themeColorDark: '#1F3340', // The color used for the dark status bar.
+    navigationColor: '#FAF5EC', // The color used for the navigation bar.
+    navigationColorDark: '#1F3340', // The color used for the dark navbar.
+    navigationDividerColor: '#FAF5EC', // The navbar divider color.
+    navigationDividerColorDark: '#1F3340', // The dark navbar divider color.
+    backgroundColor: '#FAF5EC', // The color used for the splash screen background.
     enableNotifications: false, // Set to true to enable notification delegation.
     // Every shortcut must include the following fields:
     // - name: String that will show up in the shortcut.
@@ -57,8 +57,8 @@ android {
         applicationId "com.hosunglee.holidaytrip"
         minSdkVersion 24
         targetSdkVersion 36
-        versionCode 3
-        versionName "3"
+        versionCode 4
+        versionName "4"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name

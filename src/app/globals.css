@@ -2,7 +2,8 @@
 
 /*
  * 디자인: 소프트 팝 — 노랑·코랄 브랜드 색은 살리고, 얇은 연한 테두리와 부드러운 그림자로 정돈한다.
- * 밝은 화면은 「모래사장」(따뜻한 베이지 + 먹색 띠), 어두운 화면은 「따뜻한 밤」(먹색 + 크림 글자) — 띠 색이 어두운 화면 바탕과 이어진다.
+ * 밝은 화면은 「모래사장」(따뜻한 베이지 + 밤바다 띠), 어두운 화면은 「밤바다」(짙은 청록 + 크림 글자) — 해변과 밤바다.
+ * 밝은 화면의 띠 색이 어두운 화면 바탕과 같아 모드를 바꿔도 한 앱으로 이어진다.
  * 밝은 화면과 어두운 화면(휴대폰 다크 모드) 둘 다 우리가 고른 색으로 그린다 — 아래 「어두운 화면」 참고.
  * 우리 다크 모드가 있어야 삼성 인터넷 같은 브라우저가 화면을 멋대로 어둡게 칠하지 않는다.
  */
@@ -28,30 +29,32 @@
   /* 옅은 바탕(불러오는 자리, 작은 동그라미) */
   --soft-ink: #ece4d6;
   /* 진한 띠(다음 연휴·상세 머리) 바탕 */
-  --band: #2f2b26;
+  --band: #1f3340;
   /* 불러오는 자리가 반짝일 때 밝은 쪽 */
   --shimmer-hi: #f7f1e6;
-  --band-shimmer: #3a352f;
-  --band-shimmer-hi: #4a443c;
+  --band-shimmer: #2c3f4b;
+  --band-shimmer-hi: #40515c;
   /* 그림자 색(r g b) */
   --shadow-rgb: 60 45 30;
 }
 
 /*
- * 어두운 화면 — 「따뜻한 밤」: 먹색 바탕에 크림 글자. 노랑·코랄·민트는 그대로 둔다.
+ * 어두운 화면 — 「밤바다」: 짙은 청록 바탕에 크림 글자. 노랑·코랄·민트는 그대로 둔다(차가운 바탕이라 더 또렷하다).
  * 글자 색(ink)과 바탕(cream)을 뒤바꾸는 셈이라, 밝은 바탕(노랑·코랄 등)과 진한 띠 안은 아래 base 층에서 따로 맞춘다.
  */
 @media (prefers-color-scheme: dark) {
   :root {
-    --cream: #1b1916;
-    --surface: #26231f;
+    --cream: #1f3340;
+    --surface: #2c3f4b;
     --ink: #fff3dc;
-    --muted: #c2b9a8;
-    --coral-soft: #5c3a33;
-    --sky: #2d5b70;
-    --soft-ink: #3a352f;
-    --band: #2f2b26;
-    --shimmer-hi: #4a443c;
+    --muted: #cfc6b6;
+    --coral-soft: #5e4550;
+    --sky: #40515c;
+    --soft-ink: #394b56;
+    --band: #354753;
+    --shimmer-hi: #4b5b66;
+    --band-shimmer: #40515c;
+    --band-shimmer-hi: #4b5b66;
     --shadow-rgb: 0 0 0;
   }
 }
@@ -358,5 +361,97 @@ html:has(dialog[open]:modal) {
   :is(h1, h2).font-display {
     font-weight: 800;
     letter-spacing: -0.02em;
+  }
+}
+
+/*
+ * ── 앱 시작 애니메이션 「선글라스 척」(app-intro.tsx) ───────────
+ * <html data-intro> 일 때만 보인다. 바탕은 앱 스플래시와 같은 모래사장 색 — 정지 스플래시에서 끊김 없이 이어지게.
+ * 캐릭터 크기는 스플래시 그림(300dp)과 같게 둔다. 끝나면 스스로 투명해지고 누를 수도 없게 된다.
+ */
+.app-intro {
+  display: none;
+}
+[data-intro] .app-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  /* 앱 스플래시 바탕과 같다 — 밝은 화면 모래사장, 어두운 화면 밤바다(android values-night) */
+  background: #faf5ec;
+  animation: app-intro-out 0.3s ease-in 1.1s both;
+  /* 내용이 화면 전환(View Transitions)으로 나타날 때 그 장면이 위로 올라오지 않게 — 따로 이름을 주고 맨 위에 둔다 */
+  view-transition-name: app-intro;
+}
+@media (prefers-color-scheme: dark) {
+  [data-intro] .app-intro {
+    background: #1f3340;
+  }
+}
+::view-transition-group(app-intro) {
+  z-index: 100;
+}
+::view-transition-old(app-intro),
+::view-transition-new(app-intro) {
+  animation: none;
+}
+.app-intro-stage {
+  position: relative;
+  width: min(300px, 80vw);
+  aspect-ratio: 1;
+}
+.app-intro-stage img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* 선글라스를 이마로 올렸다가(윙크) 다시 척 — 그림 좌표 128 칸 기준 11칸 = 8.6% */
+.app-intro-glasses {
+  transform-origin: 50% 47%;
+  animation: app-intro-glasses 1.1s ease-in-out both;
+}
+.app-intro-wink {
+  opacity: 0;
+  animation: app-intro-wink 1.1s steps(1) both;
+}
+@keyframes app-intro-glasses {
+  0% {
+    transform: none;
+  }
+  25%,
+  60% {
+    transform: translateY(-8.6%) rotate(-6deg);
+  }
+  75% {
+    transform: translateY(0.8%);
+  }
+  100% {
+    transform: none;
+  }
+}
+/* 눈 뜸 → 잠깐 감음(윙크) → 다시 뜸 → 선글라스에 가려짐 */
+@keyframes app-intro-wink {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0;
+  }
+  52% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0;
+  }
+}
+@keyframes app-intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
   }
 }
