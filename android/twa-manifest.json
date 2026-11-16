@@ -4,13 +4,13 @@
   "name": "뇌빼고",
   "launcherName": "뇌빼고",
   "display": "standalone",
-  "themeColor": "#FFFBEA",
-  "themeColorDark": "#000000",
-  "navigationColor": "#FFFBEA",
-  "navigationColorDark": "#FFFBEA",
-  "navigationDividerColor": "#FFFBEA",
-  "navigationDividerColorDark": "#FFFBEA",
-  "backgroundColor": "#FFFBEA",
+  "themeColor": "#FAF5EC",
+  "themeColorDark": "#1B1916",
+  "navigationColor": "#FAF5EC",
+  "navigationColorDark": "#1B1916",
+  "navigationDividerColor": "#FAF5EC",
+  "navigationDividerColorDark": "#1B1916",
+  "backgroundColor": "#FAF5EC",
   "enableNotifications": false,
   "startUrl": "/",
   "iconUrl": "https://noeppaego.com/icons/maskable-512.png",
@@ -20,8 +20,8 @@
     "path": "/Users/dshare/keys/noeppaego-upload.keystore",
     "alias": "upload"
   },
-  "appVersionName": "3",
-  "appVersionCode": 3,
+  "appVersionName": "4",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://noeppaego.com/manifest.webmanifest",
@@ -43,5 +43,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "3"
+  "appVersion": "4"
 }
