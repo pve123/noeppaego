@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- 뇌빼고 캐릭터 — 선글라스 끼고 튜브 타고 쉬는 뇌. 원본(이 SVG)을 고치면 같은 이름의 PNG(512px, 투명 바탕)도 다시 내보낸다 -->
+  <circle cx="100" cy="28" r="12" fill="#ffd54d" stroke="#22223B" stroke-width="3"/>
+  <ellipse cx="64" cy="92" rx="44" ry="15" fill="#ff6b6b" stroke="#22223B" stroke-width="4"/>
+  <ellipse cx="64" cy="90" rx="26" ry="6" fill="#7FD3F5" stroke="#22223B" stroke-width="3"/>
+  <g transform="translate(34 46)">
+    <path d="M8 30c-9-3-9-16 0-19c0-9 11-13 17-8c5-6 15-6 19 0c7-4 16 1 15 9c8 3 8 15 0 18c1 8-8 13-15 9c-5 6-14 6-19 0c-7 5-17 1-17-9z" fill="#ff9fb0" stroke="#22223B" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M8 13q5 3 3 8M51 12q-5 3-3 8M22 4q2 4 0 7M38 4q-2 4 0 7" fill="none" stroke="#22223B" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="11" y="15" width="16" height="9" rx="4" fill="#22223B"/>
+    <rect x="31" y="15" width="16" height="9" rx="4" fill="#22223B"/>
+    <path d="M27 18h4" stroke="#22223B" stroke-width="3"/>
+    <path d="M24 31q5 4 10 0" fill="none" stroke="#22223B" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>
