@@ -37,10 +37,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // 주소창·상태바 색 — 화면 바탕(globals.css 의 --cream)과 같게, 어두운 화면이면 먹색
+  // 주소창·상태바 색 — 화면 바탕(globals.css 의 --cream)과 같게, 어두운 화면이면 밤바다
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#faf5ec" },
-    { media: "(prefers-color-scheme: dark)", color: "#1b1916" },
+    { media: "(prefers-color-scheme: dark)", color: "#1f3340" },
   ],
   // 밝은·어두운 화면을 둘 다 직접 그린다고 알린다 — 브라우저가 화면을 멋대로 어둡게 칠하지 않게
   colorScheme: "light dark",
