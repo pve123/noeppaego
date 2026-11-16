@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { currentUser } from "@/shared/auth/session";
 import { AccountMenu, LoginNotice } from "./account-menu";
+import { CONTACT_EMAIL } from "./contact";
+import { PlayStoreLink } from "./play-store";
 import { NAV_ITEM_WIDE } from "./nav-item";
 import { Toast } from "./toast";
 
@@ -81,17 +83,18 @@ export function SiteFooter() {
         </div>
         <div className="w-full sm:w-auto">
           <p className="font-display text-lg">정보 출처</p>
-          {/* 휴대폰: 한 상자 안에 줄을 맞춘 표 / 넓은 화면: 칩 */}
-          <ul className="mt-2 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border border-ink/15 bg-surface text-sm sm:flex sm:flex-wrap sm:gap-2 sm:divide-y-0 sm:overflow-visible sm:rounded-none sm:border-0 sm:bg-transparent">
+          {/* 누르는 게 아니라 글자로만 — 버튼(알약)과 헷갈리지 않게 줄 맞춘 두 칸 */}
+          <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm sm:grid-cols-[auto_auto_auto_auto] sm:gap-x-5">
             {SOURCES.map((s) => (
-              <li
-                key={s.who}
-                className="flex items-center justify-between gap-3 px-4 py-2.5 sm:gap-1.5 sm:rounded-full sm:border sm:border-ink/15 sm:bg-surface sm:px-3 sm:py-1"
-              >
-                <span className="text-muted">{s.what}</span> <span className="font-bold">{s.who}</span>
-              </li>
+              <div key={s.who} className="contents">
+                <dt className="text-muted">{s.what}</dt>
+                <dd className="font-bold">{s.who}</dd>
+              </div>
             ))}
-          </ul>
+          </dl>
+          <div className="mt-5">
+            <PlayStoreLink />
+          </div>
         </div>
       </div>
       <div className="border-t-2 border-ink/15">
@@ -100,6 +103,7 @@ export function SiteFooter() {
           {[
             { href: "/privacy", label: "개인정보처리방침" },
             { href: "/account#delete", label: "계정 삭제" },
+            { href: `mailto:${CONTACT_EMAIL}`, label: "문의" },
           ].map((l, i) => (
             <span key={l.href} className="flex items-center gap-3">
               {i > 0 && (

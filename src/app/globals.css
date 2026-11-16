@@ -8,6 +8,10 @@
   --ink: #22223b;
   --muted: #4a4a68;
   --coral: #ff6b6b;
+  /* 주말 칸 — 공휴일(코랄)과 같은 「쉬는 날」 계열을 옅게 */
+  --coral-soft: #ffd6d6;
+  /* 되돌릴 수 없는 버튼(탈퇴)에만 — 흰 글자와 대비 4.5:1 이상 */
+  --danger: #d7263d;
   --yellow: #ffd84d;
   --mint: #3ccfb4;
   --lavender: #b8b5ff;
@@ -23,6 +27,8 @@
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
+  --color-danger: var(--danger);
   --color-yellow: var(--yellow);
   --color-mint: var(--mint);
   --color-lavender: var(--lavender);
@@ -223,6 +229,20 @@ html {
     transform: translateY(0) scale(1);
   }
 }
+/* 첫 화면 캐릭터 — 물 위에 떠 있는 듯 천천히 */
+.float {
+  animation: float 4.5s ease-in-out infinite;
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-1.5deg);
+  }
+}
+
 .install-bob {
   animation: loading-pin 0.7s ease-in-out 0.5s 2;
 }

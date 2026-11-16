@@ -16,6 +16,7 @@ import {
   prefsSummary,
   type Option,
 } from "./trip-prefs";
+import { BUTTON_MD, PRIMARY } from "./button-styles";
 
 /**
  * 여행 취향 카드 + 시트 — 카드는 고른 취향을 칩으로 보여 주고, 누르면 시트가 열린다(휴대폰은 아래에서, 넓은 화면은 가운데).
@@ -186,7 +187,7 @@ export function TripPrefsSheet({ base, prefs, hasPicks }: { base: string; prefs:
               </span>
               <button
                 type="submit"
-                className="ml-auto inline-flex h-13 min-w-0 flex-1 items-center justify-center gap-2 rounded-[18px] border border-ink/10 bg-coral px-5 font-display text-[18px] shadow-pop-sm transition-transform hover:-translate-y-0.5 sm:flex-none"
+                className={`ml-auto min-w-0 flex-1 px-5 sm:flex-none ${BUTTON_MD} ${PRIMARY}`}
               >
                 이대로 다시 짜기
               </button>

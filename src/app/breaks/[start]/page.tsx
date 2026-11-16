@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { CalendarDate, findLongBreak, type LongBreakView } from "@/contexts/calendar";
 import { findDestinations, reachPreferenceOf, type ReachPreference } from "@/contexts/destination";
 import { PublicDataError } from "@/shared/public-data/public-data";
+import { DayLegend, DayStrip } from "../../_components/day-strip";
 import { DestinationCard } from "../../_components/destination-card";
 import { KakaoMap, type MapPin } from "../../_components/kakao-map";
 import { LeaveLine, PeriodLine } from "../../_components/leave-text";
@@ -18,6 +19,7 @@ import { SourceError } from "../../_components/source-error";
 import { Steps } from "../../_components/steps";
 import { EMPTY_BOX } from "../../_components/empty-box";
 import { BrainMascot } from "../../_components/brain-mascot";
+import { BUTTON_MD, PRIMARY } from "../../_components/button-styles";
 
 export const metadata: Metadata = {
   title: "갈 곳 고르기 | 뇌빼고",
@@ -80,6 +82,12 @@ async function BreakDetail({ params, searchParams }: PageProps<"/breaks/[start]"
             <PeriodLine option={base} className="text-cream" />
             <LeaveLine option={base} className="mt-2" />
           </>
+        }
+        aside={
+          <div className="flex flex-col items-center gap-3">
+            <DayStrip days={base.days} tone="dark" />
+            <DayLegend days={base.days} tone="dark" />
+          </div>
         }
       />
       <RevealSuspense fallback={<DestinationsSkeleton />}>
@@ -200,7 +208,7 @@ function EmptyDestinations({
         <Link
           href={`${basePath}?from=${originId}${reachQuery(wider, recommended)}`}
           scroll={false}
-          className="mt-5 inline-flex h-12 items-center rounded-[16px] border border-ink/10 bg-coral px-6 font-display text-lg shadow-pop-sm transition-transform hover:-translate-y-0.5"
+          className={`mt-5 ${BUTTON_MD} ${PRIMARY}`}
         >
           「{reachLabel(wider)}」로 넓혀 보기
         </Link>

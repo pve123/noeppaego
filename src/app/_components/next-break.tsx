@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { LongBreakView } from "@/contexts/calendar";
-import { DayStrip } from "./day-strip";
+import { DayLegend, DayStrip } from "./day-strip";
 import { periodText } from "./leave-text";
+import { BUTTON_LG, PRIMARY } from "./button-styles";
 
 /**
  * 첫 화면의 가장 가까운 연휴 — 할 일은 「갈 곳 찾기」 하나.
@@ -26,11 +27,14 @@ export function NextBreak({ item, upcomingLabel = "다음 연휴까지" }: { ite
           <span className="block">{periodText(base)}</span>
           <span className="block">{base.leaveCount === 0 ? "연차 없이 쉬어요." : `연차 ${base.leaveCount}일만 쓰고 쉬어요.`}</span>
         </p>
-        <DayStrip days={base.days} tone="dark" />
+        <div className="flex flex-col items-center gap-3">
+          <DayStrip days={base.days} tone="dark" />
+          <DayLegend days={base.days} tone="dark" />
+        </div>
         {status.kind !== "past" && (
           <Link
             href={`/breaks/${item.key}`}
-            className="mt-2 inline-flex h-14 items-center gap-2 rounded-[18px] bg-coral shadow-pop px-7 font-display text-xl text-ink transition-transform hover:-translate-y-0.5"
+            className={`mt-2 ${BUTTON_LG} ${PRIMARY}`}
           >
             갈 곳 찾기
             <span aria-hidden>→</span>
