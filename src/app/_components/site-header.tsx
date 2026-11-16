@@ -18,7 +18,8 @@ function BrandName() {
 }
 
 function Logo({ size }: { size: number }) {
-  return <Image src="/logo.svg" alt="" width={size} height={size} unoptimized className="shrink-0" />;
+  // PNG — 삼성 인터넷 다크 모드가 SVG 선 색을 바꿔 그림이 흐려진다(brain-mascot.tsx 참고)
+  return <Image src="/art/logo.png" alt="" width={size} height={size} unoptimized className="shrink-0" />;
 }
 
 export function SiteHeader() {
