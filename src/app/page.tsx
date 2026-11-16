@@ -13,6 +13,8 @@ import { SourceError } from "./_components/source-error";
 import { YearTabs } from "./_components/year-tabs";
 import { EMPTY_BOX } from "./_components/empty-box";
 
+const SUMMARY_TAG = "inline-flex items-center gap-1.5 rounded-lg bg-ink/5 px-2.5 py-1 font-bold sm:gap-2 sm:px-3 sm:py-1.5";
+
 export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <>
@@ -59,10 +61,16 @@ async function Breaks({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
           <YearTabs years={view.years} selected={view.year} />
         </div>
         {!view.notPublished && (
-          <ul className="mt-4 flex flex-wrap gap-2 text-[15px]">
-            {/* 날짜 칸·연차 줄과 같은 색 — 공휴일은 코랄, 연차 없이는 민트 */}
-            <li className="rounded-full bg-coral px-3 py-1 font-bold">공휴일 {view.holidayCount}일</li>
-            <li className="rounded-full bg-mint px-3 py-1 font-bold">연차 없이 3일 이상 쉬는 연휴 {view.freeBreakCount}번</li>
+          <ul className="mt-4 flex flex-wrap gap-1.5 text-[14px] sm:gap-2 sm:text-[15px]">
+            {/* 요약 숫자 — 버튼과 헷갈리지 않게 알약 대신 옅은 바탕의 네모 태그. 색은 날짜 칸과 같다 */}
+            <li className={SUMMARY_TAG}>
+              <span aria-hidden className="size-2.5 rounded-full bg-coral" />
+              공휴일 {view.holidayCount}일
+            </li>
+            <li className={SUMMARY_TAG}>
+              <span aria-hidden className="size-2.5 rounded-full bg-mint" />
+              연차 없이 3일 이상 쉬는 연휴 {view.freeBreakCount}번
+            </li>
           </ul>
         )}
 

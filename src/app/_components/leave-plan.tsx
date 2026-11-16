@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { LeavePlanView } from "@/contexts/calendar";
 import { DayStrip } from "./day-strip";
 import { periodText } from "./leave-text";
+import { CHIP } from "./button-styles";
 
 /** 처음 고르는 남은 연차 — 많이들 남기는 수 */
 const QUICK = [3, 5, 10, 15];
@@ -30,13 +31,14 @@ export function LeavePlan({ year, plan }: { year: number; plan?: LeavePlanView }
       {!plan ? (
         <>
           <p className="mt-1 text-[15px] text-muted">남은 연차를 고르면 {year}년 연휴에 어떻게 나눠 쓸지 짜 드려요.</p>
-          <ul className="mt-4 flex flex-wrap gap-2">
+          {/* 휴대폰은 2×2 로 칸을 맞추고(3+1 로 남지 않게), 넓은 화면은 한 줄 */}
+          <ul className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
             {QUICK.map((n) => (
               <li key={n}>
                 <Link
                   href={hrefOf(year, n)}
                   scroll={false}
-                  className="inline-flex h-11 items-center rounded-full border border-ink/15 bg-surface px-4 font-display text-[16px] hover:bg-yellow"
+                  className={`${CHIP} w-full justify-center sm:w-auto`}
                 >
                   연차 {n}개
                 </Link>

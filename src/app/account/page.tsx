@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { listFavorites } from "@/contexts/itinerary";
 import { currentUser } from "@/shared/auth/session";
-import { DeleteAccountForm } from "../_components/delete-account-form";
+import { DeleteAccountForm, DeleteDetails } from "../_components/delete-account-form";
 import { KakaoLoginButton } from "../_components/kakao-login-button";
 import { PageBand } from "../_components/page-band";
 import { RevealSuspense, Shimmer } from "../_components/reveal";
@@ -75,19 +75,22 @@ async function Account() {
         </form>
       </section>
 
+      {/* 찜이 없으면 막힌 길 대신 연휴 목록으로 */}
       <Link
-        href="/saved"
-        className="flex items-center justify-between gap-3 rounded-3xl border border-ink/10 bg-surface px-5 py-4 font-display text-lg transition-transform hover:-translate-y-0.5 sm:px-6"
+        href={favorites.length > 0 ? "/saved" : "/#breaks"}
+        className="flex items-center justify-between gap-3 rounded-3xl border border-ink/10 bg-surface px-5 py-4 transition-transform hover:-translate-y-0.5 sm:px-6"
       >
-        <span>찜한 일정 {favorites.length}개</span>
-        <span aria-hidden>→</span>
+        <span className="min-w-0">
+          <span className="block font-display text-lg">찜한 일정 {favorites.length}개</span>
+          {favorites.length === 0 && <span className="block text-[15px] text-muted">마음에 드는 일정을 찜해 두면 여기서 바로 열어요.</span>}
+        </span>
+        <span className="shrink-0 font-display text-[16px]">
+          {favorites.length > 0 ? "보기" : "연휴 둘러보기"} <span aria-hidden>→</span>
+        </span>
       </Link>
 
-      <section id="delete" aria-labelledby="delete-title" className="scroll-mt-24 rounded-3xl border border-ink/10 bg-surface p-5 sm:p-6">
-        <h2 id="delete-title" className="font-display text-[24px]">
-          탈퇴하기
-        </h2>
-        <p className="mt-1 text-[15px] text-muted">탈퇴하면 아래 정보가 바로 지워지고 되돌릴 수 없어요.</p>
+      <DeleteDetails>
+        <p className="text-[15px] text-muted">탈퇴하면 아래 정보가 바로 지워지고 되돌릴 수 없어요.</p>
 
         <ul className="mt-4 divide-y-2 divide-ink/10 overflow-hidden rounded-2xl border border-ink/15 text-[15px]">
           <Consequence label="내가 저장한 일정" value={`${mine}개`} note={mine > 0 ? "공유한 링크도 더 이상 열리지 않아요" : undefined} />
@@ -107,7 +110,7 @@ async function Account() {
         <Suspense>
           <DeleteAccountForm />
         </Suspense>
-      </section>
+      </DeleteDetails>
     </div>
   );
 }
@@ -119,7 +122,7 @@ function Consequence({ label, value, note }: { label: string; value: string; not
         <p className="font-bold">{label}</p>
         {note && <p className="text-[14px] text-muted">{note}</p>}
       </div>
-      <span className="shrink-0 rounded-full bg-coral/20 px-2.5 py-0.5 font-bold tabular-nums">{value}</span>
+      <span className="shrink-0 font-bold tabular-nums text-muted">{value}</span>
     </li>
   );
 }
