@@ -21,11 +21,11 @@ export function BreakList({ breaks, nextYear }: { breaks: LongBreakView[]; nextY
 
       {past.length > 0 && (
         <details className="group mt-12">
-          <summary className="inline-flex cursor-pointer list-none items-center gap-1 font-display text-lg underline underline-offset-4">
+          <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 rounded-full py-1 font-display text-lg text-muted hover:text-ink [&::-webkit-details-marker]:hidden">
             지난 연휴 {past.length}개
-            <span className="transition-transform " aria-hidden>
-              ▾
-            </span>
+            <svg viewBox="0 0 24 24" aria-hidden className="size-5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </summary>
           <div className="opacity-75 transition-opacity hover:opacity-100">
             <MonthGroups breaks={past} />

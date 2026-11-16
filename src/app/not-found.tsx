@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BrainMascot } from "./_components/brain-mascot";
 import { SiteFooter, SiteHeader } from "./_components/site-header";
+import { BUTTON_LG, PRIMARY, SECONDARY } from "./_components/button-styles";
 
 export const metadata: Metadata = {
   title: "찾는 페이지가 없어요 | 뇌빼고",
@@ -25,11 +26,11 @@ export default function NotFound() {
         <div className="mt-8 flex flex-wrap justify-center gap-2">
           <Link
             href="/#breaks"
-            className="inline-flex h-14 items-center rounded-[18px] border border-ink/10 bg-coral px-7 font-display text-xl shadow-pop-sm"
+            className={`${BUTTON_LG} ${PRIMARY}`}
           >
             연휴 고르러 가기
           </Link>
-          <Link href="/" className="inline-flex h-14 items-center rounded-[18px] border border-ink/15 bg-surface px-7 font-display text-xl">
+          <Link href="/" className={`${BUTTON_LG} ${SECONDARY}`}>
             홈으로
           </Link>
         </div>
