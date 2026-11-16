@@ -8,7 +8,7 @@ import { PlayStoreLink } from "./play-store";
 import { NAV_ITEM_WIDE } from "./nav-item";
 import { Toast } from "./toast";
 
-/** 서비스 이름 — 「J」만 노랑으로 띄워 MBTI 의 J(계획형)가 눈에 들어오게 */
+/** 서비스 이름 — 「뇌」만 노랑으로 띄워 「뇌를 빼고」가 먼저 읽히게 */
 function BrandName() {
   return (
     <span className="font-brand">
@@ -98,7 +98,7 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t-2 border-ink/15">
-        {/* 휴대폰에는 마우스 올림이 없어 밑줄을 늘 보여 준다 — 위 출처 칩(누르는 게 아님)과 모양으로 갈린다 */}
+        {/* 휴대폰에는 마우스 올림이 없어 링크 밑줄을 늘 보여 준다 — 위 출처(그냥 글자)와 모양으로 갈린다 */}
         <nav aria-label="정책" className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-4 text-[14px] font-bold sm:px-6">
           {[
             { href: "/privacy", label: "개인정보처리방침" },

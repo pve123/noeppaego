@@ -5,6 +5,8 @@
  * 앱 주소 형식은 각 앱이 공개한 URL 스킴을 따른다 — 실제 휴대폰에서 앱별로 확인이 필요하다.
  */
 
+import { isAndroid, isIOS } from "./device";
+
 export type Destination = { name: string; lat: number; lng: number };
 export type NavApp = "kakaomap" | "naver" | "tmap";
 
@@ -36,9 +38,6 @@ function appRouteUrl(app: NavApp, d: Destination): string {
   }
 }
 
-const userAgent = () => (typeof navigator === "undefined" ? "" : navigator.userAgent);
-const isAndroid = () => /Android/i.test(userAgent());
-const isIOS = () => /iPhone|iPad|iPod/i.test(userAgent());
 /** 휴대폰인지 — 내비 앱을 고를 수 있는 곳 */
 export const canOpenNavApp = () => isAndroid() || isIOS();
 

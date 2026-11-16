@@ -56,7 +56,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
  * 탈퇴 영역 — 계정 화면 맨 아래에 접어 둔다(위험한 동작이 화면 절반을 차지하지 않게).
  * 바닥글·스토어의 「계정 삭제」 링크(#delete)로 들어오면 펼친 채로 연다.
  */
-export function DeleteDetails({ children }: { children: ReactNode }) {
+export function DeleteAccountSection({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     const openOnHash = () => {
