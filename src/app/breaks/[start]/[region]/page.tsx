@@ -24,6 +24,8 @@ import { TripPrefsSheet } from "../../../_components/trip-prefs-sheet";
 
 export const metadata: Metadata = {
   title: "여행 일정 | 뇌빼고",
+  // 사람마다 다른 일정이라 검색에 올리지 않고, 「바꾸기」 링크도 따라가지 않게 한다(robots.ts·proxy.ts 참고)
+  robots: { index: false, follow: false },
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
