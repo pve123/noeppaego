@@ -190,6 +190,8 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
               <Link
                 href={hrefFor(slot.key)}
                 scroll={false}
+                prefetch={false}
+                rel="nofollow"
                 className="rounded-full border border-ink/15 bg-surface px-3 py-0.5 font-bold hover:bg-yellow sm:order-last sm:ml-auto"
               >
                 원래대로
@@ -201,9 +203,12 @@ function SlotCard({ slot, hrefFor }: { slot: SlotView; hrefFor?: HrefFor }) {
             <ul className="no-scrollbar flex snap-x gap-1.5 overflow-x-auto scroll-px-3 px-3 pr-10 [mask-image:linear-gradient(to_right,#000_calc(100%-36px),transparent)] sm:flex-wrap sm:overflow-visible sm:px-0 sm:[mask-image:none]">
               {slot.alternatives.map((p) => (
                 <li key={p.id} className="shrink-0 snap-start">
+                  {/* 후보마다 새 주소(일정을 처음부터 다시 짠다) — 로봇이 따라가지 않게 nofollow, 화면에 보이기만 해도 미리 불러오지 않게 prefetch 끔 */}
                   <Link
                     href={hrefFor(slot.key, p.id)}
                     scroll={false}
+                    prefetch={false}
+                    rel="nofollow"
                     title={p.category ? `${p.title} (${p.category})` : p.title}
                     className="block whitespace-nowrap rounded-full border-2 border-ink/25 bg-surface px-2.5 py-0.5 hover:border-ink/30 hover:bg-yellow"
                   >
