@@ -24,7 +24,8 @@ export function DestinationCard({
   const cover = festivals.find((f) => f.imageUrl)?.imageUrl;
 
   return (
-    <Link href={planHref} className="group block h-full rounded-3xl outline-offset-4">
+    // 일정 화면은 무겁다 — 카드가 화면에 보이기만 해도 미리 불러오지 않게 prefetch 를 끈다
+    <Link href={planHref} prefetch={false} className="group block h-full rounded-3xl outline-offset-4">
       <article className="flex h-full flex-col overflow-hidden rounded-3xl border border-ink/10 bg-surface shadow-pop transition-transform group-hover:-translate-y-1 group-focus-visible:-translate-y-1">
         <div className="flex flex-col items-start gap-2 border-b border-ink/10 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
           <h3 className="flex min-w-0 items-center gap-2.5 font-display text-[22px] leading-tight [overflow-wrap:anywhere]">
